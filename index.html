@@ -721,7 +721,11 @@ async function loadAll(){
     if(e.length){expenses=e;S.set('v5_exp',expenses);}
     if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
     if(g.length){goals=g;S.set('v5_goals',goals);}
-    if(s.length){signIns=s;S.set('v5_signins',signIns);}
+    if(s.length){
+      // Filter out old bad format records with 1899 dates
+      const cleanSignIns=s.filter(si=>si.date&&!String(si.date).includes('1899')&&!String(si.time).includes('1899')&&!String(si.date).includes('T'));
+      if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
+    }
     renderAll();
   }catch(e){console.log('Load all error:',e);}
 }
