@@ -733,11 +733,28 @@ function doLogin(){
   if(p===cfg.pwdCEO){role='ceo';}
   else if(p===cfg.pwdCE){role='ce';}
   else{const e=document.getElementById('lerr');e.style.display='block';setTimeout(()=>e.style.display='none',3000);return;}
+  // Save session
+  S.set('v5_session',{role,time:Date.now()});
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   initApp();autoSignIn();
-  // Load latest data from Google Sheets
   loadAll();
+}
+
+function checkSession(){
+  const session=S.get('v5_session',null);
+  if(session&&session.role){
+    // Session valid for 12 hours
+    if(Date.now()-session.time < 12*60*60*1000){
+      role=session.role;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      initApp();
+      loadAll();
+      return true;
+    }
+  }
+  return false;
 }
 function logout(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('pwd').value='';}
 
@@ -824,6 +841,19 @@ function initApp(){
   });
   renderAll();buildCal();renderSIPage();showHints();
   showPage('p-'+(isCEO?'dashboard':first||'signin'));
+  // Auto refresh sign-in board every 2 minutes for CEO
+  if(isCEO){
+    setInterval(async()=>{
+      try{
+        const s=await loadFromSheet('SignIns');
+        if(s.length){
+          signIns=s.filter(si=>si.role&&si.date&&si.time);
+          S.set('v5_signins',signIns);
+          renderSIBoard();renderAttLog();updSbSI();
+        }
+      }catch(e){}
+    },120000);
+  }
 }
 
 function showPage(pid){
@@ -1412,7 +1442,16 @@ function toast(msg){
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+function logout(){
+  S.set('v5_session',null);
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pwd').value='';
+}
+
 selRole('ceo',document.querySelector('.rtab'));showHints();
+// Check if already logged in
+checkSession();
 </script>
 </body>
 </html>
