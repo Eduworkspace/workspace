@@ -741,10 +741,16 @@ function doLogin(){
   loadAll();
 }
 
+function logout(){
+  S.set('v5_session',null);
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pwd').value='';
+}
+
 function checkSession(){
   const session=S.get('v5_session',null);
   if(session&&session.role){
-    // Session valid for 12 hours
     if(Date.now()-session.time < 12*60*60*1000){
       role=session.role;
       document.getElementById('login-screen').style.display='none';
@@ -752,11 +758,12 @@ function checkSession(){
       initApp();
       loadAll();
       return true;
+    }else{
+      S.set('v5_session',null);
     }
   }
   return false;
 }
-function logout(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('pwd').value='';}
 
 // Show hints
 function showHints(){
@@ -766,25 +773,25 @@ function showHints(){
 
 // ══ AUTO SIGN IN ══
 function autoSignIn(){
-  const today=new Date().toDateString();
-  if(!signIns.find(s=>s.role===role&&s.date===today)){
-    const now=new Date();
+  const now=new Date();
+  const dateClean=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  if(!signIns.find(s=>s.role===roleLabel&&s.date===dateClean)){
     const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-    const dateClean=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
     signIns.push({
       id:Date.now(),
-      role:role==='ceo'?'CEO':'Client Executive',
+      role:roleLabel,
       date:dateClean,
       time:time,
       onTime:onTime?'Yes':'No'
     });
     S.set('v5_signins',signIns);
+    syncToSheet('SignIns',signIns);
   }
   updSbSI();
   renderSIBoard();
   renderAttLog();
-  syncToSheet('SignIns',signIns);
 }
 function updSbSI(){
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
