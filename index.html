@@ -722,8 +722,13 @@ async function loadAll(){
     if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
     if(g.length){goals=g;S.set('v5_goals',goals);}
     if(s.length){
-      // Filter out old bad format records with 1899 dates
-      const cleanSignIns=s.filter(si=>si.date&&!String(si.date).includes('1899')&&!String(si.time).includes('1899')&&!String(si.date).includes('T'));
+      const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
+        id:si.id,
+        role:si.role,
+        date:si.date,
+        time:si.signin?si.signin.split(' at ')[1]||String(si.time||''):String(si.time||'').replace(/30\/12\/1899,?\s?/,''),
+        onTime:si.onTime
+      })).filter(si=>si.time&&!si.time.includes('1899'));
       if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
     }
     renderAll();
@@ -791,7 +796,14 @@ function autoSignIn(){
       onTime:onTime?'Yes':'No'
     });
     S.set('v5_signins',signIns);
-    syncToSheet('SignIns',signIns);
+    syncToSheet('SignIns',signIns.map(s=>({
+      id:String(s.id),
+      role:s.role,
+      date:s.date,
+      time:String(s.time),
+      signin:s.date+' at '+s.time,
+      onTime:s.onTime
+    })));
   }
   updSbSI();
   renderSIBoard();
@@ -956,16 +968,25 @@ function renderCETasks(){
 
 // ══ SIGN IN ══
 function doSignIn(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const now=new Date();
+  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   if(signIns.find(s=>s.role===roleLabel&&s.date===today)){toast('Already signed in today');return;}
-  const now=new Date();
-  const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  signIns.push({id:Date.now(),role:roleLabel,date:today,time,onTime:onTime?'Yes':'No'});
+  const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr,onTime:onTime?'Yes':'No'};
+  signIns.push(entry);
   S.set('v5_signins',signIns);
   renderSIPage();renderSIBoard();updSbSI();renderAttLog();
-  syncToSheet('SignIns',signIns);
+  // Save to sheets with time as text to prevent 1899 conversion
+  syncToSheet('SignIns',signIns.map(s=>({
+    id:String(s.id),
+    role:s.role,
+    date:s.date,
+    time:String(s.time),
+    signin:s.date+' at '+s.time,
+    onTime:s.onTime
+  })));
   toast(onTime?'Signed in on time ✅':'Signed in — noted as late ⚠️');
 }
 function renderSIPage(){
