@@ -219,7 +219,6 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
     </div>
     <button class="lbtn" onclick="doLogin()">Sign In →</button>
     <div class="lerr" id="lerr">Incorrect password. Please try again.</div>
-    <div class="lhint" id="pw-hint"></div>
   </div>
 </div>
 
@@ -1561,7 +1560,7 @@ function logout(){
   document.getElementById('pwd').value='';
 }
 
-selRole('ceo',document.querySelector('.rtab'));showHints();
+selRole('ceo',document.querySelector('.rtab'));
 // Check if already logged in
 checkSession();
 </script>
