@@ -870,8 +870,7 @@ function initApp(){
     setInterval(async()=>{
       try{
         const s=await loadFromSheet('SignIns');
-        if(s.length){
-          const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+        if(s&&s.length){
           const clean=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T'));
           if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
           renderSIBoard();renderAttLog();updSbSI();
@@ -977,28 +976,72 @@ function renderCETasks(){
     </div>`).join('');
 }
 
-// ══ SIGN IN ══
-function doSignIn(){
+// ══ SIGN IN — Google Sheets as single source of truth ══
+async function doSignIn(){
   const now=new Date();
   const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  if(signIns.find(s=>s.role===roleLabel&&s.date===today)){toast('Already signed in today');return;}
-  const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr,onTime:onTime?'Yes':'No'};
+  // Check if already signed in today
+  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
+  if(existing){toast('Already signed in today');return;}
+  const entry={
+    id:String(Date.now()),
+    role:roleLabel,
+    date:today,
+    signin:today+' — '+roleLabel,
+    onTime:onTime?'Yes':'No'
+  };
   signIns.push(entry);
   S.set('v5_signins',signIns);
-  renderSIPage();renderSIBoard();updSbSI();renderAttLog();
-  // Save to sheets with time as text to prevent 1899 conversion
-  syncToSheet('SignIns',signIns.map(s=>({
+  // Write to Google Sheets
+  await syncToSheet('SignIns',signIns.map(s=>({
     id:String(s.id),
-    role:s.role,
-    date:s.date,
-    time:String(s.time),
-    signin:s.date+' at '+s.time,
-    onTime:s.onTime
+    role:String(s.role),
+    date:String(s.date),
+    signin:String(s.signin||s.date),
+    onTime:String(s.onTime)
   })));
+  renderSIPage();renderSIBoard();updSbSI();renderAttLog();
   toast(onTime?'Signed in on time ✅':'Signed in — noted as late ⚠️');
+}
+
+async function autoSignIn(){
+  const now=new Date();
+  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
+  // First load latest from sheets
+  try{
+    const latest=await loadFromSheet('SignIns');
+    if(latest&&latest.length){
+      const clean=latest.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+      if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
+    }
+  }catch(e){}
+  // Check if already signed in
+  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
+  if(!existing){
+    const entry={
+      id:String(Date.now()),
+      role:roleLabel,
+      date:today,
+      signin:today+' — '+roleLabel,
+      onTime:onTime?'Yes':'No'
+    };
+    signIns.push(entry);
+    S.set('v5_signins',signIns);
+    await syncToSheet('SignIns',signIns.map(s=>({
+      id:String(s.id),
+      role:String(s.role),
+      date:String(s.date),
+      signin:String(s.signin||s.date),
+      onTime:String(s.onTime)
+    })));
+  }
+  updSbSI();
+  renderSIBoard();
+  renderAttLog();
 }
 function renderSIPage(){
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
