@@ -465,7 +465,7 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
     <!-- CLIENTS -->
     <div class="page" id="p-clients">
       <div class="ph"><h1>Client Work</h1><p>Track all active clients, status and documents.</p></div>
-      <div class="card">
+      <div class="card" id="clients-add-form">
         <div class="card-hd"><span class="dot"></span>Add New Client</div>
         <div class="g2">
           <div class="fr"><label>Client Name</label><input type="text" id="cl-n" placeholder="Full name"></div>
@@ -1150,6 +1150,7 @@ function initApp(){
   const ceNav=[
     {s:'Daily'},{id:'signin',i:'⏰',l:'Sign In'},{id:'checklist',i:'✅',l:'Daily Checklist'},
     {s:'Weekly'},{id:'report',i:'📝',l:'Friday Report'},
+    {s:'Business'},{id:'clients',i:'👤',l:'Client Work'},
     {s:'Social'},{id:'social',i:'📱',l:'Social Media'},
   ];
   const nav=isCEO?ceoNav:ceNav;
@@ -1516,26 +1517,39 @@ function addClient(){
   renderClients();renderDash();toast('Client added');
   syncToSheet('Clients',clients);
 }
-function delClient(id){clients=clients.filter(c=>c.id!==id);S.set('v5_clients',clients);renderClients();renderDash();}
-function updStatus(id,s){clients=clients.map(c=>c.id===id?{...c,status:s}:c);S.set('v5_clients',clients);}
+function delClient(id){
+  if(role!=='ceo')return toast('Only the CEO can delete clients');
+  clients=clients.filter(c=>c.id!==id);S.set('v5_clients',clients);renderClients();renderDash();
+  syncToSheet('Clients',clients);
+}
+function updStatus(id,s){
+  clients=clients.map(c=>c.id===id?{...c,status:s}:c);
+  S.set('v5_clients',clients);
+  syncToSheet('Clients',clients);
+  toast('Status updated ✓');
+}
 const SC={'New Enquiry':'p-blue','Documents Pending':'p-warn','In Progress':'p-warn','Submitted':'p-blue','Approved':'p-green','Completed':'p-green','On Hold':'p-gray'};
 function renderClients(){
   const el=document.getElementById('clients-list');if(!el)return;
+  // Show/hide Add Client form based on role
+  const addForm=document.getElementById('clients-add-form');
+  if(addForm)addForm.style.display=role==='ceo'?'block':'none';
+  const isCEO=role==='ceo';
   if(!clients.length){el.innerHTML='<div class="empty"><div class="ei">👤</div><p>No clients yet.</p></div>';return;}
   el.innerHTML=clients.map(c=>`
     <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div><div style="font-size:14px;font-weight:600;">${c.name}</div><div style="font-size:11px;color:var(--text-light);">${c.type}${c.dest?' → '+c.dest:''} · Added ${c.added}</div></div>
+        <div><div style="font-size:14px;font-weight:600;">${c.name}</div><div style="font-size:11px;color:var(--text-light);">${c.type}${c.dest?' → '+c.dest:''} · Added ${c.added||''}</div></div>
         <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
           <select class="pill ${SC[c.status]||'p-gray'}" onchange="updStatus(${c.id},this.value)" style="border:none;font-size:9px;font-weight:700;text-transform:uppercase;cursor:pointer;padding:2px 8px;border-radius:20px;">
             ${['New Enquiry','Documents Pending','In Progress','Submitted','Approved','Completed','On Hold'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}
           </select>
-          <button class="btn btn-danger btn-sm" onclick="delClient(${c.id})" style="padding:3px 8px;">✕</button>
+          ${isCEO?`<button class="btn btn-danger btn-sm" onclick="delClient(${c.id})" style="padding:3px 8px;">✕</button>`:''}
         </div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${c.paid?`<span class="pill p-green">Paid: ₦${c.paid.toLocaleString()}</span>`:''}
-        ${c.balance?`<span class="pill p-red">Balance: ₦${c.balance.toLocaleString()}</span>`:''}
+        ${c.paid?`<span class="pill p-green">Paid: ₦${parseInt(c.paid).toLocaleString()}</span>`:''}
+        ${c.balance?`<span class="pill p-red">Balance: ₦${parseInt(c.balance).toLocaleString()}</span>`:''}
         ${c.drive?`<a href="${c.drive}" target="_blank" class="pill p-blue" style="text-decoration:none;">📁 Drive Folder</a>`:''}
       </div>
       ${c.notes?`<div style="font-size:12px;color:var(--text-mid);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">${c.notes}</div>`:''}
