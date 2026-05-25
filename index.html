@@ -725,30 +725,52 @@ function roleLabel(r){return r==='ceo'?'CEO':'Client Executive';}
 function isOnTime(d){return d.getHours()<9||(d.getHours()===9&&d.getMinutes()===0);}
 
 function formatSignInsForSheet(arr){
+  // We intentionally do NOT send a separate 'time' column because Google Sheets
+  // auto-converts time strings into date serial numbers (1899-12-30T...).
+  // Instead we embed the time inside the human-readable 'signin' text field,
+  // which Sheets stores as plain text and never mangles.
   return arr.map(s=>({
     id:String(s.id),
     role:String(s.role),
     date:String(s.date),
-    time:String(s.time||''),
-    signin:String(s.date)+' at '+String(s.time||''),
+    // Prefix time with a single-quote-style marker so Sheets treats it as text
+    // We store as "HH:MM" inside the signin field for safe retrieval
+    signin:'SIGNIN|'+String(s.date)+'|'+String(s.time||'')+'|'+String(s.onTime||'No'),
     onTime:String(s.onTime)
   }));
 }
 
 function parseSheetSignIns(raw){
-  // Robustly parse sign-ins coming back from Google Sheets
-  return raw.filter(s=>
-    s.role && s.date &&
-    !String(s.date).includes('1899') &&
-    !String(s.date).includes('T') &&
-    String(s.date).length > 0
-  ).map(s=>({
-    id:s.id||String(Date.now()),
-    role:String(s.role).trim(),
-    date:String(s.date).trim(),
-    time:String(s.time||'').replace(/30\/12\/1899,?\s?/,'').trim(),
-    onTime:String(s.onTime||'No')
-  })).filter(s=>s.date && s.role);
+  // Parse sign-ins — time is embedded in the signin field to avoid Sheets date mangling
+  return raw.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T')&&String(s.date).length>0)
+  .map(s=>{
+    // Try to extract time from our safe encoded signin field first
+    let timeVal='';
+    let onTimeVal=String(s.onTime||'No');
+    const signinStr=String(s.signin||'');
+    if(signinStr.startsWith('SIGNIN|')){
+      // Format: SIGNIN|date|time|onTime
+      const parts=signinStr.split('|');
+      timeVal=parts[2]||'';
+      onTimeVal=parts[3]||onTimeVal;
+    } else {
+      // Legacy: try to extract from old signin field "DD/MM/YYYY at HH:MM"
+      const atMatch=signinStr.match(/at\s+(\d{1,2}:\d{2})/);
+      if(atMatch)timeVal=atMatch[1];
+      // Also strip any 1899 garbage from time column if it snuck through
+      const rawTime=String(s.time||'');
+      if(!timeVal&&!rawTime.includes('1899')&&!rawTime.includes('T')&&rawTime.match(/^\d{1,2}:\d{2}/)){
+        timeVal=rawTime;
+      }
+    }
+    return {
+      id:s.id||String(Date.now()),
+      role:String(s.role).trim(),
+      date:String(s.date).trim(),
+      time:timeVal,
+      onTime:onTimeVal
+    };
+  }).filter(s=>s.date&&s.role);
 }
 
 function findTodaySignIn(arr, rl){
