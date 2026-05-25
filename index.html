@@ -149,14 +149,24 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
 .ti-t{flex:1;font-size:13px;color:var(--text);}
 .ti-t.done{text-decoration:line-through;color:var(--text-light);}
 
-.si-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
-.si-card{background:var(--white);border-radius:var(--r);padding:20px;border:1.5px solid var(--border);box-shadow:var(--shadow);text-align:center;transition:all 0.2s;}
+/* ── SIGN IN BOARD ── */
+.si-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.si-card{background:var(--white);border-radius:var(--r);padding:20px;border:2px solid var(--border);box-shadow:var(--shadow);text-align:center;transition:all 0.3s;}
 .si-card.signed{border-color:var(--success);background:var(--success-bg);}
+.si-card.loading{opacity:0.6;}
 .si-av{font-size:32px;margin-bottom:8px;}
 .si-nm{font-size:14px;font-weight:600;margin-bottom:2px;}
 .si-rl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
 .si-tm{font-size:13px;font-weight:700;margin-top:5px;}
 .si-tm.ok{color:var(--success);}.si-tm.lt{color:var(--warning);}
+
+/* Sync status indicator */
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--blue-pale);border-radius:8px;margin-bottom:14px;font-size:11px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+.sync-dot.ok{background:var(--success);}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite;}
+.sync-dot.err{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px;}
 .cal-hd{font-size:9px;font-weight:700;color:var(--text-light);text-align:center;padding:4px 0;letter-spacing:1px;text-transform:uppercase;}
@@ -176,7 +186,6 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
 .toast{position:fixed;bottom:24px;right:24px;background:var(--blue);color:var(--white);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;display:none;animation:fadeUp 0.3s ease;}
 .toast.show{display:block;}
 
-/* SETTINGS TOGGLE */
 .setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
 .setting-row:last-child{border-bottom:none;}
 .setting-info .setting-lbl{font-size:13px;font-weight:600;color:var(--text);}
@@ -232,7 +241,7 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
     </div>
     <div class="sb-si">
       <div class="sb-si-l">Today's Sign In</div>
-      <div class="sb-si-v" id="sb-si-v">Not signed in</div>
+      <div class="sb-si-v" id="sb-si-v">Checking...</div>
       <div class="sb-si-t" id="sb-si-t"></div>
     </div>
     <nav class="sb-nav" id="sb-nav"></nav>
@@ -252,7 +261,15 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
         <p>Your Eduvoyage command centre overview.</p>
       </div>
       <div class="card">
-        <div class="card-hd"><span class="dot"></span>Team Sign-In — Today</div>
+        <div class="card-hd" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;"><span class="dot"></span>Team Sign-In — Today</div>
+          <button class="btn btn-ghost btn-sm" onclick="refreshSignIns()" id="si-refresh-btn" style="font-size:11px;padding:5px 12px;">↻ Refresh</button>
+        </div>
+        <!-- Sync status bar -->
+        <div class="sync-bar" id="si-sync-bar">
+          <span><span class="sync-dot ok" id="si-sync-dot"></span><span id="si-sync-txt">Synced</span></span>
+          <span style="color:var(--text-light);" id="si-sync-time"></span>
+        </div>
         <div class="si-grid" id="si-board"></div>
       </div>
       <div class="g4" style="margin-bottom:18px;">
@@ -291,7 +308,7 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
       </div>
     </div>
 
-    <!-- SIGN IN -->
+    <!-- SIGN IN PAGE (CE) -->
     <div class="page" id="p-signin">
       <div class="ph">
         <div class="ph-tag" id="si-date"></div>
@@ -302,9 +319,9 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
         <div class="card-hd"><span class="dot"></span>Sign In for Today</div>
         <div style="text-align:center;padding:16px 0;">
           <div style="font-size:52px;margin-bottom:12px;" id="si-icon">⏰</div>
-          <div style="font-size:16px;font-weight:600;margin-bottom:4px;" id="si-msg">You haven't signed in yet today.</div>
-          <div style="font-size:12px;color:var(--text-light);margin-bottom:22px;" id="si-sub">Sign in before 9am to be marked on time.</div>
-          <button class="btn btn-blue" onclick="doSignIn()" id="si-btn" style="padding:13px 36px;font-size:15px;">Sign In Now ✓</button>
+          <div style="font-size:16px;font-weight:600;margin-bottom:4px;" id="si-msg">Checking sign-in status...</div>
+          <div style="font-size:12px;color:var(--text-light);margin-bottom:22px;" id="si-sub">Please wait.</div>
+          <button class="btn btn-blue" onclick="doSignIn()" id="si-btn" style="padding:13px 36px;font-size:15px;display:none;">Sign In Now ✓</button>
         </div>
       </div>
       <div class="card">
@@ -562,7 +579,6 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
     <!-- SETTINGS (CEO ONLY) -->
     <div class="page" id="p-settings">
       <div class="ph"><h1>Settings</h1><p>Edit passwords, targets and workspace configuration.</p></div>
-
       <div class="card">
         <div class="card-hd"><span class="dot"></span>Passwords</div>
         <div class="g2">
@@ -571,7 +587,6 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
         </div>
         <button class="btn btn-blue btn-sm" onclick="savePwds()">Save Passwords</button>
       </div>
-
       <div class="card">
         <div class="card-hd"><span class="dot"></span>Targets & Goals</div>
         <div class="g2">
@@ -581,7 +596,6 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
         <div class="fr"><label>Company Growth Goal (₦)</label><input type="number" id="set-growth" placeholder="e.g. 1000000"></div>
         <button class="btn btn-gold btn-sm" onclick="saveTargets()">Save Targets</button>
       </div>
-
       <div class="card">
         <div class="card-hd"><span class="dot"></span>Fine Policy <span style="font-size:9px;color:var(--text-light);font-weight:400;margin-left:4px;">— for your reference only</span></div>
         <div id="fines-policy-list"></div>
@@ -592,10 +606,9 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
           <button class="btn btn-warn btn-sm" onclick="addFinePolicy()">Add Fine</button>
         </div>
       </div>
-
       <div class="card">
         <div class="card-hd"><span class="dot"></span>Clear Sign-In History</div>
-        <div class="alert a-warn">⚠️ This will clear all sign-in records from this device. Use this to fix date display issues.</div>
+        <div class="alert a-warn">⚠️ This will clear all sign-in records from Google Sheets and this device.</div>
         <button class="btn btn-danger" onclick="clearSignIns()">🗑️ Clear Sign-In History</button>
       </div>
     </div>
@@ -606,13 +619,17 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
 <div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
 
 <script>
-// ══ STORAGE ══
+// ══════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════
 const S={
   get:(k,d)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}},
   set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 };
 
-// ══ CONFIG (all editable) ══
+// ══════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════
 let cfg=S.get('v5_cfg',{
   pwdCEO:'edu2024',pwdCE:'ce2024',
   leadTarget:400000,breakEven:460000,growthGoal:1000000,
@@ -637,7 +654,9 @@ let finePolicy=S.get('v5_fines',[
   {id:4,reason:'Social media post not uploaded',amount:2000},
 ]);
 
-// ══ STATE ══
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
 let todos=S.get('v5_todos',[]);
 let clients=S.get('v5_clients',[]);
 let posts=S.get('v5_posts',[]);
@@ -655,19 +674,21 @@ let fixed=S.get('v5_fixed',[
   {id:3,name:'Live-in Nanny',amount:80000,cat:'Personal'},
 ]);
 
-const TEAM=[{role:'ceo',name:'Aminat',title:'CEO',av:'👑'},{role:'ce',name:'Client Executive',title:'Client Executive',av:'👤'}];
+const TEAM=[
+  {role:'ceo',name:'Aminat',title:'CEO',av:'👑'},
+  {role:'ce',name:'Client Executive',title:'Client Executive',av:'👤'}
+];
 let role='ceo',selR='ceo';
 let calYear,calMonth;
 
-// ══ GOOGLE SHEETS SYNC ══
+// ══════════════════════════════════════════════
+// GOOGLE SHEETS — SINGLE SOURCE OF TRUTH
+// ══════════════════════════════════════════════
 const GS_URL='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzygaX37hDNRrFUcNMaWBF08i7La4AaOHaP1Ke2u6IWUncQg/exec';
 
-async function syncToSheet(sheetName, rows){
+async function syncToSheet(sheetName,rows){
   try{
-    await fetch(GS_URL,{
-      method:'POST',
-      body:JSON.stringify({sheet:sheetName,rows}),
-    });
+    await fetch(GS_URL,{method:'POST',body:JSON.stringify({sheet:sheetName,rows})});
   }catch(e){console.log('Sync error:',e);}
 }
 
@@ -688,65 +709,326 @@ async function syncAll(){
   await syncToSheet('Expenses',expenses);
   await syncToSheet('Revenue',revHist);
   await syncToSheet('Goals',goals);
-  await syncToSheet('SignIns',signIns);
+  await syncToSheet('SignIns',formatSignInsForSheet(signIns));
   toast('✅ Synced to Google Sheets');
 }
 
-async function loadAll(){
-  try{
-    const [c,p,w,t,r,e,rv,g,s]=await Promise.all([
-      loadFromSheet('Clients'),
-      loadFromSheet('Posts'),
-      loadFromSheet('Waka'),
-      loadFromSheet('Todos'),
-      loadFromSheet('Reports'),
-      loadFromSheet('Expenses'),
-      loadFromSheet('Revenue'),
-      loadFromSheet('Goals'),
-      loadFromSheet('SignIns'),
-    ]);
-    if(c.length){clients=c;S.set('v5_clients',clients);}
-    if(p.length){posts=p;S.set('v5_posts',posts);}
-    if(w.length){waka=w;S.set('v5_waka',waka);}
-    // For todos — restore done state properly from sheets
-    if(t.length){
-      todos=t.map(td=>({
-        id:td.id,
-        text:td.text,
-        done:String(td.done).toUpperCase()==='TRUE'
-      }));
-      S.set('v5_todos',todos);
-    }
-    if(r.length){reports=r;S.set('v5_reports',reports);}
-    if(e.length){expenses=e;S.set('v5_exp',expenses);}
-    if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
-    if(g.length){goals=g;S.set('v5_goals',goals);}
-    if(s.length){
-      const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
-        id:si.id,
-        role:si.role,
-        date:si.date,
-        time:si.signin?si.signin.split(' at ')[1]||String(si.time||''):String(si.time||'').replace(/30\/12\/1899,?\s?/,''),
-        onTime:si.onTime
-      })).filter(si=>si.time&&!si.time.includes('1899'));
-      if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
-    }
-    renderAll();
-  }catch(e){console.log('Load all error:',e);}
+// ══════════════════════════════════════════════
+// SIGN-IN — FIXED CROSS-DEVICE SYSTEM
+// ══════════════════════════════════════════════
+
+// Helpers
+function todayKey(){
+  return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function roleLabel(r){return r==='ceo'?'CEO':'Client Executive';}
+function isOnTime(d){return d.getHours()<9||(d.getHours()===9&&d.getMinutes()===0);}
+
+function formatSignInsForSheet(arr){
+  return arr.map(s=>({
+    id:String(s.id),
+    role:String(s.role),
+    date:String(s.date),
+    time:String(s.time||''),
+    signin:String(s.date)+' at '+String(s.time||''),
+    onTime:String(s.onTime)
+  }));
 }
 
-// ══ LOGIN ══
-function selRole(r,el){selR=r;document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function parseSheetSignIns(raw){
+  // Robustly parse sign-ins coming back from Google Sheets
+  return raw.filter(s=>
+    s.role && s.date &&
+    !String(s.date).includes('1899') &&
+    !String(s.date).includes('T') &&
+    String(s.date).length > 0
+  ).map(s=>({
+    id:s.id||String(Date.now()),
+    role:String(s.role).trim(),
+    date:String(s.date).trim(),
+    time:String(s.time||'').replace(/30\/12\/1899,?\s?/,'').trim(),
+    onTime:String(s.onTime||'No')
+  })).filter(s=>s.date && s.role);
+}
+
+function findTodaySignIn(arr, rl){
+  const today=todayKey();
+  return arr.find(s=>
+    String(s.role).trim()===rl &&
+    String(s.date).trim()===today
+  );
+}
+
+// setSyncStatus: 'ok' | 'syncing' | 'err'
+function setSyncStatus(status, timeStr){
+  const dot=document.getElementById('si-sync-dot');
+  const txt=document.getElementById('si-sync-txt');
+  const time=document.getElementById('si-sync-time');
+  if(!dot)return;
+  dot.className='sync-dot '+status;
+  txt.textContent=status==='ok'?'Synced':status==='syncing'?'Syncing...':'Sync failed — using cached';
+  if(timeStr&&time)time.textContent='Last updated: '+timeStr;
+}
+
+// Core: load sign-ins from Sheets and update local cache
+async function fetchSignIns(){
+  setSyncStatus('syncing');
+  try{
+    const raw=await loadFromSheet('SignIns');
+    if(raw&&raw.length>0){
+      const clean=parseSheetSignIns(raw);
+      if(clean.length>0){
+        signIns=clean;
+        S.set('v5_signins',signIns);
+      }
+    }
+    const now=new Date();
+    const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    setSyncStatus('ok',timeStr);
+    return true;
+  }catch(e){
+    setSyncStatus('err');
+    return false;
+  }
+}
+
+// Auto sign-in: called right after login
+// Loads from Sheets first, THEN adds if not found, THEN writes back
+async function autoSignIn(){
+  const now=new Date();
+  const rl=roleLabel(role);
+  const today=todayKey();
+  const onTime=isOnTime(now);
+  const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+
+  // Step 1: Pull latest from Sheets
+  setSyncStatus('syncing');
+  try{
+    const raw=await loadFromSheet('SignIns');
+    if(raw&&raw.length>0){
+      const clean=parseSheetSignIns(raw);
+      if(clean.length>0){
+        signIns=clean;
+        S.set('v5_signins',signIns);
+      }
+    }
+  }catch(e){
+    // Fall through — use local cache
+  }
+
+  // Step 2: Check if already signed in today
+  const existing=findTodaySignIn(signIns,rl);
+
+  if(!existing){
+    // Step 3: Add today's sign-in
+    const entry={
+      id:String(Date.now()),
+      role:rl,
+      date:today,
+      time:timeStr,
+      onTime:onTime?'Yes':'No'
+    };
+    signIns.push(entry);
+    S.set('v5_signins',signIns);
+
+    // Step 4: Write back to Sheets
+    try{
+      await syncToSheet('SignIns',formatSignInsForSheet(signIns));
+      setSyncStatus('ok',timeStr);
+    }catch(e){
+      setSyncStatus('err');
+    }
+  }else{
+    setSyncStatus('ok',timeStr);
+  }
+
+  // Step 5: Update all UI
+  updSbSI();
+  renderSIBoard();
+  renderSIPage();
+  renderAttLog();
+}
+
+// Manual sign-in button (for CE sign-in page)
+async function doSignIn(){
+  const now=new Date();
+  const rl=roleLabel(role);
+  const today=todayKey();
+  const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const onTime=isOnTime(now);
+
+  // Check local first
+  if(findTodaySignIn(signIns,rl)){
+    toast('Already signed in today ✓');
+    return;
+  }
+
+  const btn=document.getElementById('si-btn');
+  if(btn){btn.disabled=true;btn.textContent='Signing in...';}
+
+  // Load latest from Sheets before writing
+  try{
+    const raw=await loadFromSheet('SignIns');
+    if(raw&&raw.length>0){
+      const clean=parseSheetSignIns(raw);
+      if(clean.length>0){signIns=clean;S.set('v5_signins',signIns);}
+    }
+  }catch(e){}
+
+  // Double-check after fresh load
+  if(findTodaySignIn(signIns,rl)){
+    toast('Already signed in today ✓');
+    if(btn){btn.disabled=false;}
+    renderSIPage();return;
+  }
+
+  const entry={
+    id:String(Date.now()),
+    role:rl,
+    date:today,
+    time:timeStr,
+    onTime:onTime?'Yes':'No'
+  };
+  signIns.push(entry);
+  S.set('v5_signins',signIns);
+
+  try{
+    await syncToSheet('SignIns',formatSignInsForSheet(signIns));
+    toast(onTime?'Signed in on time ✅':'Signed in — marked as late ⚠️');
+  }catch(e){
+    toast('Signed in (offline — will sync later)');
+  }
+
+  updSbSI();
+  renderSIPage();
+  renderSIBoard();
+  renderAttLog();
+  if(btn){btn.disabled=false;}
+}
+
+// Refresh button on dashboard — manually re-pull from Sheets
+async function refreshSignIns(){
+  const btn=document.getElementById('si-refresh-btn');
+  if(btn){btn.textContent='↻ Refreshing...';btn.disabled=true;}
+  await fetchSignIns();
+  renderSIBoard();
+  updSbSI();
+  renderAttLog();
+  if(btn){btn.textContent='↻ Refresh';btn.disabled=false;}
+}
+
+// Render the dashboard sign-in board
+function renderSIBoard(){
+  const el=document.getElementById('si-board');if(!el)return;
+  const today=todayKey();
+  el.innerHTML=TEAM.map(t=>{
+    const rl=roleLabel(t.role);
+    const s=findTodaySignIn(signIns,rl);
+    const signed=!!s;
+    return `<div class="si-card${signed?' signed':''}">
+      <div class="si-av">${t.av}</div>
+      <div class="si-nm">${t.name}</div>
+      <div class="si-rl">${t.title}</div>
+      ${signed
+        ?`<span class="pill p-green">✅ Signed In</span>
+           <div class="si-tm ok" style="margin-top:6px;font-size:12px;">${s.onTime==='Yes'?'On time':'Late'} · ${s.time||''}</div>`
+        :`<span class="pill p-gray">Not Signed In</span>`}
+    </div>`;
+  }).join('');
+}
+
+// Render the CE's own sign-in page
+function renderSIPage(){
+  const today=todayKey();
+  const rl=roleLabel(role);
+  const s=findTodaySignIn(signIns,rl);
+  const icon=document.getElementById('si-icon');
+  const msg=document.getElementById('si-msg');
+  const sub=document.getElementById('si-sub');
+  const btn=document.getElementById('si-btn');
+  if(s){
+    if(icon)icon.textContent=s.onTime==='Yes'?'✅':'⚠️';
+    if(msg)msg.textContent=s.onTime==='Yes'?'You are signed in on time!':'Signed in — marked as late.';
+    if(sub)sub.textContent='Signed in at '+s.time+' today.';
+    if(btn)btn.style.display='none';
+  }else{
+    if(icon)icon.textContent='⏰';
+    if(msg)msg.textContent="You haven't signed in yet today.";
+    if(sub)sub.textContent='Sign in before 9am to be on time.';
+    if(btn)btn.style.display='inline-block';
+  }
+  const hist=document.getElementById('si-hist');
+  if(hist){
+    const mine=signIns.filter(s=>s.role===rl).slice(-10).reverse();
+    if(!mine.length){hist.innerHTML='<div class="empty"><p>No history yet.</p></div>';return;}
+    hist.innerHTML=mine.map(s=>`<div class="row">
+      <div class="rn">${s.date}</div>
+      <span style="font-size:12px;color:var(--text-light);">${s.time||''}</span>
+      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+    </div>`).join('');
+  }
+}
+
+// Sidebar sign-in status text
+function updSbSI(){
+  const rl=roleLabel(role);
+  const s=findTodaySignIn(signIns,rl);
+  const v=document.getElementById('sb-si-v');
+  const t=document.getElementById('sb-si-t');
+  if(s){
+    if(v)v.textContent=s.onTime==='Yes'?'✅ Signed in on time':'⚠️ Signed in (late)';
+    if(t)t.textContent=s.time||'';
+  }else{
+    if(v)v.textContent='Not signed in';
+    if(t)t.textContent='';
+  }
+}
+
+// Attendance log (CEO view)
+function renderAttLog(){
+  const el=document.getElementById('att-log');if(!el)return;
+  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
+  el.innerHTML=[...signIns].reverse().slice(0,30).map(s=>`
+    <div class="row">
+      <div class="rn">${s.role==='CEO'?'👑 Aminat (CEO)':'👤 Client Executive'}</div>
+      <span style="font-size:12px;color:var(--text-light);">${s.date||''} ${s.time?'· '+s.time:''}</span>
+      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+    </div>`).join('');
+}
+
+function clearSignIns(){
+  if(!confirm('Clear ALL sign-in records from Sheets and this device?'))return;
+  signIns=[];
+  S.set('v5_signins',[]);
+  syncToSheet('SignIns',[]);
+  renderSIBoard();renderAttLog();updSbSI();renderSIPage();
+  toast('Sign-in history cleared ✓');
+}
+
+// ══════════════════════════════════════════════
+// LOGIN / SESSION
+// ══════════════════════════════════════════════
+function selRole(r,el){
+  selR=r;
+  document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
 function doLogin(){
   const p=document.getElementById('pwd').value;
-  if(p===cfg.pwdCEO){role='ceo';}
-  else if(p===cfg.pwdCE){role='ce';}
-  else{const e=document.getElementById('lerr');e.style.display='block';setTimeout(()=>e.style.display='none',3000);return;}
-  // Save session
+  if(p===cfg.pwdCEO)role='ceo';
+  else if(p===cfg.pwdCE)role='ce';
+  else{
+    const e=document.getElementById('lerr');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+    return;
+  }
   S.set('v5_session',{role,time:Date.now()});
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-  initApp();autoSignIn();
+  initApp();
+  autoSignIn();   // auto sign-in with full Sheets sync
   loadAll();
 }
 
@@ -765,6 +1047,7 @@ function checkSession(){
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
       initApp();
+      autoSignIn();
       loadAll();
       return true;
     }else{
@@ -774,51 +1057,49 @@ function checkSession(){
   return false;
 }
 
-// Show hints
-function showHints(){
-  const el=document.getElementById('pw-hint');
-  if(el)el.innerHTML=`CEO: <b>${cfg.pwdCEO}</b> &nbsp;·&nbsp; Client Executive: <b>${cfg.pwdCE}</b>`;
+// ══════════════════════════════════════════════
+// LOAD ALL FROM SHEETS ON LOGIN
+// ══════════════════════════════════════════════
+async function loadAll(){
+  try{
+    const [c,p,w,t,r,e,rv,g]=await Promise.all([
+      loadFromSheet('Clients'),loadFromSheet('Posts'),loadFromSheet('Waka'),
+      loadFromSheet('Todos'),loadFromSheet('Reports'),loadFromSheet('Expenses'),
+      loadFromSheet('Revenue'),loadFromSheet('Goals'),
+    ]);
+    if(c.length){clients=c;S.set('v5_clients',clients);}
+    if(p.length){posts=p;S.set('v5_posts',posts);}
+    if(w.length){waka=w;S.set('v5_waka',waka);}
+    if(t.length){
+      todos=t.map(td=>({id:td.id,text:td.text,done:String(td.done).toUpperCase()==='TRUE'}));
+      S.set('v5_todos',todos);
+    }
+    if(r.length){reports=r;S.set('v5_reports',reports);}
+    if(e.length){expenses=e;S.set('v5_exp',expenses);}
+    if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
+    if(g.length){goals=g;S.set('v5_goals',goals);}
+    renderAll();
+  }catch(e){console.log('Load all error:',e);}
 }
 
-// ══ AUTO SIGN IN ══
-function autoSignIn(){
-  const now=new Date();
-  const dateClean=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  if(!signIns.find(s=>s.role===roleLabel&&s.date===dateClean)){
-    const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-    signIns.push({
-      id:Date.now(),
-      role:roleLabel,
-      date:dateClean,
-      time:time,
-      onTime:onTime?'Yes':'No'
-    });
-    S.set('v5_signins',signIns);
-    syncToSheet('SignIns',signIns.map(s=>({
-      id:String(s.id),
-      role:s.role,
-      date:s.date,
-      time:String(s.time),
-      signin:s.date+' at '+s.time,
-      onTime:s.onTime
-    })));
-  }
-  updSbSI();
-  renderSIBoard();
-  renderAttLog();
-}
-function updSbSI(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
-  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
-  if(s){if(v)v.textContent=s.onTime==='Yes'?'✅ On time':'⚠️ Late';if(t)t.textContent=s.time;}
-  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
+// ══════════════════════════════════════════════
+// AUTO REFRESH SIGN-INS (CEO DASHBOARD ONLY)
+// Every 90 seconds — silent background sync
+// ══════════════════════════════════════════════
+let siRefreshInterval=null;
+function startSIAutoRefresh(){
+  if(siRefreshInterval)clearInterval(siRefreshInterval);
+  siRefreshInterval=setInterval(async()=>{
+    await fetchSignIns();
+    renderSIBoard();
+    updSbSI();
+    renderAttLog();
+  },90000); // 90 seconds
 }
 
-// ══ INIT ══
+// ══════════════════════════════════════════════
+// INIT APP
+// ══════════════════════════════════════════════
 function initApp(){
   const isCEO=role==='ceo';
   document.getElementById('sb-role').textContent=isCEO?'CEO — Aminat':'Client Executive';
@@ -826,13 +1107,11 @@ function initApp(){
   if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
   const ds=now.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   ['dash-date','si-date','ce-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
-  const nf=document.getElementById('not-fri');if(nf)nf.style.display=now.getDay()!==5?'flex':'none';
   const fm=document.getElementById('fin-mo');if(fm)fm.value=now.toISOString().slice(0,7);
   const sd=document.getElementById('sm-date');if(sd)sd.value=now.toISOString().slice(0,10);
   const wd=document.getElementById('wk-dt');if(wd)wd.value=now.toISOString().slice(0,10);
   const ed=document.getElementById('ex-d');if(ed)ed.value=now.toISOString().slice(0,10);
 
-  // Populate settings fields
   const sc=document.getElementById('set-pwd-ceo');if(sc)sc.value=cfg.pwdCEO;
   const sce=document.getElementById('set-pwd-ce');if(sce)sce.value=cfg.pwdCE;
   const sl=document.getElementById('set-lead');if(sl)sl.value=cfg.leadTarget;
@@ -862,20 +1141,13 @@ function initApp(){
     el.onclick=()=>showPage('p-'+item.id);
     navEl.appendChild(el);
   });
-  renderAll();buildCal();renderSIPage();showHints();
+
+  renderAll();buildCal();renderSIPage();
   showPage('p-'+(isCEO?'dashboard':first||'signin'));
-  // Auto refresh sign-in board every 2 minutes for CEO
+
+  // CEO only: start background auto-refresh of sign-ins
   if(isCEO){
-    setInterval(async()=>{
-      try{
-        const s=await loadFromSheet('SignIns');
-        if(s&&s.length){
-          const clean=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T'));
-          if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
-          renderSIBoard();renderAttLog();updSbSI();
-        }
-      }catch(e){}
-    },60000);
+    startSIAutoRefresh();
   }
 }
 
@@ -896,14 +1168,16 @@ function renderAll(){
   renderFinePolicy();renderConfig();
 }
 
-// ══ SETTINGS ══
+// ══════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════
 function savePwds(){
   const c=document.getElementById('set-pwd-ceo')?.value?.trim();
   const ce=document.getElementById('set-pwd-ce')?.value?.trim();
   if(!c||!ce)return toast('Fill in both passwords');
   if(c.length<4||ce.length<4)return toast('Passwords must be at least 4 characters');
   cfg.pwdCEO=c;cfg.pwdCE=ce;S.set('v5_cfg',cfg);
-  showHints();renderConfig();toast('Passwords updated ✓');
+  renderConfig();toast('Passwords updated ✓');
 }
 function saveTargets(){
   const l=parseInt(document.getElementById('set-lead')?.value);
@@ -936,26 +1210,16 @@ function renderFinePolicy(){
       <button class="btn btn-danger btn-sm" onclick="delFinePolicy(${f.id})" style="padding:3px 8px;">✕</button>
     </div>`).join('');
 }
-function clearSignIns(){
-  if(!confirm('Clear all sign-in history?'))return;
-  signIns=[];
-  S.set('v5_signins',[]);
-  syncToSheet('SignIns',[]);
-  renderSIBoard();renderAttLog();updSbSI();
-  toast('Sign-in history cleared ✓');
-}
-
 function renderConfig(){
   const el=document.getElementById('config-display');if(!el)return;
   el.innerHTML=`
     <div class="row"><div class="rn">CEO Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCEO}</div></div>
-    <div class="row"><div class="rn">CE Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCE}</div></div>
-    <div class="row"><div class="rn">CE Lead Target</div><div style="font-size:13px;font-weight:600;color:var(--gold);">₦${cfg.leadTarget.toLocaleString()}</div></div>
-    <div class="row"><div class="rn">Break Even Target</div><div style="font-size:13px;font-weight:600;color:var(--danger);">₦${cfg.breakEven.toLocaleString()}</div></div>
-    <div class="row"><div class="rn">Growth Goal</div><div style="font-size:13px;font-weight:600;color:var(--success);">₦${cfg.growthGoal.toLocaleString()}</div></div>`;
+    <div class="row"><div class="rn">CE Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCE}</div></div>`;
 }
 
-// ══ CE TASKS ══
+// ══════════════════════════════════════════════
+// CE TASKS
+// ══════════════════════════════════════════════
 function addCETask(){
   const t=document.getElementById('new-task-txt')?.value?.trim();if(!t)return toast('Enter task description');
   const tag=document.getElementById('new-task-tag')?.value||'d';
@@ -975,130 +1239,9 @@ function renderCETasks(){
     </div>`).join('');
 }
 
-// ══ SIGN IN — Google Sheets as single source of truth ══
-async function doSignIn(){
-  const now=new Date();
-  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  // Check if already signed in today
-  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
-  if(existing){toast('Already signed in today');return;}
-  const entry={
-    id:String(Date.now()),
-    role:roleLabel,
-    date:today,
-    signin:today+' — '+roleLabel,
-    onTime:onTime?'Yes':'No'
-  };
-  signIns.push(entry);
-  S.set('v5_signins',signIns);
-  // Write to Google Sheets
-  await syncToSheet('SignIns',signIns.map(s=>({
-    id:String(s.id),
-    role:String(s.role),
-    date:String(s.date),
-    signin:String(s.signin||s.date),
-    onTime:String(s.onTime)
-  })));
-  renderSIPage();renderSIBoard();updSbSI();renderAttLog();
-  toast(onTime?'Signed in on time ✅':'Signed in — noted as late ⚠️');
-}
-
-async function autoSignIn(){
-  const now=new Date();
-  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  // First load latest from sheets
-  try{
-    const latest=await loadFromSheet('SignIns');
-    if(latest&&latest.length){
-      const clean=latest.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
-      if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
-    }
-  }catch(e){}
-  // Check if already signed in
-  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
-  if(!existing){
-    const entry={
-      id:String(Date.now()),
-      role:roleLabel,
-      date:today,
-      signin:today+' — '+roleLabel,
-      onTime:onTime?'Yes':'No'
-    };
-    signIns.push(entry);
-    S.set('v5_signins',signIns);
-    await syncToSheet('SignIns',signIns.map(s=>({
-      id:String(s.id),
-      role:String(s.role),
-      date:String(s.date),
-      signin:String(s.signin||s.date),
-      onTime:String(s.onTime)
-    })));
-  }
-  updSbSI();
-  renderSIBoard();
-  renderAttLog();
-}
-function renderSIPage(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
-  const icon=document.getElementById('si-icon');const msg=document.getElementById('si-msg');
-  const sub=document.getElementById('si-sub');const btn=document.getElementById('si-btn');
-  if(s){
-    if(icon)icon.textContent=s.onTime==='Yes'?'✅':'⚠️';
-    if(msg)msg.textContent=s.onTime==='Yes'?'You are signed in on time!':'Signed in — marked as late.';
-    if(sub)sub.textContent='Signed in at '+s.time+' today.';
-    if(btn)btn.style.display='none';
-  }else{
-    if(icon)icon.textContent='⏰';if(msg)msg.textContent="You haven't signed in yet today.";
-    if(sub)sub.textContent='Sign in before 9am to be on time.';if(btn)btn.style.display='inline-block';
-  }
-  const hist=document.getElementById('si-hist');
-  if(hist){
-    const mine=signIns.filter(s=>s.role===(role==='ceo'?'CEO':'Client Executive')).slice(-10).reverse();
-    if(!mine.length){hist.innerHTML='<div class="empty"><p>No history yet.</p></div>';return;}
-    hist.innerHTML=mine.map(s=>`<div class="row"><div class="rn">${s.date}</div><span style="font-size:12px;color:var(--text-light);">${s.time}</span><span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span></div>`).join('');
-  }
-}
-function renderSIBoard(){
-  const el=document.getElementById('si-board');if(!el)return;
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  el.innerHTML=TEAM.map(t=>{
-    const roleLabel=t.role==='ceo'?'CEO':'Client Executive';
-    const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
-    return `<div class="si-card${s?' signed':''}">
-      <div class="si-av">${t.av}</div>
-      <div class="si-nm">${t.name}</div>
-      <div class="si-rl">${t.title}</div>
-      ${s?`<span class="pill p-green">✅ Signed In</span>`:
-      `<span class="pill p-gray">Not Signed In</span>`}
-    </div>`;
-  }).join('');
-}
-function renderAttLog(){
-  const el=document.getElementById('att-log');if(!el)return;
-  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
-  el.innerHTML=[...signIns].reverse().slice(0,20).map(s=>`
-    <div class="row">
-      <div class="rn">${s.role==='CEO'?'👑 Aminat (CEO)':'👤 Client Executive'}</div>
-      <span style="font-size:12px;color:var(--text-light);">${s.date||''}</span>
-      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
-    </div>`).join('');
-}
-function updSbSI(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
-  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
-  if(s){if(v)v.textContent='✅ Signed in today';if(t)t.textContent='';}
-  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
-}
-
-// ══ CALENDAR ══
+// ══════════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════════
 function buildCal(){
   const el=document.getElementById('cal-grid');if(!el)return;
   const now=new Date();
@@ -1113,12 +1256,10 @@ function buildCal(){
   for(let i=0;i<startOffset;i++)html+=`<div class="cal-d" style="background:transparent;border-color:transparent;cursor:default;min-height:68px;"></div>`;
   for(let i=1;i<=daysInMonth;i++){
     const mm=String(calMonth+1).padStart(2,'0');const dd=String(i).padStart(2,'0');
-    const dateStr=`${calYear}-${mm}-${dd}`;
-    const cleanDateStr=`${dd}/${mm}/${calYear}`;
+    const dateStr=`${calYear}-${mm}-${dd}`;const cleanDateStr=`${dd}/${mm}/${calYear}`;
     const dp=posts.filter(p=>p.date===cleanDateStr||p.date===dateStr);
     const isToday=now.getDate()===i&&now.getMonth()===calMonth&&now.getFullYear()===calYear;
     const dots=dp.map(p=>`<span class="cdot ${p.plat==='Instagram'?'c-ig':p.plat==='TikTok'?'c-tt':'c-fb'}"></span>`).join('');
-    const dayIdx=(startOffset+i-1)%7;
     html+=`<div class="cal-d${dp.length?' has':''}${isToday?' today':''}" onclick="setDate('${dateStr}')">
       <div class="cal-dt">${i}</div>
       <div class="cal-dots">${dots}</div>
@@ -1131,7 +1272,9 @@ function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}buildCal()
 function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}buildCal();}
 function setDate(d){const el=document.getElementById('sm-date');if(el){el.value=d;document.getElementById('sm-topic')?.focus();}toast('Date set to '+d);}
 
-// ══ DASHBOARD ══
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
 function renderDash(){
   const rev=revHist.length?revHist[revHist.length-1].amount:0;
   const el=document.getElementById('d-rev');if(el)el.textContent='₦'+rev.toLocaleString();
@@ -1144,7 +1287,7 @@ function renderDash(){
   const rep=reports[reports.length-1];
   const rel=document.getElementById('d-report');if(rel)rel.textContent=rep?'✅':'⏳';
   const rb=document.getElementById('d-rev-b');if(rb)rb.style.width=Math.min((rev/cfg.breakEven)*100,100)+'%';
-  const rl=document.getElementById('d-rev-l');if(rl)rl.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.breakEven.toLocaleString();
+  const rl2=document.getElementById('d-rev-l');if(rl2)rl2.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.breakEven.toLocaleString();
   const lb=document.getElementById('d-lead-b');if(lb)lb.style.width=pct+'%';
   const ll=document.getElementById('d-lead-l');if(ll)ll.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
   const gb=document.getElementById('d-gr-b');if(gb)gb.style.width=Math.min((rev/cfg.growthGoal)*100,100)+'%';
@@ -1153,14 +1296,13 @@ function renderDash(){
   const gd=document.getElementById('gr-goal-display');if(gd)gd.textContent='₦'+cfg.growthGoal.toLocaleString();
   const ct=document.getElementById('ce-target-display');if(ct)ct.textContent='₦'+cfg.leadTarget.toLocaleString();
 
-  // CE Checklist on dashboard
   const dcp=document.getElementById('d-chk-prog');
   const dci=document.getElementById('d-chk-items');
   if(dcp&&dci){
     const done=ceTasks.filter(t=>chk[t.id]).length;
     const total=ceTasks.length;
-    const pct=Math.round((done/total)*100);
-    dcp.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${total} tasks completed</span><span style="font-weight:700;color:${pct===100?'var(--success)':pct>=50?'var(--gold)':'var(--danger)'};">${pct}%</span></div><div class="pb"><div class="pf ${pct===100?'green':pct>=50?'gold':''}" style="width:${pct}%"></div></div></div>`;
+    const p=Math.round((done/total)*100);
+    dcp.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${total} tasks completed</span><span style="font-weight:700;color:${p===100?'var(--success)':p>=50?'var(--gold)':'var(--danger)'};">${p}%</span></div><div class="pb"><div class="pf ${p===100?'green':p>=50?'gold':''}" style="width:${p}%"></div></div></div>`;
     dci.innerHTML=ceTasks.map(t=>`
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
         <span style="font-size:14px;">${chk[t.id]?'✅':'⏳'}</span>
@@ -1168,7 +1310,6 @@ function renderDash(){
       </div>`).join('');
   }
 
-  // Latest Friday Report on dashboard
   const dlr=document.getElementById('d-latest-report');
   if(dlr){
     const last=reports[reports.length-1];
@@ -1186,7 +1327,9 @@ function renderDash(){
   }
 }
 
-// ══ CHECKLIST ══
+// ══════════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════════
 function renderChk(){
   const el=document.getElementById('chk-items');if(!el)return;
   const today=new Date().toDateString();
@@ -1204,15 +1347,16 @@ function renderChk(){
 }
 function togChk(id){
   chk[id]=!chk[id];S.set('v5_chk',chk);renderChk();
-  // Sync checklist state to Google Sheets
   const done=ceTasks.filter(t=>chk[t.id]).length;
   const total=ceTasks.length;
   const pct=Math.round((done/total)*100);
-  syncToSheet('Checklist',[{date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),completed:done,total,percentage:pct+'%',tasks:ceTasks.map(t=>t.text+': '+(chk[t.id]?'✅':'⏳')).join(' | ')}]);
+  syncToSheet('Checklist',[{date:todayKey(),completed:done,total,percentage:pct+'%',tasks:ceTasks.map(t=>t.text+': '+(chk[t.id]?'✅':'⏳')).join(' | ')}]);
 }
 function resetChk(){chk={date:new Date().toDateString()};S.set('v5_chk',chk);renderChk();toast('Checklist reset for today');}
 
-// ══ LEADS ══
+// ══════════════════════════════════════════════
+// LEADS
+// ══════════════════════════════════════════════
 function renderLeads(){
   const pct=Math.min(Math.round((leadsAmt/cfg.leadTarget)*100),100);
   ['ce-lead-b','ce-prog-b'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.width=pct+'%';});
@@ -1225,47 +1369,27 @@ function updateLeads(){
   renderLeads();renderDash();toast('Lead target updated');
 }
 
-// ══ REPORT ══
+// ══════════════════════════════════════════════
+// WEEKLY REPORT
+// ══════════════════════════════════════════════
 function checkReportWindow(){
   const now=new Date();
-  const day=now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
-  const hour=now.getHours();
+  const day=now.getDay();const hour=now.getHours();
   const warn=document.getElementById('report-warning');
   const wrap=document.getElementById('report-form-wrap');
   if(!warn||!wrap)return;
-
   if(day===6&&hour<14){
-    // Saturday before 2pm — window is OPEN
-    warn.className='alert a-success';
-    warn.textContent='✅ Report window is open! Submit before 2pm today (Saturday).';
-    warn.style.display='flex';
-    wrap.style.display='block';
-  } else if(day===6&&hour>=14){
-    // Saturday after 2pm — LOCKED
-    warn.className='alert a-warn';
-    warn.textContent='🔒 Report window is closed. Deadline was Saturday 2pm. This counts as a missed report.';
-    warn.style.display='flex';
-    wrap.style.display='none';
-  } else if(day===5){
-    // Friday — remind her
-    warn.className='alert a-info';
-    warn.textContent='📅 Report is due tomorrow — Saturday before 2pm.';
-    warn.style.display='flex';
-    wrap.style.display='block';
-  } else {
-    // Other days
-    warn.className='alert a-info';
-    warn.textContent='📅 Weekly report is due every Saturday before 2pm.';
-    warn.style.display='flex';
-    wrap.style.display='block';
+    warn.className='alert a-success';warn.textContent='✅ Report window is open! Submit before 2pm today (Saturday).';warn.style.display='flex';wrap.style.display='block';
+  }else if(day===6&&hour>=14){
+    warn.className='alert a-warn';warn.textContent='🔒 Report window is closed. Deadline was Saturday 2pm. This counts as a missed report.';warn.style.display='flex';wrap.style.display='none';
+  }else if(day===5){
+    warn.className='alert a-info';warn.textContent='📅 Report is due tomorrow — Saturday before 2pm.';warn.style.display='flex';wrap.style.display='block';
+  }else{
+    warn.className='alert a-info';warn.textContent='📅 Weekly report is due every Saturday before 2pm.';warn.style.display='flex';wrap.style.display='block';
   }
 }
-
 function submitReport(){
-  const now=new Date();
-  const day=now.getDay();
-  const hour=now.getHours();
-  // Block submission after Saturday 2pm
+  const now=new Date();const day=now.getDay();const hour=now.getHours();
   if(day===6&&hour>=14)return toast('⏰ Report deadline has passed — Saturday 2pm');
   const vals=['r-nl','r-fu','r-cv','r-rv'].map(f=>document.getElementById(f)?.value?.trim());
   if(vals.some(v=>!v))return toast('Fill in all required fields');
@@ -1290,7 +1414,9 @@ function renderReports(){
     </div>`).join('');
 }
 
-// ══ FINANCE ══
+// ══════════════════════════════════════════════
+// FINANCE
+// ══════════════════════════════════════════════
 function logRev(){
   const m=document.getElementById('fin-mo')?.value;const a=parseInt(document.getElementById('fin-amt')?.value);
   if(!m||!a||a<0)return toast('Fill in month and amount');
@@ -1357,7 +1483,9 @@ function renderExp(){
     expenses.map(e=>`<div class="row"><div class="rn">${e.name} <span style="font-size:11px;color:var(--text-light);">${e.date||''}</span></div><span class="pill p-gray">${e.cat}</span><div class="ra out">-₦${e.amount.toLocaleString()}</div></div>`).join('');
 }
 
-// ══ CLIENTS ══
+// ══════════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════════
 function addClient(){
   const n=document.getElementById('cl-n')?.value?.trim();if(!n)return toast('Enter client name');
   clients.push({id:Date.now(),name:n,type:document.getElementById('cl-t')?.value,dest:document.getElementById('cl-d')?.value,status:document.getElementById('cl-s')?.value,paid:parseInt(document.getElementById('cl-p')?.value)||0,balance:parseInt(document.getElementById('cl-b')?.value)||0,drive:document.getElementById('cl-dr')?.value,notes:document.getElementById('cl-no')?.value,added:new Date().toLocaleDateString('en-GB')});
@@ -1392,11 +1520,13 @@ function renderClients(){
     </div>`).join('');
 }
 
-// ══ POSTS ══
+// ══════════════════════════════════════════════
+// POSTS
+// ══════════════════════════════════════════════
 function addPost(){
   const t=document.getElementById('sm-topic')?.value?.trim();if(!t)return toast('Enter post topic');
   const rawDate=document.getElementById('sm-date')?.value||'';
-  const cleanDate=rawDate?rawDate.split('T')[0].split('-').reverse().join('/'):new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const cleanDate=rawDate?rawDate.split('T')[0].split('-').reverse().join('/'):todayKey();
   posts.push({id:Date.now(),topic:t,date:cleanDate,plat:document.getElementById('sm-plat')?.value,status:document.getElementById('sm-st')?.value,type:document.getElementById('sm-type')?.value});
   S.set('v5_posts',posts);document.getElementById('sm-topic').value='';
   renderPosts();buildCal();toast('Post logged');
@@ -1407,12 +1537,9 @@ const PC={Instagram:'p-red',TikTok:'p-red',Facebook:'p-blue','All Platforms':'p-
 const SC2={Scheduled:'p-warn',Published:'p-green','Pending Design':'p-red',Draft:'p-gray'};
 function updPostStatus(id,status){
   posts=posts.map(p=>p.id==id?{...p,status}:p);
-  S.set('v5_posts',posts);
-  renderPosts();buildCal();
-  syncToSheet('Posts',posts);
-  toast('Status updated to '+status);
+  S.set('v5_posts',posts);renderPosts();buildCal();
+  syncToSheet('Posts',posts);toast('Status updated to '+status);
 }
-
 function renderPosts(){
   const el=document.getElementById('posts-list');if(!el)return;
   const tot=document.getElementById('sm-tot');if(tot)tot.textContent=posts.length;
@@ -1435,7 +1562,9 @@ function renderPosts(){
     </div>`).join('');
 }
 
-// ══ WAKA ══
+// ══════════════════════════════════════════════
+// WAKA
+// ══════════════════════════════════════════════
 function addWaka(){
   const h=document.getElementById('wk-h')?.value?.trim();if(!h)return toast('Enter hook/title');
   waka.push({id:Date.now(),hook:h,date:document.getElementById('wk-dt')?.value,plat:document.getElementById('wk-pl')?.value,status:document.getElementById('wk-st')?.value,pillar:document.getElementById('wk-pi')?.value});
@@ -1464,7 +1593,9 @@ function renderWaka(){
     </div>`).join('');
 }
 
-// ══ GROWTH ══
+// ══════════════════════════════════════════════
+// GROWTH
+// ══════════════════════════════════════════════
 function renderGrowth(){
   const el=document.getElementById('gr-chart');if(!el)return;
   if(!revHist.length){el.innerHTML='<div class="empty"><p>Log revenue in Finance to see chart.</p></div>';return;}
@@ -1483,7 +1614,9 @@ function renderGrowth(){
   }).join('');
 }
 
-// ══ GOALS ══
+// ══════════════════════════════════════════════
+// GOALS
+// ══════════════════════════════════════════════
 function addGoal(){
   const t=document.getElementById('goal-t')?.value?.trim();if(!t)return toast('Enter goal');
   goals.push({id:Date.now(),text:t,date:document.getElementById('goal-d')?.value,done:false});
@@ -1503,34 +1636,25 @@ function renderGoals(){
     </div>`).join('');
 }
 
-// ══ TODOS ══
+// ══════════════════════════════════════════════
+// TODOS
+// ══════════════════════════════════════════════
 function addTodo(){
   const inp=document.getElementById('todo-i');const t=inp?.value?.trim();if(!t)return;
   const newTodo={id:Date.now(),text:t,done:false};
-  todos.push(newTodo);
-  S.set('v5_todos',todos);inp.value='';renderTodos();
+  todos.push(newTodo);S.set('v5_todos',todos);inp.value='';renderTodos();
   syncToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done===true?'TRUE':'FALSE'})));
 }
 function togTodo(id){
   todos=todos.map(t=>{
-    if(t.id==id||t.id==String(id)){
-      return {...t,done:!(t.done===true||String(t.done).toLowerCase()==='true')};
-    }
+    if(t.id==id||t.id==String(id)){return {...t,done:!(t.done===true||String(t.done).toLowerCase()==='true')};}
     return t;
   });
-  S.set('v5_todos',todos);
-  renderTodos();
-  const payload=todos.map(t=>({
-    id:String(t.id),
-    text:t.text,
-    done:t.done===true?'TRUE':'FALSE'
-  }));
-  syncToSheet('Todos',payload);
+  S.set('v5_todos',todos);renderTodos();
+  syncToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done===true?'TRUE':'FALSE'})));
 }
 function delTodo(id){
-  todos=todos.filter(t=>t.id!==id);
-  S.set('v5_todos',todos);
-  renderTodos();
+  todos=todos.filter(t=>t.id!==id);S.set('v5_todos',todos);renderTodos();
   syncToSheet('Todos',todos.map(t=>({id:t.id,text:t.text,done:t.done?'true':'false'})));
 }
 function renderTodos(){
@@ -1538,30 +1662,26 @@ function renderTodos(){
   if(!todos.length){el.innerHTML='<div class="empty"><div class="ei">✅</div><p>No tasks yet.</p></div>';return;}
   el.innerHTML=todos.map(t=>{
     const isDone=t.done===true||String(t.done).toLowerCase()==='true';
-    return `
-    <div class="ti">
+    return `<div class="ti">
       <input type="checkbox" ${isDone?'checked':''} onchange="togTodo(${t.id})">
       <span class="ti-t${isDone?' done':''}">${t.text}</span>
       <button class="btn btn-danger btn-sm" onclick="delTodo(${t.id})" style="padding:3px 8px;">✕</button>
     </div>`;}).join('');
 }
 
-// ══ TOAST ══
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
 function toast(msg){
   const t=document.getElementById('toast');
   document.getElementById('toast-msg').textContent=msg;
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-function logout(){
-  S.set('v5_session',null);
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app').style.display='none';
-  document.getElementById('pwd').value='';
-}
-
+// ══════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════
 selRole('ceo',document.querySelector('.rtab'));
-// Check if already logged in
 checkSession();
 </script>
 </body>
