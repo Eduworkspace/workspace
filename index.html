@@ -544,10 +544,33 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
       </div>
     </div>
 
+    <!-- CE TO-DO PAGE -->
+    <div class="page" id="p-cetodo">
+      <div class="ph">
+        <div class="ph-tag" id="cetodo-date"></div>
+        <h1>My To-Do</h1>
+        <p>Log your tasks for the day. Aminat can see these.</p>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>My Tasks</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <input type="text" id="cetodo-i" placeholder="Add a task..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);" onkeydown="if(event.key==='Enter')addCETodo()">
+          <button class="btn btn-gold" onclick="addCETodo()" style="font-size:20px;padding:8px 16px;">+</button>
+        </div>
+        <div id="cetodo-list"></div>
+      </div>
+    </div>
+
     <!-- REPORTS (CEO) -->
     <div class="page" id="p-reports">
       <div class="ph"><h1>Friday Reports</h1><p>Review CE weekly submissions and attendance.</p></div>
       <div class="card"><div class="card-hd"><span class="dot"></span>Submitted Reports</div><div id="reports-list"></div></div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>CE To-Do — Today</div>
+        <div style="font-size:11px;color:var(--text-light);margin-bottom:12px;">Tasks your Client Executive has logged. Updates live from Sheets.</div>
+        <div id="ce-todo-view"></div>
+        <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" onclick="refreshCETodos()">↻ Refresh</button></div>
+      </div>
       <div class="card"><div class="card-hd"><span class="dot"></span>Sign-In Attendance Log</div><div id="att-log"></div></div>
     </div>
 
@@ -658,6 +681,7 @@ let finePolicy=S.get('v5_fines',[
 // STATE
 // ══════════════════════════════════════════════
 let todos=S.get('v5_todos',[]);
+let ceTodos=S.get('v5_cetodos',[]);
 let clients=S.get('v5_clients',[]);
 let posts=S.get('v5_posts',[]);
 let waka=S.get('v5_waka',[]);
@@ -1084,10 +1108,10 @@ function checkSession(){
 // ══════════════════════════════════════════════
 async function loadAll(){
   try{
-    const [c,p,w,t,r,e,rv,g]=await Promise.all([
+    const [c,p,w,t,r,e,rv,g,ct]=await Promise.all([
       loadFromSheet('Clients'),loadFromSheet('Posts'),loadFromSheet('Waka'),
       loadFromSheet('Todos'),loadFromSheet('Reports'),loadFromSheet('Expenses'),
-      loadFromSheet('Revenue'),loadFromSheet('Goals'),
+      loadFromSheet('Revenue'),loadFromSheet('Goals'),loadFromSheet('CETodos'),
     ]);
     if(c.length){clients=c;S.set('v5_clients',clients);}
     if(p.length){posts=p;S.set('v5_posts',posts);}
@@ -1100,6 +1124,10 @@ async function loadAll(){
     if(e.length){expenses=e;S.set('v5_exp',expenses);}
     if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
     if(g.length){goals=g;S.set('v5_goals',goals);}
+    if(ct.length){
+      ceTodos=ct.map(td=>({id:td.id,text:td.text,done:String(td.done).toUpperCase()==='TRUE',date:td.date||''}));
+      S.set('v5_cetodos',ceTodos);
+    }
     renderAll();
   }catch(e){console.log('Load all error:',e);}
 }
@@ -1128,7 +1156,7 @@ function initApp(){
   const now=new Date();
   if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
   const ds=now.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  ['dash-date','si-date','ce-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
+  ['dash-date','si-date','ce-date','cetodo-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
   const fm=document.getElementById('fin-mo');if(fm)fm.value=now.toISOString().slice(0,7);
   const sd=document.getElementById('sm-date');if(sd)sd.value=now.toISOString().slice(0,10);
   const wd=document.getElementById('wk-dt');if(wd)wd.value=now.toISOString().slice(0,10);
@@ -1152,6 +1180,7 @@ function initApp(){
     {s:'Weekly'},{id:'report',i:'📝',l:'Friday Report'},
     {s:'Business'},{id:'clients',i:'👤',l:'Client Work'},
     {s:'Social'},{id:'social',i:'📱',l:'Social Media'},
+    {s:'Personal'},{id:'cetodo',i:'✅',l:'My To-Do'},
   ];
   const nav=isCEO?ceoNav:ceNav;
   const navEl=document.getElementById('sb-nav');navEl.innerHTML='';
@@ -1188,7 +1217,7 @@ function renderAll(){
   renderPosts();renderWaka();renderGrowth();renderReports();
   renderExp();renderRevHist();renderGoals();renderLeads();
   renderFixed();renderSIBoard();renderAttLog();renderCETasks();
-  renderFinePolicy();renderConfig();
+  renderFinePolicy();renderConfig();renderCETodos();renderCETodoView();
 }
 
 // ══════════════════════════════════════════════
@@ -1705,6 +1734,110 @@ function renderTodos(){
     </div>`;}).join('');
 }
 
+// ══════════════════════════════════════════════
+// CE TO-DO (Client Executive personal tasks)
+// ══════════════════════════════════════════════
+function addCETodo(){
+  const inp=document.getElementById('cetodo-i');
+  const t=inp?.value?.trim();if(!t)return;
+  const today=todayKey();
+  const newTodo={id:Date.now(),text:t,done:false,date:today};
+  ceTodos.push(newTodo);
+  S.set('v5_cetodos',ceTodos);
+  inp.value='';
+  renderCETodos();
+  renderCETodoView();
+  syncToSheet('CETodos',ceTodos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE',date:t.date||''})));
+}
+function togCETodo(id){
+  ceTodos=ceTodos.map(t=>{
+    if(t.id==id||t.id==String(id)){return {...t,done:!(t.done===true||String(t.done).toLowerCase()==='true')};}
+    return t;
+  });
+  S.set('v5_cetodos',ceTodos);
+  renderCETodos();
+  renderCETodoView();
+  syncToSheet('CETodos',ceTodos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE',date:t.date||''})));
+}
+function delCETodo(id){
+  ceTodos=ceTodos.filter(t=>t.id!==id&&t.id!==String(id));
+  S.set('v5_cetodos',ceTodos);
+  renderCETodos();
+  renderCETodoView();
+  syncToSheet('CETodos',ceTodos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE',date:t.date||''})));
+}
+// CE sees her own list
+function renderCETodos(){
+  const el=document.getElementById('cetodo-list');if(!el)return;
+  const today=todayKey();
+  // Show today's tasks first, then older ones grouped
+  const todayTasks=ceTodos.filter(t=>t.date===today);
+  const older=ceTodos.filter(t=>t.date!==today);
+  if(!ceTodos.length){el.innerHTML='<div class="empty"><div class="ei">✅</div><p>No tasks yet. Add your first task above.</p></div>';return;}
+  const renderItem=t=>{
+    const isDone=t.done===true||String(t.done).toLowerCase()==='true';
+    return `<div class="ti">
+      <input type="checkbox" ${isDone?'checked':''} onchange="togCETodo(${t.id})">
+      <span class="ti-t${isDone?' done':''}">${t.text}</span>
+      <button class="btn btn-danger btn-sm" onclick="delCETodo(${t.id})" style="padding:3px 8px;">✕</button>
+    </div>`;
+  };
+  let html='';
+  if(todayTasks.length){
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Today</div>`;
+    html+=todayTasks.map(renderItem).join('');
+  }
+  if(older.length){
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">Earlier</div>`;
+    html+=[...older].reverse().slice(0,10).map(t=>`
+      <div class="ti" style="opacity:0.7;">
+        <input type="checkbox" ${(t.done===true||String(t.done).toLowerCase()==='true')?'checked':''} onchange="togCETodo(${t.id})">
+        <span class="ti-t${(t.done===true||String(t.done).toLowerCase()==='true')?' done':''}">${t.text}</span>
+        <span style="font-size:10px;color:var(--text-light);margin-right:4px;">${t.date||''}</span>
+        <button class="btn btn-danger btn-sm" onclick="delCETodo(${t.id})" style="padding:3px 8px;">✕</button>
+      </div>`).join('');
+  }
+  el.innerHTML=html;
+}
+// CEO sees CE's tasks in Reports page
+function renderCETodoView(){
+  const el=document.getElementById('ce-todo-view');if(!el)return;
+  const today=todayKey();
+  const todayTasks=ceTodos.filter(t=>t.date===today);
+  if(!todayTasks.length){
+    el.innerHTML='<div class="empty" style="padding:12px;"><p>No tasks logged by CE today yet.</p></div>';
+    return;
+  }
+  const done=todayTasks.filter(t=>t.done===true||String(t.done).toLowerCase()==='true').length;
+  const pct=Math.round((done/todayTasks.length)*100);
+  el.innerHTML=`
+    <div class="pw" style="margin-bottom:12px;"><div class="pl"><span>${done}/${todayTasks.length} completed</span><span style="font-weight:700;color:${pct===100?'var(--success)':pct>=50?'var(--gold)':'var(--danger)'};">${pct}%</span></div><div class="pb"><div class="pf ${pct===100?'green':pct>=50?'gold':''}" style="width:${pct}%"></div></div></div>
+    ${todayTasks.map(t=>{
+      const isDone=t.done===true||String(t.done).toLowerCase()==='true';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
+        <span>${isDone?'✅':'⏳'}</span>
+        <span style="flex:1;${isDone?'text-decoration:line-through;color:var(--text-light)':''}">${t.text}</span>
+      </div>`;
+    }).join('')}`;
+}
+async function refreshCETodos(){
+  const btn=event.target;
+  btn.textContent='↻ Refreshing...';btn.disabled=true;
+  try{
+    const ct=await loadFromSheet('CETodos');
+    if(ct&&ct.length){
+      ceTodos=ct.map(td=>({id:td.id,text:td.text,done:String(td.done).toUpperCase()==='TRUE',date:td.date||''}));
+      S.set('v5_cetodos',ceTodos);
+    }
+  }catch(e){}
+  renderCETodoView();
+  btn.textContent='↻ Refresh';btn.disabled=false;
+  toast('CE tasks refreshed');
+}
+
+// ══════════════════════════════════════════════
+// CE TO-DO (Client Executive personal tasks)
+// ══════════════════════════════════════════════
 // ══════════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════════
