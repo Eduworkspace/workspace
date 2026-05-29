@@ -319,13 +319,21 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
       <div class="ph">
         <div class="ph-tag" id="ce-date"></div>
         <h1>Daily Checklist</h1>
-        <p>Complete every task before 6pm.</p>
+        <p>Complete every mandatory task before 6pm.</p>
       </div>
       <div class="card">
-        <div class="card-hd"><span class="dot"></span>Today's Tasks</div>
+        <div class="card-hd"><span class="dot"></span>Mandatory Tasks — Today</div>
         <div id="chk-prog" style="margin-bottom:14px;"></div>
         <div id="chk-items"></div>
         <div style="margin-top:16px;"><button class="btn btn-gold btn-sm" onclick="resetChk()">Reset for New Day</button></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>My Daily To-Do</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <input type="text" id="ce-todo-i" placeholder="Add a task for today..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Montserrat',sans-serif;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addCETodo()">
+          <button class="btn btn-gold" onclick="addCETodo()">+</button>
+        </div>
+        <div id="ce-todo-list"></div>
       </div>
       <div class="card">
         <div class="card-hd"><span class="dot"></span>Monthly Lead Target</div>
@@ -735,8 +743,10 @@ let ceTasks=S.get('v5_tasks',[
   {id:6,text:'Upload today\'s social media post',tag:'s'},
   {id:7,text:'Follow up on all pending leads',tag:'d'},
   {id:8,text:'Chase outstanding client payments',tag:'d'},
-  {id:9,text:'Submit Friday report by 5pm (Fridays only)',tag:'w'},
+  {id:9,text:'Submit weekly report by Saturday 2pm',tag:'w'},
 ]);
+
+let ceTodos=S.get('v5_ce_todos',[]);
 
 let finePolicy=S.get('v5_fines',[
   {id:1,reason:'Missing Friday report',amount:5000},
@@ -798,7 +808,7 @@ async function syncAll(){
 
 async function loadAll(){
   try{
-    const [c,p,w,t,r,e,rv,g,s,wb,sv,sc]=await Promise.all([
+    const [c,p,w,t,r,e,rv,g,s,wb,sv,sc,ct]=await Promise.all([
       loadFromSheet('Clients'),
       loadFromSheet('Posts'),
       loadFromSheet('Waka'),
@@ -811,6 +821,7 @@ async function loadAll(){
       loadFromSheet('Webinars'),
       loadFromSheet('Services'),
       loadFromSheet('Scholarships'),
+      loadFromSheet('CETodos'),
     ]);
     if(c.length){clients=c.map(x=>({id:x.id||Date.now(),name:x.name||x.Name||'',type:x.type||x.Type||'',dest:x.dest||x.destination||x.Destination||'',status:x.status||x.Status||'New Enquiry',paid:parseInt(x.paid||x.Paid||0)||0,balance:parseInt(x.balance||x.Balance||0)||0,drive:x.drive||x['Drive Link']||x.driveLink||'',notes:x.notes||x.Notes||'',added:x.added||x.Added||''}));S.set('v5_clients',clients);}
     if(p.length){posts=p.map(x=>({id:x.id||Date.now(),topic:x.topic||x.Topic||'',date:x.date||x.Date||'',plat:x.plat||x.Platform||x.platform||'Instagram',status:x.status||x.Status||'Draft',type:x.type||x.Type||'Reel/Video'}));S.set('v5_posts',posts);}
@@ -841,6 +852,7 @@ async function loadAll(){
     if(wb&&wb.length){webinars=wb;S.set('v5_webinars',webinars);}
     if(sv&&sv.length){services=sv.map(x=>({...x,price:parseInt(x.price||x.Price||0)||0}));S.set('v5_services',services);}
     if(sc&&sc.length){scholarships=sc;S.set('v5_schols',scholarships);}
+    if(ct&&ct.length){ceTodos=ct.map(x=>({id:x.id,text:x.text,done:String(x.done).toUpperCase()==='TRUE'})).filter(x=>x.text);S.set('v5_ce_todos',ceTodos);}
     renderAll();
   }catch(e){console.log('Load all error:',e);}
 }
@@ -1008,7 +1020,7 @@ function renderAll(){
   renderExp();renderRevHist();renderGoals();renderLeads();
   renderFixed();renderSIBoard();renderAttLog();renderCETasks();
   renderFinePolicy();renderConfig();renderSchols();
-  renderWebinars();renderServices();
+  renderWebinars();renderServices();renderCETodos();
 }
 
 // ══ SETTINGS ══
@@ -1068,6 +1080,42 @@ function renderConfig(){
     <div class="row"><div class="rn">CE Lead Target</div><div style="font-size:13px;font-weight:600;color:var(--gold);">₦${cfg.leadTarget.toLocaleString()}</div></div>
     <div class="row"><div class="rn">Break Even Target</div><div style="font-size:13px;font-weight:600;color:var(--danger);">₦${cfg.breakEven.toLocaleString()}</div></div>
     <div class="row"><div class="rn">Growth Goal</div><div style="font-size:13px;font-weight:600;color:var(--success);">₦${cfg.growthGoal.toLocaleString()}</div></div>`;
+}
+
+// ══ CE DAILY TODOS ══
+function addCETodo(){
+  const inp=document.getElementById('ce-todo-i');
+  const t=inp?.value?.trim();if(!t)return;
+  ceTodos.push({id:Date.now(),text:t,done:false});
+  S.set('v5_ce_todos',ceTodos);
+  inp.value='';
+  renderCETodos();
+  syncToSheet('CETodos',ceTodos.map(x=>({id:String(x.id),text:x.text,done:x.done?'TRUE':'FALSE'})));
+}
+
+function togCETodo(id){
+  ceTodos=ceTodos.map(t=>t.id==id?{...t,done:!t.done}:t);
+  S.set('v5_ce_todos',ceTodos);
+  renderCETodos();
+  syncToSheet('CETodos',ceTodos.map(x=>({id:String(x.id),text:x.text,done:x.done?'TRUE':'FALSE'})));
+}
+
+function delCETodo(id){
+  ceTodos=ceTodos.filter(t=>t.id!=id);
+  S.set('v5_ce_todos',ceTodos);
+  renderCETodos();
+  syncToSheet('CETodos',ceTodos.map(x=>({id:String(x.id),text:x.text,done:x.done?'TRUE':'FALSE'})));
+}
+
+function renderCETodos(){
+  const el=document.getElementById('ce-todo-list');if(!el)return;
+  if(!ceTodos.length){el.innerHTML='<div class="empty"><p>No tasks added yet. Add what you need to do today!</p></div>';return;}
+  el.innerHTML=ceTodos.map(t=>`
+    <div class="ti">
+      <input type="checkbox" ${t.done?'checked':''} onchange="togCETodo(${t.id})">
+      <span class="ti-t${t.done?' done':''}">${t.text}</span>
+      <button class="btn btn-danger btn-sm" onclick="delCETodo(${t.id})" style="padding:3px 8px;">✕</button>
+    </div>`).join('');
 }
 
 // ══ CE TASKS ══
