@@ -600,6 +600,59 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);m
       </div>
     </div>
 
+    <!-- WEBINAR UPDATES -->
+    <div class="page" id="p-webinar">
+      <div class="ph">
+        <h1>Webinar Updates</h1>
+        <p>Log and track updates from KC Overseas and partner webinars.</p>
+      </div>
+      <div class="card" id="webinar-add-card">
+        <div class="card-hd"><span class="dot"></span>Log New Webinar</div>
+        <div class="g2">
+          <div class="fr"><label>Webinar Date</label><input type="date" id="wb-date"></div>
+          <div class="fr"><label>Country / School</label><input type="text" id="wb-country" placeholder="e.g. UK / University of Manchester"></div>
+        </div>
+        <div class="fr"><label>Key Updates & Information Learned</label><textarea id="wb-update" placeholder="Write all key updates, changes, new requirements, deadlines, opportunities..." style="min-height:100px;"></textarea></div>
+        <div class="fr"><label>Action Points</label><textarea id="wb-action" placeholder="What actions should we take based on this webinar?"></textarea></div>
+        <button class="btn btn-gold" onclick="addWebinar()">Save Webinar Update ✓</button>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Webinar History</div>
+        <div id="webinar-list"></div>
+      </div>
+    </div>
+
+    <!-- SERVICES & PRICING -->
+    <div class="page" id="p-services">
+      <div class="ph">
+        <h1>Services & Pricing</h1>
+        <p>All Eduvoyage services and charges for study abroad and travel.</p>
+      </div>
+      <div id="services-add-section">
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Add New Service</div>
+          <div class="g2">
+            <div class="fr"><label>Service Name</label><input type="text" id="sv-name" placeholder="e.g. Canada Study Permit"></div>
+            <div class="fr"><label>Division</label><select id="sv-div"><option>Study Abroad</option><option>Travel & Tour</option></select></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Route / Destination</label><input type="text" id="sv-route" placeholder="e.g. Nigeria → Canada"></div>
+            <div class="fr"><label>Price (₦)</label><input type="number" id="sv-price" placeholder="e.g. 600000"></div>
+          </div>
+          <div class="fr"><label>Description (optional)</label><textarea id="sv-desc" placeholder="Brief description of what's included..."></textarea></div>
+          <button class="btn btn-gold" onclick="addService()">Add Service ✓</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Study Abroad Services</div>
+        <div id="services-study"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Travel & Tour Services</div>
+        <div id="services-travel"></div>
+      </div>
+    </div>
+
     <!-- SCHOLARSHIP ADVISORY -->
     <div class="page" id="p-scholarship">
       <div class="ph">
@@ -741,7 +794,7 @@ async function syncAll(){
 
 async function loadAll(){
   try{
-    const [c,p,w,t,r,e,rv,g,s]=await Promise.all([
+    const [c,p,w,t,r,e,rv,g,s,wb,sv]=await Promise.all([
       loadFromSheet('Clients'),
       loadFromSheet('Posts'),
       loadFromSheet('Waka'),
@@ -751,6 +804,8 @@ async function loadAll(){
       loadFromSheet('Revenue'),
       loadFromSheet('Goals'),
       loadFromSheet('SignIns'),
+      loadFromSheet('Webinars'),
+      loadFromSheet('Services'),
     ]);
     if(c.length){clients=c.map(x=>({id:x.id||Date.now(),name:x.name||x.Name||'',type:x.type||x.Type||'',dest:x.dest||x.destination||x.Destination||'',status:x.status||x.Status||'New Enquiry',paid:parseInt(x.paid||x.Paid||0)||0,balance:parseInt(x.balance||x.Balance||0)||0,drive:x.drive||x['Drive Link']||x.driveLink||'',notes:x.notes||x.Notes||'',added:x.added||x.Added||''}));S.set('v5_clients',clients);}
     if(p.length){posts=p.map(x=>({id:x.id||Date.now(),topic:x.topic||x.Topic||'',date:x.date||x.Date||'',plat:x.plat||x.Platform||x.platform||'Instagram',status:x.status||x.Status||'Draft',type:x.type||x.Type||'Reel/Video'}));S.set('v5_posts',posts);}
@@ -778,6 +833,8 @@ async function loadAll(){
       })).filter(si=>si.time&&!si.time.includes('1899'));
       if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
     }
+    if(wb&&wb.length){webinars=wb;S.set('v5_webinars',webinars);}
+    if(sv&&sv.length){services=sv.map(x=>({...x,price:parseInt(x.price||x.Price||0)||0}));S.set('v5_services',services);}
     renderAll();
   }catch(e){console.log('Load all error:',e);}
 }
@@ -890,12 +947,15 @@ function initApp(){
     {s:'Overview'},{id:'dashboard',i:'🏠',l:'Dashboard'},
     {s:'Team'},{id:'ce',i:'⚡',l:'CE Management'},{id:'reports',i:'📋',l:'Reports & Attendance'},
     {s:'Business'},{id:'clients',i:'👤',l:'Client Work'},{id:'social',i:'📱',l:'Social Media'},{id:'finance',i:'💰',l:'Finance'},{id:'growth',i:'📈',l:'Growth'},{id:'scholarship',i:'🎓',l:'Scholarship Advisory'},
+    {s:'Knowledge'},{id:'webinar',i:'📡',l:'Webinar Updates'},{id:'services',i:'💼',l:'Services & Pricing'},
     {s:'Personal'},{id:'waka',i:'✈️',l:'WakawithAmi'},{id:'todo',i:'✅',l:'My To-Do'},
     {s:'System'},{id:'settings',i:'⚙️',l:'Settings'},
   ];
   const ceNav=[
     {s:'Daily'},{id:'signin',i:'⏰',l:'Sign In'},{id:'checklist',i:'✅',l:'Daily Checklist'},
     {s:'Weekly'},{id:'report',i:'📝',l:'Friday Report'},
+    {s:'Business'},{id:'clients',i:'👤',l:'Client Work'},{id:'scholarship',i:'🎓',l:'Scholarship Advisory'},
+    {s:'Knowledge'},{id:'webinar',i:'📡',l:'Webinar Updates'},{id:'services',i:'💼',l:'Services & Pricing'},
     {s:'Social'},{id:'social',i:'📱',l:'Social Media'},
   ];
   const nav=isCEO?ceoNav:ceNav;
@@ -941,6 +1001,7 @@ function renderAll(){
   renderExp();renderRevHist();renderGoals();renderLeads();
   renderFixed();renderSIBoard();renderAttLog();renderCETasks();
   renderFinePolicy();renderConfig();renderSchols();
+  renderWebinars();renderServices();
 }
 
 // ══ SETTINGS ══
@@ -1605,6 +1666,134 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').style.display='none';
   document.getElementById('pwd').value='';
+}
+
+// ══ WEBINARS ══
+let webinars=S.get('v5_webinars',[]);
+
+function addWebinar(){
+  const date=document.getElementById('wb-date')?.value;
+  const country=document.getElementById('wb-country')?.value?.trim();
+  const update=document.getElementById('wb-update')?.value?.trim();
+  if(!date||!country||!update)return toast('Please fill in Date, Country and Updates');
+  webinars.unshift({
+    id:Date.now(),
+    date:new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+    country,update,
+    action:document.getElementById('wb-action')?.value?.trim()||''
+  });
+  S.set('v5_webinars',webinars);
+  ['wb-date','wb-country','wb-update','wb-action'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  syncToSheet('Webinars',webinars);
+  renderWebinars();toast('Webinar update saved ✓');
+}
+
+function delWebinar(id){
+  if(role!=='ceo'){toast('Only CEO can delete webinars');return;}
+  if(!confirm('Delete this webinar?'))return;
+  webinars=webinars.filter(w=>w.id!=id);
+  S.set('v5_webinars',webinars);
+  syncToSheet('Webinars',webinars);
+  renderWebinars();toast('Deleted');
+}
+
+function renderWebinars(){
+  const el=document.getElementById('webinar-list');if(!el)return;
+  // Hide add form for CEO (CEO can only view and delete)
+  const addCard=document.getElementById('webinar-add-card');
+  if(addCard)addCard.style.display=role==='ce'?'block':'block'; // Both can see, CE adds
+  if(!webinars.length){el.innerHTML='<div class="empty"><div class="ei">📡</div><p>No webinars logged yet.</p></div>';return;}
+  el.innerHTML=webinars.map(w=>`
+    <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">📡 ${w.country}</div>
+          <div style="font-size:12px;color:var(--text-light);margin-top:2px;">📅 ${w.date}</div>
+        </div>
+        ${role==='ceo'?`<button class="btn btn-danger btn-sm" onclick="delWebinar(${w.id})" style="padding:4px 10px;">🗑</button>`:''}
+      </div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:8px;padding:10px;background:var(--white);border-radius:8px;line-height:1.6;">
+        <strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);">Updates:</strong><br>${w.update}
+      </div>
+      ${w.action?`<div style="font-size:13px;color:var(--text-mid);padding:10px;background:rgba(201,168,76,0.08);border-radius:8px;border-left:3px solid var(--gold);line-height:1.6;">
+        <strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);">Action Points:</strong><br>${w.action}
+      </div>`:''}
+    </div>`).join('');
+}
+
+// ══ SERVICES ══
+let services=S.get('v5_services',[
+  {id:1,name:'Canada Study Permit',div:'Study Abroad',route:'Nigeria → Canada',price:600000,desc:'Full application support and documentation'},
+  {id:2,name:'Indonesia Bali Package',div:'Travel & Tour',route:'Nigeria → Bali, Indonesia',price:750000,desc:'Full travel package'},
+]);
+
+function addService(){
+  if(role!=='ceo'){toast('Only CEO can add services');return;}
+  const name=document.getElementById('sv-name')?.value?.trim();
+  const price=parseInt(document.getElementById('sv-price')?.value);
+  if(!name||!price)return toast('Please fill in Service Name and Price');
+  services.push({
+    id:Date.now(),
+    name,
+    div:document.getElementById('sv-div')?.value,
+    route:document.getElementById('sv-route')?.value?.trim()||'',
+    price,
+    desc:document.getElementById('sv-desc')?.value?.trim()||''
+  });
+  S.set('v5_services',services);
+  ['sv-name','sv-route','sv-price','sv-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  syncToSheet('Services',services);
+  renderServices();toast('Service added ✓');
+}
+
+function delService(id){
+  if(role!=='ceo'){toast('Only CEO can delete services');return;}
+  if(!confirm('Remove this service?'))return;
+  services=services.filter(s=>s.id!=id);
+  S.set('v5_services',services);
+  syncToSheet('Services',services);
+  renderServices();toast('Removed');
+}
+
+function editService(id){
+  if(role!=='ceo'){toast('Only CEO can edit services');return;}
+  const s=services.find(s=>s.id==id);if(!s)return;
+  const newPrice=parseInt(prompt('New price (₦):',s.price));
+  if(!newPrice||newPrice<0)return;
+  const newName=prompt('Service name:',s.name);if(!newName)return;
+  s.price=newPrice;s.name=newName;
+  S.set('v5_services',services);
+  syncToSheet('Services',services);
+  renderServices();toast('Updated ✓');
+}
+
+function renderServices(){
+  const studyEl=document.getElementById('services-study');
+  const travelEl=document.getElementById('services-travel');
+  // Hide add section for CE
+  const addSection=document.getElementById('services-add-section');
+  if(addSection)addSection.style.display=role==='ceo'?'block':'none';
+
+  const renderList=(el,items)=>{
+    if(!el)return;
+    if(!items.length){el.innerHTML='<div class="empty" style="padding:12px;"><p>No services added yet.</p></div>';return;}
+    el.innerHTML=items.map(s=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);">${s.name}</div>
+          ${s.route?`<div style="font-size:12px;color:var(--text-light);">✈️ ${s.route}</div>`:''}
+          ${s.desc?`<div style="font-size:12px;color:var(--text-light);">${s.desc}</div>`:''}
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--blue);">₦${s.price.toLocaleString()}</div>
+        ${role==='ceo'?`<div style="display:flex;gap:5px;">
+          <button class="btn btn-ghost btn-sm" onclick="editService(${s.id})" style="padding:4px 10px;">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="delService(${s.id})" style="padding:4px 8px;">✕</button>
+        </div>`:''}
+      </div>`).join('');
+  };
+
+  renderList(studyEl,services.filter(s=>s.div==='Study Abroad'));
+  renderList(travelEl,services.filter(s=>s.div==='Travel & Tour'));
 }
 
 // ══ SCHOLARSHIPS ══
