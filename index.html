@@ -752,22 +752,22 @@ async function loadAll(){
       loadFromSheet('Goals'),
       loadFromSheet('SignIns'),
     ]);
-    if(c.length){clients=c;S.set('v5_clients',clients);}
-    if(p.length){posts=p;S.set('v5_posts',posts);}
-    if(w.length){waka=w;S.set('v5_waka',waka);}
+    if(c.length){clients=c.map(x=>({id:x.id||Date.now(),name:x.name||x.Name||'',type:x.type||x.Type||'',dest:x.dest||x.destination||x.Destination||'',status:x.status||x.Status||'New Enquiry',paid:parseInt(x.paid||x.Paid||0)||0,balance:parseInt(x.balance||x.Balance||0)||0,drive:x.drive||x['Drive Link']||x.driveLink||'',notes:x.notes||x.Notes||'',added:x.added||x.Added||''}));S.set('v5_clients',clients);}
+    if(p.length){posts=p.map(x=>({id:x.id||Date.now(),topic:x.topic||x.Topic||'',date:x.date||x.Date||'',plat:x.plat||x.Platform||x.platform||'Instagram',status:x.status||x.Status||'Draft',type:x.type||x.Type||'Reel/Video'}));S.set('v5_posts',posts);}
+    if(w.length){waka=w.map(x=>({id:x.id||Date.now(),hook:x.hook||x.Hook||'',date:x.date||x.Date||'',plat:x.plat||x.Platform||'TikTok',status:x.status||x.Status||'Idea',pillar:x.pillar||x.Pillar||''}));S.set('v5_waka',waka);}
     // For todos — restore done state properly from sheets
     if(t.length){
       todos=t.map(td=>({
-        id:td.id,
-        text:td.text,
-        done:String(td.done).toUpperCase()==='TRUE'
-      }));
+        id:td.id||td.ID||Date.now(),
+        text:td.text||td.Text||'',
+        done:String(td.done||td.Done||'false').toUpperCase()==='TRUE'
+      })).filter(td=>td.text);
       S.set('v5_todos',todos);
     }
-    if(r.length){reports=r;S.set('v5_reports',reports);}
-    if(e.length){expenses=e;S.set('v5_exp',expenses);}
-    if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
-    if(g.length){goals=g;S.set('v5_goals',goals);}
+    if(r.length){reports=r.map(x=>({id:x.id||Date.now(),date:x.date||x.Date||'',newLeads:x.newLeads||x['New Leads']||0,followedUp:x.followedUp||x['Followed Up']||0,converted:x.converted||x.Converted||0,revenue:x.revenue||x.Revenue||0,posts:x.posts||x.Posts||0,complaints:x.complaints||x.Complaints||'None',pending:x.pending||x.Pending||'',plan:x.plan||x.Plan||'',onTime:x.onTime||x['On Time']}));S.set('v5_reports',reports);}
+    if(e.length){expenses=e.map(x=>({id:x.id||Date.now(),name:x.name||x.Name||'',amount:parseInt(x.amount||x.Amount||0)||0,cat:x.cat||x.Category||'Other',date:x.date||x.Date||''}));S.set('v5_exp',expenses);}
+    if(rv.length){revHist=rv.map(x=>({month:x.month||x.Month||'',amount:parseInt(x.amount||x.Amount||0)||0})).filter(x=>x.month);S.set('v5_rev',revHist);}
+    if(g.length){goals=g.map(x=>({id:x.id||Date.now(),text:x.text||x.Text||'',date:x.date||x.Date||'',done:String(x.done||x.Done||'false').toUpperCase()==='TRUE'})).filter(x=>x.text);S.set('v5_goals',goals);}
     if(s.length){
       const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
         id:si.id,
