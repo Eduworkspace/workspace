@@ -789,7 +789,10 @@ async function loadFromSheet(sheetName){
 async function syncAll(){
   toast('⏳ Loading from Google Sheets...');
   await loadAll();
-  toast('✅ Data loaded from Google Sheets');
+  // Also push current services and webinars to sheets
+  if(services.length)await syncToSheet('Services',services);
+  if(webinars.length)await syncToSheet('Webinars',webinars);
+  toast('✅ Data synced with Google Sheets');
 }
 
 async function loadAll(){
@@ -852,6 +855,7 @@ function doLogin(){
   document.getElementById('app').style.display='block';
   initApp();autoSignIn();
   loadAll();
+  setTimeout(()=>{initDefaultServices();},3000);
 }
 
 function logout(){
@@ -1722,10 +1726,18 @@ function renderWebinars(){
 }
 
 // ══ SERVICES ══
-let services=S.get('v5_services',[
-  {id:1,name:'Canada Study Permit',div:'Study Abroad',route:'Nigeria → Canada',price:600000,desc:'Full application support and documentation'},
-  {id:2,name:'Indonesia Bali Package',div:'Travel & Tour',route:'Nigeria → Bali, Indonesia',price:750000,desc:'Full travel package'},
-]);
+let services=S.get('v5_services',[]);
+
+function initDefaultServices(){
+  if(services.length===0){
+    services=[
+      {id:1,name:'Canada Study Permit',div:'Study Abroad',route:'Nigeria → Canada',price:600000,desc:'Full application support and documentation'},
+      {id:2,name:'Indonesia Bali Package',div:'Travel & Tour',route:'Nigeria → Bali, Indonesia',price:750000,desc:'Full travel package'},
+    ];
+    S.set('v5_services',services);
+    syncToSheet('Services',services);
+  }
+}
 
 function addService(){
   if(role!=='ceo'){toast('Only CEO can add services');return;}
