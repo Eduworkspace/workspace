@@ -3,506 +3,1715 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eduvoyage — CEO Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Eduvoyage — Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --orange-900: #3d1000;
-    --orange-800: #6b1e00;
-    --orange-700: #8f2a00;
-    --orange-600: #b83500;
-    --orange-500: #d44200;
-    --orange-400: #e85c1a;
-    --orange-300: #f28050;
-    --orange-200: #f5b090;
-    --orange-100: #fae0d0;
-    --orange-50:  #fdf0e8;
-    --white: #ffffff;
-    --text-dark: #1a0800;
-    --text-mid: #4a1e00;
-    --text-light: #8a3e18;
-    --shadow-sm: 0 2px 8px rgba(180,50,0,0.14);
-    --shadow-md: 0 6px 24px rgba(180,50,0,0.22);
-    --shadow-lg: 0 16px 48px rgba(180,50,0,0.28);
-  }
+:root{
+  --blue:#8f2a00;--blue-mid:#b83500;--blue-light:#d44200;
+  --blue-pale:#fdf0e8;--cream:#faf6f2;--cream-dark:#f5e8e0;
+  --gold:#c07800;--gold-light:#e09a00;--white:#ffffff;
+  --text:#1a0800;--text-mid:#4a1e00;--text-light:#8a3e18;--border:#f0d0c0;
+  --success:#1a7f5a;--success-bg:#e8f7f1;
+  --danger:#c0392b;--danger-bg:#fdf0ef;
+  --warning:#b7770d;--warning-bg:#fef8ec;
+  --shadow:0 2px 16px rgba(140,40,0,0.08);
+  --shadow-lg:0 8px 40px rgba(140,40,0,0.18);
+  --r:12px;--sw:228px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+#login-screen{min-height:100vh;display:flex;background:linear-gradient(135deg,#0f2444 0%,var(--blue) 50%,var(--blue-mid) 100%);align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#login-screen::before{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(201,168,76,0.10) 0%,transparent 65%);top:-200px;right:-150px;border-radius:50%;}
+#login-screen::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 70%);bottom:-100px;left:-80px;border-radius:50%;}
+.lbox{background:var(--white);border-radius:24px;padding:52px 44px;width:420px;max-width:94vw;box-shadow:var(--shadow-lg);position:relative;z-index:2;animation:fadeUp 0.5s ease;}
+.llogo{text-align:center;margin-bottom:6px;}
+.llogo .wm{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--blue);}
+.llogo .wm span{color:var(--gold);}
+.llogo .tl{font-size:10px;color:var(--text-light);letter-spacing:2.5px;text-transform:uppercase;margin-top:4px;}
+.ldiv{height:1px;background:var(--border);margin:22px 0;}
+.ltitle{font-size:16px;font-weight:600;margin-bottom:3px;}
+.lsub{font-size:12px;color:var(--text-light);margin-bottom:20px;}
+.rtabs{display:flex;gap:7px;margin-bottom:18px;}
+.rtab{flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:9px;background:transparent;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;color:var(--text-light);cursor:pointer;transition:all 0.2s;text-align:center;}
+.rtab.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);font-weight:600;}
+.linp{margin-bottom:14px;}
+.linp label{display:block;font-size:10px;font-weight:700;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
+.linp input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all 0.2s;background:var(--cream);}
+.linp input:focus{border-color:var(--blue);background:var(--white);}
+.lbtn{width:100%;padding:13px;background:var(--blue);color:var(--white);border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.lbtn:hover{background:var(--blue-light);}
+.lerr{color:var(--danger);font-size:12px;margin-top:8px;text-align:center;display:none;}
+.lhint{font-size:10px;color:var(--text-light);text-align:center;margin-top:16px;line-height:1.8;}
 
-  body { font-family: 'DM Sans', sans-serif; background: var(--orange-50); color: var(--text-dark); min-height: 100vh; display: flex; }
+#app{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;width:var(--sw);height:100vh;background:var(--blue);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.sb-top{padding:26px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sb-wm{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:var(--white);}
+.sb-wm span{color:var(--gold);}
+.sb-badge{display:inline-block;margin-top:6px;padding:2px 10px;background:rgba(201,168,76,0.15);border-radius:20px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;}
+.sb-si{margin:12px 16px 0;padding:10px 13px;background:rgba(255,255,255,0.05);border-radius:9px;border:1px solid rgba(255,255,255,0.09);}
+.sb-si-l{font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.sb-si-v{font-size:11px;color:rgba(255,255,255,0.7);}
+.sb-si-t{font-size:10px;color:var(--gold);margin-top:2px;}
+.sb-nav{padding:10px 10px;flex:1;}
+.sb-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,0.22);letter-spacing:2px;text-transform:uppercase;padding:0 9px;margin:14px 0 4px;}
+.nv{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all 0.15s;margin-bottom:1px;}
+.nv:hover{background:rgba(255,255,255,0.06);}
+.nv.active{background:rgba(61,111,196,0.35);border-left:2px solid var(--gold);}
+.nv .ic{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.nv .lb{font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);}
+.nv.active .lb{color:var(--white);font-weight:600;}
+.sb-foot{padding:14px 10px;border-top:1px solid rgba(255,255,255,0.07);}
+.sb-out{width:100%;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.35);font-family:'Outfit',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;}
+.sb-out:hover{background:rgba(192,57,43,0.15);color:#e74c3c;}
 
-  .page { display: none !important; }
-  .page.active { display: block !important; }
+.main{margin-left:var(--sw);padding:30px 34px;min-height:100vh;}
+.page{display:none;animation:fadeIn 0.3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
-  .sidebar {
-    width: 240px; min-height: 100vh;
-    background: linear-gradient(180deg, var(--orange-600) 0%, var(--orange-800) 100%);
-    display: flex; flex-direction: column;
-    position: fixed; top: 0; left: 0; z-index: 100;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
-    overflow-y: auto;
-  }
+.ph{margin-bottom:26px;}
+.ph-tag{display:inline-block;padding:3px 12px;background:var(--blue-pale);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);margin-bottom:7px;}
+.ph h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--blue);letter-spacing:-0.5px;line-height:1.1;}
+.ph p{font-size:13px;color:var(--text-light);margin-top:4px;}
 
-  .sidebar-logo { padding: 28px 24px 18px; border-bottom: 1px solid rgba(255,255,255,0.15); }
-  .logo-text { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
-  .logo-text span { color: var(--orange-200); }
-  .logo-badge { display: inline-block; margin-top: 6px; background: rgba(255,255,255,0.18); color: var(--orange-100); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
+.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);margin-bottom:18px;border:1px solid var(--border);}
+.card-hd{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:7px;}
+.card-hd .dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0;}
 
-  .sign-in-box { margin: 14px 16px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 10px 14px; font-size: 11px; color: var(--orange-100); }
-  .sign-in-box .label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange-200); margin-bottom: 4px; }
-  .sign-in-status { color: #ffe08a; font-weight: 600; }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 
-  .nav-section-label { padding: 14px 24px 4px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.45); font-weight: 600; }
+.sc{background:var(--white);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.sc-l{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.sc-v{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--text);}
+.sc-v.blue{color:var(--blue);}.sc-v.gold{color:var(--gold);}.sc-v.green{color:var(--success);}
+.sc-s{font-size:11px;color:var(--text-light);margin-top:3px;}
 
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin: 1px 10px; border-radius: 8px; user-select: none; }
-  .nav-item:hover { background: rgba(255,255,255,0.12); color: var(--white); }
-  .nav-item.active { background: rgba(255,255,255,0.25); color: var(--white); font-weight: 700; }
-  .nav-item .icon { width: 18px; text-align: center; font-size: 14px; }
+.pw{margin:8px 0;}
+.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-bottom:5px;}
+.pb{height:6px;background:var(--cream-dark);border-radius:20px;overflow:hidden;}
+.pf{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-light));border-radius:20px;transition:width 0.6s ease;}
+.pf.gold{background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.pf.green{background:linear-gradient(90deg,var(--success),#2ecc71);}
 
-  .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; gap: 8px; }
-  .btn-sync { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: var(--white); font-size: 12px; font-weight: 500; padding: 9px 14px; border-radius: 8px; cursor: pointer; text-align: center; }
-  .btn-signout { background: transparent; border: none; color: rgba(255,255,255,0.55); font-size: 12px; cursor: pointer; text-align: center; padding: 4px; }
+.fr{margin-bottom:14px;}
+.fr label{display:block;font-size:10px;font-weight:700;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px;}
+.fr input,.fr textarea,.fr select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;transition:all 0.2s;background:var(--cream);}
+.fr input:focus,.fr textarea:focus,.fr select:focus{border-color:var(--blue);background:var(--white);}
+.fr textarea{resize:vertical;min-height:72px;}
 
-  .main { margin-left: 240px; flex: 1; padding: 28px 28px 40px; min-height: 100vh; }
+.btn{padding:10px 20px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn:hover{transform:translateY(-1px);}
+.btn-blue{background:var(--blue);color:var(--white);}.btn-blue:hover{background:var(--blue-light);}
+.btn-gold{background:var(--gold);color:var(--white);}.btn-gold:hover{background:var(--blue);}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-mid);}.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border:none;}.btn-danger:hover{background:var(--danger);color:white;}
+.btn-success{background:var(--success-bg);color:var(--success);border:none;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-warn{background:var(--warning-bg);color:var(--warning);border:none;}
 
-  /* DASHBOARD STYLES */
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .stat-card { background: var(--white); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow-sm); border-top: 4px solid var(--orange-400); transition: transform 0.2s, box-shadow 0.2s; }
-  .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--orange-500); margin-bottom: 10px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text-dark); line-height: 1; }
-  .stat-sub { font-size: 11px; color: var(--text-light); margin-top: 6px; }
-  .check-icon { font-size: 28px; line-height: 1; }
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.p-blue{background:var(--blue-pale);color:var(--blue);}
+.p-gold{background:rgba(201,168,76,0.12);color:var(--gold);}
+.p-green{background:var(--success-bg);color:var(--success);}
+.p-red{background:var(--danger-bg);color:var(--danger);}
+.p-gray{background:var(--cream-dark);color:var(--text-light);}
+.p-warn{background:var(--warning-bg);color:var(--warning);}
 
-  .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .card { background: var(--white); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow-sm); }
-  .card-title { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--orange-600); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-  .card-title::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--orange-500); flex-shrink: 0; }
+.alert{padding:11px 14px;border-radius:9px;font-size:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.a-info{background:var(--blue-pale);color:var(--blue-mid);border-left:3px solid var(--blue);}
+.a-warn{background:var(--warning-bg);color:var(--warning);border-left:3px solid var(--gold);}
+.a-success{background:var(--success-bg);color:var(--success);border-left:3px solid var(--success);}
 
-  .target-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--orange-100); font-size: 13px; }
-  .target-row:last-child { border-bottom: none; }
-  .t-label { color: var(--text-mid); }
-  .t-value { font-weight: 600; color: var(--orange-700); font-family: 'Syne', sans-serif; }
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.rn{flex:1;font-size:13px;color:var(--text);}
+.ra{font-size:13px;font-weight:600;}
+.ra.out{color:var(--danger);}.ra.in{color:var(--success);}
 
-  .progress-bar-wrap { background: var(--orange-100); border-radius: 20px; height: 6px; margin-bottom: 16px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--orange-500), var(--orange-400)); border-radius: 20px; width: 0%; transition: width 0.6s ease; }
-  .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); margin-bottom: 6px; }
-  .progress-pct { font-weight: 700; color: var(--orange-600); }
+.ci{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
+.ci:last-child{border-bottom:none;}
+.ci input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;margin-top:2px;flex-shrink:0;}
+.ci label{font-size:13px;color:var(--text);cursor:pointer;line-height:1.4;flex:1;}
+.ci.done label{text-decoration:line-through;color:var(--text-light);}
+.tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;text-transform:uppercase;flex-shrink:0;}
+.t-d{background:var(--blue-pale);color:var(--blue);}
+.t-w{background:var(--warning-bg);color:var(--warning);}
+.t-s{background:rgba(201,168,76,0.12);color:var(--gold);}
 
-  .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--orange-50); font-size: 12.5px; color: var(--text-mid); cursor: pointer; }
-  .checklist-item:last-child { border-bottom: none; }
-  .cb { width: 16px; height: 16px; border: 2px solid var(--orange-300); border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .checklist-item.done .cb { background: var(--orange-500); border-color: var(--orange-500); color: white; font-size: 10px; }
-  .checklist-item.done span { text-decoration: line-through; color: var(--text-light); }
+.ti{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
+.ti:last-child{border-bottom:none;}
+.ti input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;}
+.ti-t{flex:1;font-size:13px;color:var(--text);}
+.ti-t.done{text-decoration:line-through;color:var(--text-light);}
 
-  .actions-grid { display: flex; flex-direction: column; gap: 10px; }
-  .action-btn { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; text-align: left; width: 100%; font-family: 'DM Sans', sans-serif; }
-  .action-btn.primary { background: linear-gradient(135deg, var(--orange-600), var(--orange-500)); color: var(--white); box-shadow: 0 4px 16px rgba(180,50,0,0.3); }
-  .action-btn.primary:hover { transform: translateY(-1px); }
-  .action-btn.secondary { background: var(--orange-100); color: var(--orange-700); border: 1.5px solid var(--orange-200); }
-  .action-btn.secondary:hover { background: var(--orange-200); }
-  .action-btn.gold { background: linear-gradient(135deg, #c07800, #e09a00); color: var(--white); }
-  .action-btn.gold:hover { transform: translateY(-1px); }
+.si-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.si-card{background:var(--white);border-radius:var(--r);padding:20px;border:1.5px solid var(--border);box-shadow:var(--shadow);text-align:center;transition:all 0.2s;}
+.si-card.signed{border-color:var(--success);background:var(--success-bg);}
+.si-av{font-size:32px;margin-bottom:8px;}
+.si-nm{font-size:14px;font-weight:600;margin-bottom:2px;}
+.si-rl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.si-tm{font-size:13px;font-weight:700;margin-top:5px;}
+.si-tm.ok{color:var(--success);}.si-tm.lt{color:var(--warning);}
 
-  .report-date { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
-  .report-badge { display: inline-block; background: var(--orange-100); color: var(--orange-600); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px; border: 1px solid var(--orange-200); }
-  .report-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-mid); margin-bottom: 8px; }
-  .report-row strong { color: var(--text-dark); font-weight: 700; }
-  .report-warn { display: inline-flex; align-items: center; gap: 6px; background: #fff7e0; border: 1px solid #ffe08a; color: #a06000; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; margin-top: 4px; }
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px;}
+.cal-hd{font-size:9px;font-weight:700;color:var(--text-light);text-align:center;padding:4px 0;letter-spacing:1px;text-transform:uppercase;}
+.cal-d{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:8px 6px;cursor:pointer;transition:all 0.2s;min-height:68px;}
+.cal-d:hover{border-color:var(--blue-light);}
+.cal-d.has{border-color:var(--gold);background:rgba(201,168,76,0.04);}
+.cal-d.today{border-color:var(--blue);background:var(--blue-pale);}
+.cal-dn{font-size:8px;color:var(--text-light);text-transform:uppercase;margin-bottom:2px;}
+.cal-dt{font-size:16px;font-weight:700;color:var(--blue);font-family:'Cormorant Garamond',serif;}
+.cal-dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px;}
+.cdot{width:6px;height:6px;border-radius:50%;}
+.c-ig{background:#e1306c;}.c-tt{background:#ff2d55;}.c-fb{background:#1877f2;}
 
-  /* SCHOLARSHIP PAGE STYLES */
-  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-  .page-header-left h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--text-dark); }
-  .page-header-left p { font-size: 13px; color: var(--text-light); margin-top: 3px; }
+.div{height:1px;background:var(--border);margin:16px 0;}
+.empty{text-align:center;padding:28px;color:var(--text-light);}
+.empty .ei{font-size:32px;margin-bottom:8px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--blue);color:var(--white);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;display:none;animation:fadeUp 0.3s ease;}
+.toast.show{display:block;}
 
-  .schol-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-  .schol-stat { background: var(--white); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-sm); border-left: 4px solid var(--orange-500); }
-  .ss-label { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--orange-500); margin-bottom: 6px; }
-  .ss-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text-dark); }
+/* SETTINGS TOGGLE */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-info .setting-lbl{font-size:13px;font-weight:600;color:var(--text);}
+.setting-info .setting-sub{font-size:11px;color:var(--text-light);margin-top:2px;}
+.setting-val{font-size:13px;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:6px;}
+.setting-val:hover{color:var(--gold);}
 
-  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-  .filter-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--orange-200); background: var(--white); color: var(--text-mid); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
-  .filter-btn:hover, .filter-btn.active { background: var(--orange-500); border-color: var(--orange-500); color: var(--white); }
-  .filter-search { margin-left: auto; padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--orange-200); background: var(--white); font-size: 12px; color: var(--text-dark); outline: none; width: 200px; font-family: 'DM Sans', sans-serif; }
-  .filter-search:focus { border-color: var(--orange-400); }
-
-  .schol-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 28px; }
-
-  .schol-card { background: var(--white); border-radius: 14px; padding: 20px; box-shadow: var(--shadow-sm); border-top: 4px solid var(--orange-400); transition: transform 0.2s, box-shadow 0.2s; }
-  .schol-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-
-  .schol-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .schol-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-dark); line-height: 1.3; flex: 1; margin-right: 8px; }
-
-  .schol-type-badge { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-  .badge-full { background: #e8f5e9; color: #2e7d32; }
-  .badge-partial { background: #fff3e0; color: #e65100; }
-  .badge-tuition { background: #e3f2fd; color: #1565c0; }
-
-  .schol-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .schol-meta-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-mid); }
-  .meta-icon { font-size: 13px; width: 16px; text-align: center; }
-  .schol-meta-row strong { color: var(--text-dark); font-weight: 600; }
-
-  .schol-deadline { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; }
-  .deadline-urgent { background: #fdecea; color: #c62828; }
-  .deadline-soon { background: #fff8e1; color: #f57f17; }
-  .deadline-ok { background: #e8f5e9; color: #2e7d32; }
-  .deadline-na { background: var(--orange-100); color: var(--text-light); }
-
-  .schol-card-footer { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--orange-100); }
-  .btn-sm { flex: 1; padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; text-align: center; font-family: 'DM Sans', sans-serif; }
-  .btn-sm.outline { background: var(--orange-50); color: var(--orange-600); border: 1.5px solid var(--orange-200); }
-  .btn-sm.outline:hover { background: var(--orange-100); }
-  .btn-sm.danger { background: #fdecea; color: #c62828; border: 1.5px solid #ffcdd2; }
-  .btn-sm.danger:hover { background: #ffcdd2; }
-
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); grid-column: 1 / -1; }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-
-  .btn-add-schol { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: linear-gradient(135deg, var(--orange-600), var(--orange-500)); color: var(--white); border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(180,50,0,0.3); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
-  .btn-add-schol:hover { transform: translateY(-1px); }
-
-  /* MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,8,0,0.55); z-index: 999; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--white); border-radius: 18px; padding: 32px; width: 540px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-  .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
-  .modal-sub { font-size: 12px; color: var(--text-light); margin-bottom: 24px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-  .form-group.half { margin-bottom: 0; }
-  .form-group label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--orange-600); }
-  .form-group input, .form-group select, .form-group textarea { padding: 10px 13px; border: 1.5px solid var(--orange-200); border-radius: 9px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text-dark); background: var(--orange-50); outline: none; transition: border-color 0.2s; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--orange-500); background: var(--white); }
-  .form-group textarea { resize: vertical; min-height: 72px; }
-  .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
-  .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--orange-200); background: var(--orange-50); color: var(--text-mid); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .btn-save { flex: 2; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--orange-600), var(--orange-500)); color: var(--white); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@media(max-width:800px){
+  :root{--sw:0px;}
+  .sidebar{transform:translateX(-228px);width:228px;transition:transform 0.3s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:16px;}
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr;}
+  .si-grid{grid-template-columns:1fr 1fr;}
+  .cal{grid-template-columns:repeat(4,1fr);}
+  .mob{display:flex!important;}
+}
+.mob{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--blue);color:white;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:17px;}
 </style>
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-text">Edu<span>voyage</span></div>
-    <div class="logo-badge">CEO — Aminat</div>
-  </div>
-  <div class="sign-in-box">
-    <div class="label">Today's Sign In</div>
-    <div class="sign-in-status">⚠️ Signed in (late)</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">23:26</div>
-  </div>
-
-  <div class="nav-section-label">Overview</div>
-  <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
-
-  <div class="nav-section-label">Team</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">⚡</span> CE Management</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">📋</span> Reports & Attendance</div>
-
-  <div class="nav-section-label">Business</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">👤</span> Client Work</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">📱</span> Social Media</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">💰</span> Finance</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">📈</span> Growth</div>
-  <div class="nav-item" data-page="scholarship"><span class="icon">🎓</span> Scholarship Advisory</div>
-
-  <div class="nav-section-label">Personal</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">✈️</span> WakawithAmi</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">✅</span> My To-Do</div>
-
-  <div class="nav-section-label">System</div>
-  <div class="nav-item" data-page="dashboard"><span class="icon">⚙️</span> Settings</div>
-
-  <div class="sidebar-footer">
-    <button class="btn-sync">☁️ Sync to Sheets</button>
-    <button class="btn-signout">← Sign Out</button>
-  </div>
-</aside>
-
-<main class="main">
-
-  <!-- DASHBOARD PAGE -->
-  <div id="page-dashboard" class="page active">
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">Monthly Revenue</div><div class="stat-value">₦0</div><div class="stat-sub">Break even: ₦460,000</div></div>
-      <div class="stat-card"><div class="stat-label">CE Lead Target</div><div class="stat-value">0%</div><div class="stat-sub">of ₦400,000</div></div>
-      <div class="stat-card"><div class="stat-label">Active Clients</div><div class="stat-value">2</div><div class="stat-sub">In progress</div></div>
-      <div class="stat-card"><div class="stat-label">Friday Report</div><div class="check-icon">✅</div><div class="stat-sub">This week</div></div>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="wm">Edu<span>voyage</span></div>
+      <div class="tl">Expert Guidance · Exceptional Journeys</div>
     </div>
+    <div class="ldiv"></div>
+    <div class="ltitle">Command Centre</div>
+    <div class="lsub">Select your role and sign in</div>
+    <div class="rtabs">
+      <button class="rtab active" onclick="selRole('ceo',this)">👑 CEO</button>
+      <button class="rtab" onclick="selRole('ce',this)">👤 Client Executive</button>
+    </div>
+    <div class="linp">
+      <label>Password</label>
+      <input type="password" id="pwd" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="lbtn" onclick="doLogin()">Sign In →</button>
+    <div class="lerr" id="lerr">Incorrect password. Please try again.</div>
+  </div>
+</div>
 
-    <div class="grid-row">
-      <div class="card">
-        <div class="card-title">Revenue vs Targets</div>
-        <div class="target-row"><span class="t-label">Revenue vs Break Even</span><span class="t-value">₦0 / ₦460,000</span></div>
-        <div class="target-row"><span class="t-label">CE Lead Target</span><span class="t-value">₦0 / ₦400,000</span></div>
-        <div class="target-row"><span class="t-label">Growth Goal</span><span class="t-value">₦0 / ₦1,000,000</span></div>
+<!-- APP -->
+<div id="app">
+  <button class="mob" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-wm">Edu<span>voyage</span></div>
+      <div class="sb-badge" id="sb-role">CEO</div>
+    </div>
+    <div class="sb-si">
+      <div class="sb-si-l">Today's Sign In</div>
+      <div class="sb-si-v" id="sb-si-v">Not signed in</div>
+      <div class="sb-si-t" id="sb-si-t"></div>
+    </div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-foot">
+      <button class="sb-out" onclick="syncAll()" style="margin-bottom:6px;color:rgba(255,255,255,0.5);background:rgba(26,127,90,0.15);border-color:rgba(26,127,90,0.3);">☁️ Sync to Sheets</button>
+      <button class="sb-out" onclick="logout()">← Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page" id="p-dashboard">
+      <div class="ph">
+        <div class="ph-tag" id="dash-date"></div>
+        <h1>Good day, Aminat 👋</h1>
+        <p>Your Eduvoyage command centre overview.</p>
       </div>
       <div class="card">
-        <div class="card-title">CE Daily Checklist — Today</div>
-        <div class="progress-meta"><span id="checkCount">0/9 tasks completed</span><span class="progress-pct" id="checkPct">0%</span></div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
-        <div id="checklistItems">
-          <div class="checklist-item"><div class="cb"></div><span>Respond to all WhatsApp messages</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Respond to Instagram DMs and comments</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Respond to TikTok messages</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Update Lead Sheet — log all new enquiries</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Update CRM for any client status changes</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Upload today's social media post</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Follow up on all pending leads</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Chase outstanding client payments</span></div>
-          <div class="checklist-item"><div class="cb"></div><span>Submit Friday report by 5pm (Fridays only)</span></div>
+        <div class="card-hd"><span class="dot"></span>Team Sign-In — Today</div>
+        <div class="si-grid" id="si-board"></div>
+      </div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="sc"><div class="sc-l">Monthly Revenue</div><div class="sc-v blue" id="d-rev">₦0</div><div class="sc-s" id="d-rev-sub">Break even: ₦0</div></div>
+        <div class="sc"><div class="sc-l">CE Lead Target</div><div class="sc-v gold" id="d-lead">0%</div><div class="sc-s" id="d-lead-sub">of ₦0</div></div>
+        <div class="sc"><div class="sc-l">Active Clients</div><div class="sc-v" id="d-clients">0</div><div class="sc-s">In progress</div></div>
+        <div class="sc"><div class="sc-l">Friday Report</div><div class="sc-v" id="d-report" style="font-size:18px;">—</div><div class="sc-s">This week</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Revenue vs Targets</div>
+          <div class="pw"><div class="pl"><span>Revenue vs Break Even</span><span id="d-rev-l">₦0</span></div><div class="pb"><div class="pf" id="d-rev-b" style="width:0%"></div></div></div>
+          <div class="pw"><div class="pl"><span>CE Lead Target</span><span id="d-lead-l">₦0</span></div><div class="pb"><div class="pf gold" id="d-lead-b" style="width:0%"></div></div></div>
+          <div class="pw"><div class="pl"><span>Growth Goal</span><span id="d-gr-l">₦0</span></div><div class="pb"><div class="pf green" id="d-gr-b" style="width:0%"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>CE Daily Checklist — Today</div>
+          <div id="d-chk-prog" style="margin-bottom:12px;"></div>
+          <div id="d-chk-items"></div>
+        </div>
+      </div>
+      <div class="g2" style="margin-top:0;">
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-blue" onclick="showPage('p-clients')" style="text-align:left;padding:12px 16px;">👤 Add New Client</button>
+            <button class="btn btn-gold" onclick="showPage('p-finance')" style="text-align:left;padding:12px 16px;">💰 Log Revenue</button>
+            <button class="btn btn-ghost" onclick="showPage('p-social')" style="text-align:left;padding:12px 16px;">📱 Social Media Tracker</button>
+            <button class="btn btn-ghost" onclick="showPage('p-todo')" style="text-align:left;padding:12px 16px;">✅ My To-Do List</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Latest Friday Report</div>
+          <div id="d-latest-report"></div>
         </div>
       </div>
     </div>
 
-    <div class="grid-row">
-      <div class="card">
-        <div class="card-title">Quick Actions</div>
-        <div class="actions-grid">
-          <button class="action-btn primary">👤 Add New Client</button>
-          <button class="action-btn gold">💰 Log Revenue</button>
-          <button class="action-btn secondary">📱 Social Media Tracker</button>
-          <button class="action-btn secondary">✅ My To-Do List</button>
+    <!-- SIGN IN -->
+    <div class="page" id="p-signin">
+      <div class="ph">
+        <div class="ph-tag" id="si-date"></div>
+        <h1>Daily Sign In</h1>
+        <p>Sign in every morning by 9am.</p>
+      </div>
+      <div class="card" style="max-width:460px;margin:0 auto 20px;">
+        <div class="card-hd"><span class="dot"></span>Sign In for Today</div>
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-size:52px;margin-bottom:12px;" id="si-icon">⏰</div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:4px;" id="si-msg">You haven't signed in yet today.</div>
+          <div style="font-size:12px;color:var(--text-light);margin-bottom:22px;" id="si-sub">Sign in before 9am to be marked on time.</div>
+          <button class="btn btn-blue" onclick="doSignIn()" id="si-btn" style="padding:13px 36px;font-size:15px;">Sign In Now ✓</button>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">Latest Friday Report</div>
-        <div class="report-date">18/05/2026</div>
-        <div class="report-badge">Off-Day</div>
-        <div class="report-row">👥 <strong>2000</strong> new leads &nbsp;·&nbsp; ✅ <strong>1000</strong> converted</div>
-        <div class="report-row">💰 <strong>₦350,000</strong> &nbsp;·&nbsp; 📱 <strong>6 posts</strong></div>
-        <div class="report-warn">⚠️ Test1</div>
+        <div class="card-hd"><span class="dot"></span>My Sign-In History</div>
+        <div id="si-hist"></div>
       </div>
     </div>
-  </div>
 
-  <!-- SCHOLARSHIP PAGE -->
-  <div id="page-scholarship" class="page">
-    <div class="page-header">
-      <div class="page-header-left">
-        <h1>🎓 Scholarship Advisory</h1>
-        <p>Manage and track all available scholarships for your clients</p>
+    <!-- CE CHECKLIST -->
+    <div class="page" id="p-checklist">
+      <div class="ph">
+        <div class="ph-tag" id="ce-date"></div>
+        <h1>Daily Checklist</h1>
+        <p>Complete every task before 6pm.</p>
       </div>
-      <button class="btn-add-schol" id="openModalBtn">+ Add Scholarship</button>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Today's Tasks</div>
+        <div id="chk-prog" style="margin-bottom:14px;"></div>
+        <div id="chk-items"></div>
+        <div style="margin-top:16px;"><button class="btn btn-gold btn-sm" onclick="resetChk()">Reset for New Day</button></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Monthly Lead Target</div>
+        <div class="alert a-info">🎯 Your monthly target is <strong id="ce-target-display">₦400,000</strong> in converted leads.</div>
+        <div class="pw"><div class="pl"><span>Progress this month</span><span id="ce-lead-l">₦0</span></div><div class="pb"><div class="pf" id="ce-lead-b" style="width:0%"></div></div></div>
+      </div>
     </div>
 
-    <div class="schol-stats">
-      <div class="schol-stat"><div class="ss-label">Total Listed</div><div class="ss-val" id="stat-total">0</div></div>
-      <div class="schol-stat" style="border-color:#2e7d32;"><div class="ss-label" style="color:#2e7d32;">Fully Funded</div><div class="ss-val" id="stat-full">0</div></div>
-      <div class="schol-stat" style="border-color:#e65100;"><div class="ss-label" style="color:#e65100;">Partial</div><div class="ss-val" id="stat-partial">0</div></div>
-      <div class="schol-stat" style="border-color:#1565c0;"><div class="ss-label" style="color:#1565c0;">Tuition Only</div><div class="ss-val" id="stat-tuition">0</div></div>
+    <!-- FRIDAY REPORT -->
+    <div class="page" id="p-report">
+      <div class="ph">
+        <h1>Weekly Report</h1>
+        <p>Submit every Saturday before 2pm. No exceptions.</p>
+      </div>
+      <div class="alert a-warn" id="report-warning"></div>
+      <div id="report-form-wrap">
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Weekly Report Form</div>
+        <div class="g2">
+          <div class="fr"><label>New Leads This Week</label><input type="number" id="r-nl" placeholder="e.g. 8"></div>
+          <div class="fr"><label>Leads Followed Up</label><input type="number" id="r-fu" placeholder="e.g. 12"></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Leads Converted</label><input type="number" id="r-cv" placeholder="e.g. 2"></div>
+          <div class="fr"><label>Revenue from Conversions (₦)</label><input type="number" id="r-rv" placeholder="e.g. 150000"></div>
+        </div>
+        <div class="fr"><label>Social Posts Uploaded This Week</label><input type="number" id="r-sp" placeholder="e.g. 5"></div>
+        <div class="fr"><label>Client Complaints / Issues</label><textarea id="r-cc" placeholder="Write 'None' if none."></textarea></div>
+        <div class="fr"><label>Pending Tasks Carried Over</label><textarea id="r-pt" placeholder="Tasks not completed this week."></textarea></div>
+        <div class="fr"><label>Plan for Next Week</label><textarea id="r-pf" placeholder="What are you focusing on next week?"></textarea></div>
+        <button class="btn btn-gold" onclick="submitReport()">Submit Report ✓</button>
+      </div>
+      </div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="Fully Funded">Fully Funded</button>
-      <button class="filter-btn" data-filter="Partial">Partial</button>
-      <button class="filter-btn" data-filter="Tuition Only">Tuition Only</button>
-      <input class="filter-search" type="text" placeholder="🔍 Search scholarships..." id="scholSearch" />
+    <!-- SOCIAL MEDIA -->
+    <div class="page" id="p-social">
+      <div class="ph">
+        <h1>Social Media</h1>
+        <p>Content calendar and post tracker.</p>
+      </div>
+      <div class="card">
+        <div class="card-hd" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;"><span class="dot"></span>Content Calendar</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="prevMonth()" style="padding:4px 12px;">← Prev</button>
+            <span style="font-size:12px;font-weight:700;color:var(--blue);min-width:130px;text-align:center;" id="cal-lbl"></span>
+            <button class="btn btn-ghost btn-sm" onclick="nextMonth()" style="padding:4px 12px;">Next →</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-ig" style="display:inline-block;"></span>Instagram</span>
+          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-tt" style="display:inline-block;"></span>TikTok</span>
+          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-fb" style="display:inline-block;"></span>Facebook</span>
+        </div>
+        <div id="cal-grid" class="cal"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Log a Post</div>
+        <div class="g2">
+          <div class="fr"><label>Post Topic / Caption</label><input type="text" id="sm-topic" placeholder="e.g. 5 visa tips for Nigerians"></div>
+          <div class="fr"><label>Date</label><input type="date" id="sm-date"></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Platform</label><select id="sm-plat"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>All Platforms</option></select></div>
+          <div class="fr"><label>Status</label><select id="sm-st"><option>Scheduled</option><option>Published</option><option>Pending Design</option><option>Draft</option></select></div>
+        </div>
+        <div class="fr"><label>Post Type</label><select id="sm-type"><option>Reel/Video</option><option>Carousel</option><option>Static Post</option><option>Story</option></select></div>
+        <button class="btn btn-gold btn-sm" onclick="addPost()">Log Post</button>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Post Log</div>
+        <div class="g3" style="margin-bottom:16px;">
+          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Total Posts</div><div class="sc-v blue" id="sm-tot" style="font-size:22px;">0</div></div>
+          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Published</div><div class="sc-v green" id="sm-pub" style="font-size:22px;">0</div></div>
+          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Scheduled</div><div class="sc-v gold" id="sm-sch" style="font-size:22px;">0</div></div>
+        </div>
+        <div id="posts-list"></div>
+      </div>
     </div>
 
-    <div class="schol-grid" id="scholarshipGrid">
-      <div class="empty-state"><div class="empty-icon">🎓</div><p>No scholarships added yet.<br>Click <strong>"+ Add Scholarship"</strong> to get started.</p></div>
+    <!-- FINANCE -->
+    <div class="page" id="p-finance">
+      <div class="ph"><h1>Finance Tracker</h1><p>Revenue, salaries and expenses.</p></div>
+      <div class="g3" style="margin-bottom:18px;">
+        <div class="sc"><div class="sc-l">CEO Monthly Salary</div><div class="sc-v green">₦300,000</div><div class="sc-s">Paid 1st of every month</div></div>
+        <div class="sc"><div class="sc-l">Fixed Outgoings</div><div class="sc-v blue" id="fin-fixed">₦0</div><div class="sc-s">This month</div></div>
+        <div class="sc"><div class="sc-l">This Month Revenue</div><div class="sc-v" id="fin-rev">₦0</div><div class="sc-s">Log below</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Log Monthly Revenue</div>
+          <div class="fr"><label>Month</label><input type="month" id="fin-mo"></div>
+          <div class="fr"><label>Revenue Amount (₦)</label><input type="number" id="fin-amt" placeholder="e.g. 800000"></div>
+          <button class="btn btn-gold" onclick="logRev()">Log Revenue</button>
+          <div id="rev-hist" style="margin-top:16px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>Fixed Monthly Outgoings</div>
+          <div id="fixed-list"></div>
+          <div class="div"></div>
+          <div class="row"><div class="rn" style="font-weight:700;">Total Fixed</div><div class="ra out" id="fixed-total" style="font-size:15px;">-₦0</div></div>
+          <div style="margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="addFixed()">+ Add Item</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Log Additional Expense</div>
+        <div class="g2">
+          <div class="fr"><label>Expense Name</label><input type="text" id="ex-n" placeholder="e.g. Domain renewal"></div>
+          <div class="fr"><label>Amount (₦)</label><input type="number" id="ex-a" placeholder="e.g. 15000"></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Category</label><select id="ex-c"><option>Operations</option><option>Marketing</option><option>Personal</option><option>Other</option></select></div>
+          <div class="fr"><label>Date</label><input type="date" id="ex-d"></div>
+        </div>
+        <button class="btn btn-blue btn-sm" onclick="addExp()">Add Expense</button>
+        <div id="exp-list" style="margin-top:14px;"></div>
+      </div>
     </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="p-clients">
+      <div class="ph"><h1>Client Work</h1><p>Track all active clients, status and documents.</p></div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Add New Client</div>
+        <div class="g2">
+          <div class="fr"><label>Client Name</label><input type="text" id="cl-n" placeholder="Full name"></div>
+          <div class="fr"><label>Service Type</label><select id="cl-t"><option>Study Abroad</option><option>Visa Processing</option><option>Travel Package</option><option>Flight Booking</option><option>Hotel Booking</option><option>Airport Transfer</option><option>Scholarship Advisory</option><option>Other</option></select></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Destination</label><input type="text" id="cl-d" placeholder="e.g. Canada, UK"></div>
+          <div class="fr"><label>Status</label><select id="cl-s"><option>New Enquiry</option><option>Documents Pending</option><option>In Progress</option><option>Submitted</option><option>Approved</option><option>Completed</option><option>On Hold</option></select></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Amount Paid (₦)</label><input type="number" id="cl-p" placeholder="e.g. 150000"></div>
+          <div class="fr"><label>Balance Due (₦)</label><input type="number" id="cl-b" placeholder="e.g. 50000"></div>
+        </div>
+        <div class="fr"><label>Google Drive Folder Link</label><input type="url" id="cl-dr" placeholder="Paste Google Drive folder link"></div>
+        <div class="fr"><label>Notes</label><textarea id="cl-no" placeholder="Important notes..."></textarea></div>
+        <button class="btn btn-gold" onclick="addClient()">Add Client</button>
+      </div>
+      <div class="card"><div class="card-hd"><span class="dot"></span>Active Clients</div><div id="clients-list"></div></div>
+    </div>
+
+    <!-- WAKA -->
+    <div class="page" id="p-waka">
+      <div class="ph"><h1>WakawithAmi</h1><p>Your personal content — completely separate from Eduvoyage.</p></div>
+      <div class="g3" style="margin-bottom:18px;">
+        <div class="sc"><div class="sc-l">Total Content</div><div class="sc-v blue" id="wk-tot">0</div></div>
+        <div class="sc"><div class="sc-l">Published</div><div class="sc-v green" id="wk-pub">0</div></div>
+        <div class="sc"><div class="sc-l">Pending</div><div class="sc-v gold" id="wk-pend">0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Log Content</div>
+        <div class="g2">
+          <div class="fr"><label>Hook / Video Title</label><input type="text" id="wk-h" placeholder="e.g. The cheapest day to fly from Lagos"></div>
+          <div class="fr"><label>Date</label><input type="date" id="wk-dt"></div>
+        </div>
+        <div class="g2">
+          <div class="fr"><label>Platform</label><select id="wk-pl"><option>TikTok</option><option>Instagram</option><option>Twitter/X</option><option>All Platforms</option></select></div>
+          <div class="fr"><label>Status</label><select id="wk-st"><option>Idea</option><option>To Film</option><option>Filmed</option><option>Scheduled</option><option>Published</option></select></div>
+        </div>
+        <div class="fr"><label>Content Pillar</label><select id="wk-pi"><option>Hidden Gems</option><option>Practical Tips</option><option>Story-Led</option><option>Culture & POV</option><option>Hot Takes</option></select></div>
+        <button class="btn btn-gold btn-sm" onclick="addWaka()">Log Content</button>
+      </div>
+      <div class="card"><div class="card-hd"><span class="dot"></span>Content Log</div><div id="waka-list"></div></div>
+    </div>
+
+    <!-- GROWTH -->
+    <div class="page" id="p-growth">
+      <div class="ph"><h1>Company Growth</h1><p>Monthly performance and goals tracker.</p></div>
+      <div class="g3" style="margin-bottom:18px;">
+        <div class="sc"><div class="sc-l">Best Month</div><div class="sc-v gold" id="gr-best">₦0</div></div>
+        <div class="sc"><div class="sc-l">Total Clients</div><div class="sc-v blue" id="gr-clients">0</div></div>
+        <div class="sc"><div class="sc-l">Monthly Goal</div><div class="sc-v green" id="gr-goal-display">₦0</div></div>
+      </div>
+      <div class="card"><div class="card-hd"><span class="dot"></span>Revenue History</div><div id="gr-chart"></div></div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Company Goals</div>
+        <div id="goals-list"></div>
+        <div class="div"></div>
+        <div class="g2">
+          <div class="fr"><label>New Goal</label><input type="text" id="goal-t" placeholder="e.g. Hit ₦1M in July 2026"></div>
+          <div class="fr"><label>Target Date</label><input type="date" id="goal-d"></div>
+        </div>
+        <button class="btn btn-blue btn-sm" onclick="addGoal()">Add Goal</button>
+      </div>
+    </div>
+
+    <!-- TODO -->
+    <div class="page" id="p-todo">
+      <div class="ph"><h1>CEO To-Do</h1><p>Your personal task list.</p></div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>My Tasks</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <input type="text" id="todo-i" placeholder="Add a task..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);" onkeydown="if(event.key==='Enter')addTodo()">
+          <button class="btn btn-gold" onclick="addTodo()" style="font-size:20px;padding:8px 16px;">+</button>
+        </div>
+        <div id="todo-list"></div>
+      </div>
+    </div>
+
+    <!-- REPORTS (CEO) -->
+    <div class="page" id="p-reports">
+      <div class="ph"><h1>Friday Reports</h1><p>Review CE weekly submissions and attendance.</p></div>
+      <div class="card"><div class="card-hd"><span class="dot"></span>Submitted Reports</div><div id="reports-list"></div></div>
+      <div class="card"><div class="card-hd"><span class="dot"></span>Sign-In Attendance Log</div><div id="att-log"></div></div>
+    </div>
+
+    <!-- CE MANAGEMENT -->
+    <div class="page" id="p-ce">
+      <div class="ph"><h1>CE Management</h1><p>Targets, responsibilities and checklist tasks.</p></div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Update Monthly Lead Target</div>
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <div style="flex:1;"><div class="fr"><label>Leads Achieved This Month (₦)</label><input type="number" id="lead-i" placeholder="e.g. 150000"></div></div>
+          <button class="btn btn-gold" onclick="updateLeads()" style="margin-bottom:14px;">Update</button>
+        </div>
+        <div class="pw"><div class="pl"><span>Monthly Lead Target</span><span id="ce-prog-l">₦0</span></div><div class="pb"><div class="pf" id="ce-prog-b" style="width:0%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>CE Checklist Tasks <span style="font-size:9px;color:var(--text-light);font-weight:400;margin-left:4px;">— Add or remove tasks</span></div>
+        <div id="ce-tasks-list"></div>
+        <div class="div"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <input type="text" id="new-task-txt" placeholder="New task description..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);">
+          <select id="new-task-tag" style="padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);">
+            <option value="d">Daily</option><option value="w">Weekly</option><option value="s">Social</option>
+          </select>
+          <button class="btn btn-blue btn-sm" onclick="addCETask()" style="padding:10px 16px;">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS (CEO ONLY) -->
+    <div class="page" id="p-settings">
+      <div class="ph"><h1>Settings</h1><p>Edit passwords, targets and workspace configuration.</p></div>
+
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Passwords</div>
+        <div class="g2">
+          <div class="fr"><label>CEO Password</label><input type="text" id="set-pwd-ceo" placeholder="New CEO password"></div>
+          <div class="fr"><label>Client Executive Password</label><input type="text" id="set-pwd-ce" placeholder="New CE password"></div>
+        </div>
+        <button class="btn btn-blue btn-sm" onclick="savePwds()">Save Passwords</button>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Targets & Goals</div>
+        <div class="g2">
+          <div class="fr"><label>CE Monthly Lead Target (₦)</label><input type="number" id="set-lead" placeholder="e.g. 400000"></div>
+          <div class="fr"><label>Break Even Target (₦)</label><input type="number" id="set-breakeven" placeholder="e.g. 460000"></div>
+        </div>
+        <div class="fr"><label>Company Growth Goal (₦)</label><input type="number" id="set-growth" placeholder="e.g. 1000000"></div>
+        <button class="btn btn-gold btn-sm" onclick="saveTargets()">Save Targets</button>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Fine Policy <span style="font-size:9px;color:var(--text-light);font-weight:400;margin-left:4px;">— for your reference only</span></div>
+        <div id="fines-policy-list"></div>
+        <div class="div"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="fp-rsn" placeholder="Fine reason..." style="flex:2;min-width:150px;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;background:var(--cream);">
+          <input type="number" id="fp-amt" placeholder="₦ Amount" style="flex:1;min-width:110px;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;background:var(--cream);">
+          <button class="btn btn-warn btn-sm" onclick="addFinePolicy()">Add Fine</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="dot"></span>Clear Sign-In History</div>
+        <div class="alert a-warn">⚠️ This will clear all sign-in records from this device. Use this to fix date display issues.</div>
+        <button class="btn btn-danger" onclick="clearSignIns()">🗑️ Clear Sign-In History</button>
+      </div>
+    </div>
+
+    <!-- SCHOLARSHIP ADVISORY -->
+    <div class="page" id="p-scholarship">
+      <div class="ph">
+        <h1>Scholarship Advisory</h1>
+        <p>Track and manage fully funded scholarships for Nigerian students.</p>
+      </div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="sc"><div class="sc-l">Total Listed</div><div class="sc-v blue" id="ss-total">0</div></div>
+        <div class="sc"><div class="sc-l">Fully Funded</div><div class="sc-v green" id="ss-full">0</div></div>
+        <div class="sc"><div class="sc-l">Partial</div><div class="sc-v gold" id="ss-partial">0</div></div>
+        <div class="sc"><div class="sc-l">Tuition Only</div><div class="sc-v" id="ss-tuition">0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;"><span class="dot"></span>Scholarships</div>
+          <button class="btn btn-gold" onclick="document.getElementById('schol-modal').style.display='flex'">+ Add Scholarship</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="filterSchol('all',this)" style="border-color:var(--blue);color:var(--blue);">All</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterSchol('Fully Funded',this)">Fully Funded</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterSchol('Partial',this)">Partial</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterSchol('Tuition Only',this)">Tuition Only</button>
+          <input type="text" id="schol-search" placeholder="🔍 Search..." onkeyup="renderSchols()" style="margin-left:auto;padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'Outfit',sans-serif;font-size:12px;outline:none;background:var(--cream);min-width:180px;">
+        </div>
+        <div id="schol-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
+      </div>
+    </div>
+
   </div>
+</div>
 
-</main>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-title">Add New Scholarship</div>
-    <div class="modal-sub">Fill in the details below. Name, Country and Type are required.</div>
-    <div class="form-group"><label>Scholarship Name *</label><input type="text" id="f-name" placeholder="e.g. Chevening Scholarship 2026" /></div>
-    <div class="form-row">
-      <div class="form-group half"><label>Country *</label><input type="text" id="f-country" placeholder="e.g. United Kingdom" /></div>
-      <div class="form-group half"><label>Type *</label><select id="f-type"><option value="">Select type</option><option>Fully Funded</option><option>Partial</option><option>Tuition Only</option></select></div>
+<!-- SCHOLARSHIP MODAL -->
+<div id="schol-modal" style="display:none;position:fixed;inset:0;background:rgba(30,8,0,0.55);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:18px;padding:32px;width:540px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);">
+    <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;">Add New Scholarship</div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:20px;">Fill in the details. Name, Country and Type are required.</div>
+    <div class="fr"><label>Scholarship Name *</label><input type="text" id="sn-name" placeholder="e.g. Chevening Scholarship 2026"></div>
+    <div class="g2">
+      <div class="fr"><label>Country *</label><input type="text" id="sn-country" placeholder="e.g. United Kingdom"></div>
+      <div class="fr"><label>Type *</label><select id="sn-type"><option value="">Select type</option><option>Fully Funded</option><option>Partial</option><option>Tuition Only</option></select></div>
     </div>
-    <div class="form-row">
-      <div class="form-group half"><label>Award Amount</label><input type="text" id="f-amount" placeholder="e.g. Full tuition + living" /></div>
-      <div class="form-group half"><label>Application Deadline</label><input type="date" id="f-deadline" /></div>
+    <div class="g2">
+      <div class="fr"><label>Award Amount</label><input type="text" id="sn-amount" placeholder="e.g. Full tuition + living"></div>
+      <div class="fr"><label>Application Deadline</label><input type="date" id="sn-deadline"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group half"><label>Eligible Level</label><select id="f-level"><option value="">Any</option><option>Undergraduate</option><option>Postgraduate</option><option>PhD</option><option>All Levels</option></select></div>
-      <div class="form-group half"><label>Field of Study</label><input type="text" id="f-field" placeholder="e.g. Any / STEM / Law" /></div>
+    <div class="g2">
+      <div class="fr"><label>Eligible Level</label><select id="sn-level"><option value="">Any</option><option>Undergraduate</option><option>Postgraduate</option><option>PhD</option><option>All Levels</option></select></div>
+      <div class="fr"><label>Field of Study</label><input type="text" id="sn-field" placeholder="e.g. Any / STEM / Law"></div>
     </div>
-    <div class="form-group"><label>Notes / Requirements</label><textarea id="f-notes" placeholder="Key requirements, eligibility notes, links..."></textarea></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" id="closeModalBtn">Cancel</button>
-      <button class="btn-save" id="saveBtn">💾 Save Scholarship</button>
+    <div class="fr"><label>Notes / Requirements</label><textarea id="sn-notes" placeholder="Key requirements, eligibility notes, links..."></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('schol-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-gold" style="flex:2;" onclick="saveSchol()">💾 Save Scholarship</button>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
+
 <script>
-// ── NAVIGATION ──
-document.querySelectorAll('.nav-item').forEach(function(item) {
-  item.addEventListener('click', function() {
-    var page = this.getAttribute('data-page');
-    if (!page) return;
+// ══ STORAGE ══
+const S={
+  get:(k,d)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+};
 
-    // switch pages
-    document.querySelectorAll('.page').forEach(function(p) {
-      p.classList.remove('active');
+// ══ CONFIG (all editable) ══
+let cfg=S.get('v5_cfg',{
+  pwdCEO:'edu2024',pwdCE:'ce2024',
+  leadTarget:400000,breakEven:460000,growthGoal:1000000,
+});
+
+let ceTasks=S.get('v5_tasks',[
+  {id:1,text:'Respond to all WhatsApp messages',tag:'d'},
+  {id:2,text:'Respond to Instagram DMs and comments',tag:'d'},
+  {id:3,text:'Respond to TikTok messages',tag:'d'},
+  {id:4,text:'Update Lead Sheet — log all new enquiries',tag:'d'},
+  {id:5,text:'Update CRM for any client status changes',tag:'d'},
+  {id:6,text:'Upload today\'s social media post',tag:'s'},
+  {id:7,text:'Follow up on all pending leads',tag:'d'},
+  {id:8,text:'Chase outstanding client payments',tag:'d'},
+  {id:9,text:'Submit Friday report by 5pm (Fridays only)',tag:'w'},
+]);
+
+let finePolicy=S.get('v5_fines',[
+  {id:1,reason:'Missing Friday report',amount:5000},
+  {id:2,reason:'Unanswered client message',amount:2000},
+  {id:3,reason:'Lead sheet not updated (per day)',amount:1000},
+  {id:4,reason:'Social media post not uploaded',amount:2000},
+]);
+
+// ══ STATE ══
+let todos=S.get('v5_todos',[]);
+let clients=S.get('v5_clients',[]);
+let posts=S.get('v5_posts',[]);
+let waka=S.get('v5_waka',[]);
+let reports=S.get('v5_reports',[]);
+let expenses=S.get('v5_exp',[]);
+let revHist=S.get('v5_rev',[]);
+let goals=S.get('v5_goals',[]);
+let leadsAmt=S.get('v5_leads',0);
+let chk=S.get('v5_chk',{});
+let signIns=S.get('v5_signins',[]);
+let fixed=S.get('v5_fixed',[
+  {id:1,name:'Aminat — CEO Salary',amount:300000,cat:'Salary'},
+  {id:2,name:'Client Executive',amount:80000,cat:'Salary'},
+  {id:3,name:'Live-in Nanny',amount:80000,cat:'Personal'},
+]);
+
+const TEAM=[{role:'ceo',name:'Aminat',title:'CEO',av:'👑'},{role:'ce',name:'Client Executive',title:'Client Executive',av:'👤'}];
+let role='ceo',selR='ceo';
+let calYear,calMonth;
+
+// ══ GOOGLE SHEETS SYNC ══
+const GS_URL='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzygaX37hDNRrFUcNMaWBF08i7La4AaOHaP1Ke2u6IWUncQg/exec';
+
+async function syncToSheet(sheetName, rows){
+  try{
+    await fetch(GS_URL,{
+      method:'POST',
+      body:JSON.stringify({sheet:sheetName,rows}),
     });
-    document.getElementById('page-' + page).classList.add('active');
+  }catch(e){console.log('Sync error:',e);}
+}
 
-    // switch active nav
-    document.querySelectorAll('.nav-item').forEach(function(n) {
-      n.classList.remove('active');
+async function loadFromSheet(sheetName){
+  try{
+    const res=await fetch(GS_URL+'?sheet='+sheetName);
+    const data=await res.json();
+    return data.rows||[];
+  }catch(e){console.log('Load error:',e);return [];}
+}
+
+async function syncAll(){
+  await syncToSheet('Clients',clients);
+  await syncToSheet('Posts',posts);
+  await syncToSheet('Waka',waka);
+  await syncToSheet('Todos',todos);
+  await syncToSheet('Reports',reports);
+  await syncToSheet('Expenses',expenses);
+  await syncToSheet('Revenue',revHist);
+  await syncToSheet('Goals',goals);
+  await syncToSheet('SignIns',signIns);
+  toast('✅ Synced to Google Sheets');
+}
+
+async function loadAll(){
+  try{
+    const [c,p,w,t,r,e,rv,g,s]=await Promise.all([
+      loadFromSheet('Clients'),
+      loadFromSheet('Posts'),
+      loadFromSheet('Waka'),
+      loadFromSheet('Todos'),
+      loadFromSheet('Reports'),
+      loadFromSheet('Expenses'),
+      loadFromSheet('Revenue'),
+      loadFromSheet('Goals'),
+      loadFromSheet('SignIns'),
+    ]);
+    if(c.length){clients=c;S.set('v5_clients',clients);}
+    if(p.length){posts=p;S.set('v5_posts',posts);}
+    if(w.length){waka=w;S.set('v5_waka',waka);}
+    // For todos — restore done state properly from sheets
+    if(t.length){
+      todos=t.map(td=>({
+        id:td.id,
+        text:td.text,
+        done:String(td.done).toUpperCase()==='TRUE'
+      }));
+      S.set('v5_todos',todos);
+    }
+    if(r.length){reports=r;S.set('v5_reports',reports);}
+    if(e.length){expenses=e;S.set('v5_exp',expenses);}
+    if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
+    if(g.length){goals=g;S.set('v5_goals',goals);}
+    if(s.length){
+      const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
+        id:si.id,
+        role:si.role,
+        date:si.date,
+        time:si.signin?si.signin.split(' at ')[1]||String(si.time||''):String(si.time||'').replace(/30\/12\/1899,?\s?/,''),
+        onTime:si.onTime
+      })).filter(si=>si.time&&!si.time.includes('1899'));
+      if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
+    }
+    renderAll();
+  }catch(e){console.log('Load all error:',e);}
+}
+
+// ══ LOGIN ══
+function selRole(r,el){selR=r;document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function doLogin(){
+  const p=document.getElementById('pwd').value;
+  if(p===cfg.pwdCEO){role='ceo';}
+  else if(p===cfg.pwdCE){role='ce';}
+  else{const e=document.getElementById('lerr');e.style.display='block';setTimeout(()=>e.style.display='none',3000);return;}
+  // Save session
+  S.set('v5_session',{role,time:Date.now()});
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  initApp();autoSignIn();
+  loadAll();
+}
+
+function logout(){
+  S.set('v5_session',null);
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pwd').value='';
+}
+
+function checkSession(){
+  const session=S.get('v5_session',null);
+  if(session&&session.role){
+    if(Date.now()-session.time < 12*60*60*1000){
+      role=session.role;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      initApp();
+      loadAll();
+      return true;
+    }else{
+      S.set('v5_session',null);
+    }
+  }
+  return false;
+}
+
+// Show hints
+function showHints(){
+  const el=document.getElementById('pw-hint');
+  if(el)el.innerHTML=`CEO: <b>${cfg.pwdCEO}</b> &nbsp;·&nbsp; Client Executive: <b>${cfg.pwdCE}</b>`;
+}
+
+// ══ AUTO SIGN IN ══
+function autoSignIn(){
+  const now=new Date();
+  const dateClean=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  if(!signIns.find(s=>s.role===roleLabel&&s.date===dateClean)){
+    const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
+    signIns.push({
+      id:Date.now(),
+      role:roleLabel,
+      date:dateClean,
+      time:time,
+      onTime:onTime?'Yes':'No'
     });
-    this.classList.add('active');
-  });
-});
-
-// ── CHECKLIST ──
-document.querySelectorAll('.checklist-item').forEach(function(item) {
-  item.addEventListener('click', function() {
-    this.classList.toggle('done');
-    this.querySelector('.cb').textContent = this.classList.contains('done') ? '✓' : '';
-    updateProgress();
-  });
-});
-
-function updateProgress() {
-  var items = document.querySelectorAll('.checklist-item');
-  var done = document.querySelectorAll('.checklist-item.done').length;
-  var pct = Math.round((done / items.length) * 100);
-  document.getElementById('checkCount').textContent = done + '/' + items.length + ' tasks completed';
-  document.getElementById('checkPct').textContent = pct + '%';
-  document.getElementById('progressBar').style.width = pct + '%';
+    S.set('v5_signins',signIns);
+    syncToSheet('SignIns',signIns.map(s=>({
+      id:String(s.id),
+      role:s.role,
+      date:s.date,
+      time:String(s.time),
+      signin:s.date+' at '+s.time,
+      onTime:s.onTime
+    })));
+  }
+  updSbSI();
+  renderSIBoard();
+  renderAttLog();
+}
+function updSbSI(){
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
+  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
+  if(s){if(v)v.textContent=s.onTime==='Yes'?'✅ On time':'⚠️ Late';if(t)t.textContent=s.time;}
+  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
 }
 
-// ── MODAL ──
-document.getElementById('openModalBtn').addEventListener('click', function() {
-  document.getElementById('modalOverlay').classList.add('open');
-});
-document.getElementById('closeModalBtn').addEventListener('click', function() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  clearForm();
-});
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-  if (e.target === this) { this.classList.remove('open'); clearForm(); }
-});
+// ══ INIT ══
+function initApp(){
+  const isCEO=role==='ceo';
+  document.getElementById('sb-role').textContent=isCEO?'CEO — Aminat':'Client Executive';
+  const now=new Date();
+  if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
+  const ds=now.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  ['dash-date','si-date','ce-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
+  const nf=document.getElementById('not-fri');if(nf)nf.style.display=now.getDay()!==5?'flex':'none';
+  const fm=document.getElementById('fin-mo');if(fm)fm.value=now.toISOString().slice(0,7);
+  const sd=document.getElementById('sm-date');if(sd)sd.value=now.toISOString().slice(0,10);
+  const wd=document.getElementById('wk-dt');if(wd)wd.value=now.toISOString().slice(0,10);
+  const ed=document.getElementById('ex-d');if(ed)ed.value=now.toISOString().slice(0,10);
 
-function clearForm() {
-  ['f-name','f-country','f-type','f-amount','f-deadline','f-level','f-field','f-notes'].forEach(function(id) {
-    document.getElementById(id).value = '';
+  // Populate settings fields
+  const sc=document.getElementById('set-pwd-ceo');if(sc)sc.value=cfg.pwdCEO;
+  const sce=document.getElementById('set-pwd-ce');if(sce)sce.value=cfg.pwdCE;
+  const sl=document.getElementById('set-lead');if(sl)sl.value=cfg.leadTarget;
+  const sb=document.getElementById('set-breakeven');if(sb)sb.value=cfg.breakEven;
+  const sg=document.getElementById('set-growth');if(sg)sg.value=cfg.growthGoal;
+
+  const ceoNav=[
+    {s:'Overview'},{id:'dashboard',i:'🏠',l:'Dashboard'},
+    {s:'Team'},{id:'ce',i:'⚡',l:'CE Management'},{id:'reports',i:'📋',l:'Reports & Attendance'},
+    {s:'Business'},{id:'clients',i:'👤',l:'Client Work'},{id:'social',i:'📱',l:'Social Media'},{id:'finance',i:'💰',l:'Finance'},{id:'growth',i:'📈',l:'Growth'},{id:'scholarship',i:'🎓',l:'Scholarship Advisory'},
+    {s:'Personal'},{id:'waka',i:'✈️',l:'WakawithAmi'},{id:'todo',i:'✅',l:'My To-Do'},
+    {s:'System'},{id:'settings',i:'⚙️',l:'Settings'},
+  ];
+  const ceNav=[
+    {s:'Daily'},{id:'signin',i:'⏰',l:'Sign In'},{id:'checklist',i:'✅',l:'Daily Checklist'},
+    {s:'Weekly'},{id:'report',i:'📝',l:'Friday Report'},
+    {s:'Social'},{id:'social',i:'📱',l:'Social Media'},
+  ];
+  const nav=isCEO?ceoNav:ceNav;
+  const navEl=document.getElementById('sb-nav');navEl.innerHTML='';
+  let first=null;
+  nav.forEach(item=>{
+    if(item.s){const el=document.createElement('div');el.className='sb-sec';el.textContent=item.s;navEl.appendChild(el);return;}
+    if(!first)first=item.id;
+    const el=document.createElement('div');el.className='nv';el.id='nav-'+item.id;
+    el.innerHTML=`<span class="ic">${item.i}</span><span class="lb">${item.l}</span>`;
+    el.onclick=()=>showPage('p-'+item.id);
+    navEl.appendChild(el);
   });
+  renderAll();buildCal();renderSIPage();showHints();
+  showPage('p-'+(isCEO?'dashboard':first||'signin'));
+  // Auto refresh sign-in board every 2 minutes for CEO
+  if(isCEO){
+    setInterval(async()=>{
+      try{
+        const s=await loadFromSheet('SignIns');
+        if(s&&s.length){
+          const clean=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T'));
+          if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
+          renderSIBoard();renderAttLog();updSbSI();
+        }
+      }catch(e){}
+    },60000);
+  }
 }
 
-// ── SCHOLARSHIPS ──
-var scholarships = [];
-var currentFilter = 'all';
-var currentSearch = '';
-
-document.getElementById('saveBtn').addEventListener('click', function() {
-  var name = document.getElementById('f-name').value.trim();
-  var country = document.getElementById('f-country').value.trim();
-  var type = document.getElementById('f-type').value;
-  if (!name || !country || !type) { alert('Please fill in Name, Country, and Type.'); return; }
-  scholarships.push({
-    id: Date.now(),
-    name: name,
-    country: country,
-    type: type,
-    amount: document.getElementById('f-amount').value.trim() || 'Not specified',
-    deadline: document.getElementById('f-deadline').value,
-    level: document.getElementById('f-level').value || 'Any',
-    field: document.getElementById('f-field').value.trim() || 'Any',
-    notes: document.getElementById('f-notes').value.trim()
-  });
-  document.getElementById('modalOverlay').classList.remove('open');
-  clearForm();
-  renderCards();
-  updateStats();
-});
-
-// Filter buttons
-document.querySelectorAll('.filter-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    currentFilter = this.getAttribute('data-filter');
-    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-    this.classList.add('active');
-    renderCards();
-  });
-});
-
-document.getElementById('scholSearch').addEventListener('input', function() {
-  currentSearch = this.value.toLowerCase();
-  renderCards();
-});
-
-function deadlineInfo(dateStr) {
-  if (!dateStr) return { label: 'No deadline', cls: 'deadline-na' };
-  var today = new Date(); today.setHours(0,0,0,0);
-  var dl = new Date(dateStr);
-  var days = Math.round((dl - today) / 86400000);
-  if (days < 0) return { label: 'Closed', cls: 'deadline-urgent' };
-  if (days <= 30) return { label: days + 'd left', cls: 'deadline-urgent' };
-  if (days <= 90) return { label: days + 'd left', cls: 'deadline-soon' };
-  return { label: dl.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}), cls: 'deadline-ok' };
+function showPage(pid){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nv').forEach(n=>n.classList.remove('active'));
+  const p=document.getElementById(pid);if(p)p.classList.add('active');
+  const n=document.getElementById('nav-'+pid.replace('p-',''));if(n)n.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  if(pid==='p-report')checkReportWindow();
 }
 
-function badgeClass(type) {
-  if (type === 'Fully Funded') return 'badge-full';
-  if (type === 'Partial') return 'badge-partial';
-  return 'badge-tuition';
+function renderAll(){
+  renderDash();renderChk();renderTodos();renderClients();
+  renderPosts();renderWaka();renderGrowth();renderReports();
+  renderExp();renderRevHist();renderGoals();renderLeads();
+  renderFixed();renderSIBoard();renderAttLog();renderCETasks();
+  renderFinePolicy();renderConfig();renderSchols();
 }
 
-function renderCards() {
-  var grid = document.getElementById('scholarshipGrid');
-  var list = scholarships.filter(function(s) {
-    var matchFilter = currentFilter === 'all' || s.type === currentFilter;
-    var matchSearch = !currentSearch || s.name.toLowerCase().includes(currentSearch) || s.country.toLowerCase().includes(currentSearch) || s.field.toLowerCase().includes(currentSearch);
-    return matchFilter && matchSearch;
-  });
+// ══ SETTINGS ══
+function savePwds(){
+  const c=document.getElementById('set-pwd-ceo')?.value?.trim();
+  const ce=document.getElementById('set-pwd-ce')?.value?.trim();
+  if(!c||!ce)return toast('Fill in both passwords');
+  if(c.length<4||ce.length<4)return toast('Passwords must be at least 4 characters');
+  cfg.pwdCEO=c;cfg.pwdCE=ce;S.set('v5_cfg',cfg);
+  showHints();renderConfig();toast('Passwords updated ✓');
+}
+function saveTargets(){
+  const l=parseInt(document.getElementById('set-lead')?.value);
+  const b=parseInt(document.getElementById('set-breakeven')?.value);
+  const g=parseInt(document.getElementById('set-growth')?.value);
+  if(!l||!b||!g)return toast('Fill in all targets');
+  cfg.leadTarget=l;cfg.breakEven=b;cfg.growthGoal=g;S.set('v5_cfg',cfg);
+  renderDash();renderLeads();renderGrowth();renderConfig();
+  const gd=document.getElementById('gr-goal-display');if(gd)gd.textContent='₦'+g.toLocaleString();
+  const ct=document.getElementById('ce-target-display');if(ct)ct.textContent='₦'+l.toLocaleString();
+  toast('Targets saved ✓');
+}
+function addFinePolicy(){
+  const r=document.getElementById('fp-rsn')?.value?.trim();
+  const a=parseInt(document.getElementById('fp-amt')?.value);
+  if(!r||!a)return toast('Fill in reason and amount');
+  finePolicy.push({id:Date.now(),reason:r,amount:a});
+  S.set('v5_fines',finePolicy);
+  document.getElementById('fp-rsn').value='';document.getElementById('fp-amt').value='';
+  renderFinePolicy();toast('Fine added');
+}
+function delFinePolicy(id){finePolicy=finePolicy.filter(f=>f.id!==id);S.set('v5_fines',finePolicy);renderFinePolicy();}
+function renderFinePolicy(){
+  const el=document.getElementById('fines-policy-list');if(!el)return;
+  if(!finePolicy.length){el.innerHTML='<div class="empty" style="padding:12px;"><p>No fines defined yet.</p></div>';return;}
+  el.innerHTML=finePolicy.map(f=>`
+    <div class="row">
+      <div class="rn">${f.reason}</div>
+      <div class="ra out">-₦${f.amount.toLocaleString()}</div>
+      <button class="btn btn-danger btn-sm" onclick="delFinePolicy(${f.id})" style="padding:3px 8px;">✕</button>
+    </div>`).join('');
+}
+function clearSignIns(){
+  if(!confirm('Clear all sign-in history?'))return;
+  signIns=[];
+  S.set('v5_signins',[]);
+  syncToSheet('SignIns',[]);
+  renderSIBoard();renderAttLog();updSbSI();
+  toast('Sign-in history cleared ✓');
+}
 
-  if (!list.length) {
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div><p>' + (scholarships.length ? 'No scholarships match your filter.' : 'No scholarships added yet.<br>Click <strong>"+ Add Scholarship"</strong> to get started.') + '</p></div>';
-    return;
+function renderConfig(){
+  const el=document.getElementById('config-display');if(!el)return;
+  el.innerHTML=`
+    <div class="row"><div class="rn">CEO Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCEO}</div></div>
+    <div class="row"><div class="rn">CE Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCE}</div></div>
+    <div class="row"><div class="rn">CE Lead Target</div><div style="font-size:13px;font-weight:600;color:var(--gold);">₦${cfg.leadTarget.toLocaleString()}</div></div>
+    <div class="row"><div class="rn">Break Even Target</div><div style="font-size:13px;font-weight:600;color:var(--danger);">₦${cfg.breakEven.toLocaleString()}</div></div>
+    <div class="row"><div class="rn">Growth Goal</div><div style="font-size:13px;font-weight:600;color:var(--success);">₦${cfg.growthGoal.toLocaleString()}</div></div>`;
+}
+
+// ══ CE TASKS ══
+function addCETask(){
+  const t=document.getElementById('new-task-txt')?.value?.trim();if(!t)return toast('Enter task description');
+  const tag=document.getElementById('new-task-tag')?.value||'d';
+  ceTasks.push({id:Date.now(),text:t,tag});S.set('v5_tasks',ceTasks);
+  document.getElementById('new-task-txt').value='';
+  renderCETasks();renderChk();toast('Task added');
+}
+function delCETask(id){ceTasks=ceTasks.filter(t=>t.id!==id);S.set('v5_tasks',ceTasks);renderCETasks();renderChk();toast('Task removed');}
+function renderCETasks(){
+  const el=document.getElementById('ce-tasks-list');if(!el)return;
+  const tm={d:'<span class="tag t-d">Daily</span>',w:'<span class="tag t-w">Weekly</span>',s:'<span class="tag t-s">Social</span>'};
+  el.innerHTML=ceTasks.map(t=>`
+    <div class="row">
+      <div class="rn">${t.text}</div>
+      ${tm[t.tag]||''}
+      <button class="btn btn-danger btn-sm" onclick="delCETask(${t.id})" style="padding:3px 8px;">✕</button>
+    </div>`).join('');
+}
+
+// ══ SIGN IN — Google Sheets as single source of truth ══
+async function doSignIn(){
+  const now=new Date();
+  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
+  // Check if already signed in today
+  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
+  if(existing){toast('Already signed in today');return;}
+  const entry={
+    id:String(Date.now()),
+    role:roleLabel,
+    date:today,
+    signin:today+' — '+roleLabel,
+    onTime:onTime?'Yes':'No'
+  };
+  signIns.push(entry);
+  S.set('v5_signins',signIns);
+  // Write to Google Sheets
+  await syncToSheet('SignIns',signIns.map(s=>({
+    id:String(s.id),
+    role:String(s.role),
+    date:String(s.date),
+    signin:String(s.signin||s.date),
+    onTime:String(s.onTime)
+  })));
+  renderSIPage();renderSIBoard();updSbSI();renderAttLog();
+  toast(onTime?'Signed in on time ✅':'Signed in — noted as late ⚠️');
+}
+
+async function autoSignIn(){
+  const now=new Date();
+  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
+  // First load latest from sheets
+  try{
+    const latest=await loadFromSheet('SignIns');
+    if(latest&&latest.length){
+      const clean=latest.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+      if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
+    }
+  }catch(e){}
+  // Check if already signed in
+  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
+  if(!existing){
+    const entry={
+      id:String(Date.now()),
+      role:roleLabel,
+      date:today,
+      signin:today+' — '+roleLabel,
+      onTime:onTime?'Yes':'No'
+    };
+    signIns.push(entry);
+    S.set('v5_signins',signIns);
+    await syncToSheet('SignIns',signIns.map(s=>({
+      id:String(s.id),
+      role:String(s.role),
+      date:String(s.date),
+      signin:String(s.signin||s.date),
+      onTime:String(s.onTime)
+    })));
+  }
+  updSbSI();
+  renderSIBoard();
+  renderAttLog();
+}
+function renderSIPage(){
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
+  const icon=document.getElementById('si-icon');const msg=document.getElementById('si-msg');
+  const sub=document.getElementById('si-sub');const btn=document.getElementById('si-btn');
+  if(s){
+    if(icon)icon.textContent=s.onTime==='Yes'?'✅':'⚠️';
+    if(msg)msg.textContent=s.onTime==='Yes'?'You are signed in on time!':'Signed in — marked as late.';
+    if(sub)sub.textContent='Signed in at '+s.time+' today.';
+    if(btn)btn.style.display='none';
+  }else{
+    if(icon)icon.textContent='⏰';if(msg)msg.textContent="You haven't signed in yet today.";
+    if(sub)sub.textContent='Sign in before 9am to be on time.';if(btn)btn.style.display='inline-block';
+  }
+  const hist=document.getElementById('si-hist');
+  if(hist){
+    const mine=signIns.filter(s=>s.role===(role==='ceo'?'CEO':'Client Executive')).slice(-10).reverse();
+    if(!mine.length){hist.innerHTML='<div class="empty"><p>No history yet.</p></div>';return;}
+    hist.innerHTML=mine.map(s=>`<div class="row"><div class="rn">${s.date}</div><span style="font-size:12px;color:var(--text-light);">${s.time}</span><span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span></div>`).join('');
+  }
+}
+function renderSIBoard(){
+  const el=document.getElementById('si-board');if(!el)return;
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  el.innerHTML=TEAM.map(t=>{
+    const roleLabel=t.role==='ceo'?'CEO':'Client Executive';
+    const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
+    return `<div class="si-card${s?' signed':''}">
+      <div class="si-av">${t.av}</div>
+      <div class="si-nm">${t.name}</div>
+      <div class="si-rl">${t.title}</div>
+      ${s?`<span class="pill p-green">✅ Signed In</span>`:
+      `<span class="pill p-gray">Not Signed In</span>`}
+    </div>`;
+  }).join('');
+}
+function renderAttLog(){
+  const el=document.getElementById('att-log');if(!el)return;
+  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
+  el.innerHTML=[...signIns].reverse().slice(0,20).map(s=>`
+    <div class="row">
+      <div class="rn">${s.role==='CEO'?'👑 Aminat (CEO)':'👤 Client Executive'}</div>
+      <span style="font-size:12px;color:var(--text-light);">${s.date||''}</span>
+      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+    </div>`).join('');
+}
+function updSbSI(){
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
+  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
+  if(s){if(v)v.textContent='✅ Signed in today';if(t)t.textContent='';}
+  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
+}
+
+// ══ CALENDAR ══
+function buildCal(){
+  const el=document.getElementById('cal-grid');if(!el)return;
+  const now=new Date();
+  if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const startOffset=firstDay===0?6:firstDay-1;
+  const lbl=document.getElementById('cal-lbl');if(lbl)lbl.textContent=monthNames[calMonth]+' '+calYear;
+  let html=days.map(d=>`<div class="cal-hd">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++)html+=`<div class="cal-d" style="background:transparent;border-color:transparent;cursor:default;min-height:68px;"></div>`;
+  for(let i=1;i<=daysInMonth;i++){
+    const mm=String(calMonth+1).padStart(2,'0');const dd=String(i).padStart(2,'0');
+    const dateStr=`${calYear}-${mm}-${dd}`;
+    const cleanDateStr=`${dd}/${mm}/${calYear}`;
+    const dp=posts.filter(p=>p.date===cleanDateStr||p.date===dateStr);
+    const isToday=now.getDate()===i&&now.getMonth()===calMonth&&now.getFullYear()===calYear;
+    const dots=dp.map(p=>`<span class="cdot ${p.plat==='Instagram'?'c-ig':p.plat==='TikTok'?'c-tt':'c-fb'}"></span>`).join('');
+    const dayIdx=(startOffset+i-1)%7;
+    html+=`<div class="cal-d${dp.length?' has':''}${isToday?' today':''}" onclick="setDate('${dateStr}')">
+      <div class="cal-dt">${i}</div>
+      <div class="cal-dots">${dots}</div>
+      ${dp.length?`<div style="font-size:8px;color:var(--text-light);margin-top:2px;">${dp.length} post${dp.length>1?'s':''}</div>`:''}
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}buildCal();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}buildCal();}
+function setDate(d){const el=document.getElementById('sm-date');if(el){el.value=d;document.getElementById('sm-topic')?.focus();}toast('Date set to '+d);}
+
+// ══ DASHBOARD ══
+function renderDash(){
+  const rev=revHist.length?revHist[revHist.length-1].amount:0;
+  const el=document.getElementById('d-rev');if(el)el.textContent='₦'+rev.toLocaleString();
+  const rs=document.getElementById('d-rev-sub');if(rs)rs.textContent='Break even: ₦'+cfg.breakEven.toLocaleString();
+  const pct=Math.min(Math.round((leadsAmt/cfg.leadTarget)*100),100);
+  const lel=document.getElementById('d-lead');if(lel)lel.textContent=pct+'%';
+  const ls=document.getElementById('d-lead-sub');if(ls)ls.textContent='of ₦'+cfg.leadTarget.toLocaleString();
+  const ac=clients.filter(c=>c.status!=='Completed').length;
+  const cel=document.getElementById('d-clients');if(cel)cel.textContent=ac;
+  const rep=reports[reports.length-1];
+  const rel=document.getElementById('d-report');if(rel)rel.textContent=rep?'✅':'⏳';
+  const rb=document.getElementById('d-rev-b');if(rb)rb.style.width=Math.min((rev/cfg.breakEven)*100,100)+'%';
+  const rl=document.getElementById('d-rev-l');if(rl)rl.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.breakEven.toLocaleString();
+  const lb=document.getElementById('d-lead-b');if(lb)lb.style.width=pct+'%';
+  const ll=document.getElementById('d-lead-l');if(ll)ll.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
+  const gb=document.getElementById('d-gr-b');if(gb)gb.style.width=Math.min((rev/cfg.growthGoal)*100,100)+'%';
+  const gl=document.getElementById('d-gr-l');if(gl)gl.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.growthGoal.toLocaleString();
+  const gc=document.getElementById('gr-clients');if(gc)gc.textContent=clients.length;
+  const gd=document.getElementById('gr-goal-display');if(gd)gd.textContent='₦'+cfg.growthGoal.toLocaleString();
+  const ct=document.getElementById('ce-target-display');if(ct)ct.textContent='₦'+cfg.leadTarget.toLocaleString();
+
+  // CE Checklist on dashboard
+  const dcp=document.getElementById('d-chk-prog');
+  const dci=document.getElementById('d-chk-items');
+  if(dcp&&dci){
+    const done=ceTasks.filter(t=>chk[t.id]).length;
+    const total=ceTasks.length;
+    const pct=Math.round((done/total)*100);
+    dcp.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${total} tasks completed</span><span style="font-weight:700;color:${pct===100?'var(--success)':pct>=50?'var(--gold)':'var(--danger)'};">${pct}%</span></div><div class="pb"><div class="pf ${pct===100?'green':pct>=50?'gold':''}" style="width:${pct}%"></div></div></div>`;
+    dci.innerHTML=ceTasks.map(t=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span style="font-size:14px;">${chk[t.id]?'✅':'⏳'}</span>
+        <span style="flex:1;color:${chk[t.id]?'var(--text-light)':'var(--text)'};${chk[t.id]?'text-decoration:line-through;':''}">${t.text}</span>
+      </div>`).join('');
   }
 
-  grid.innerHTML = list.map(function(s) {
-    var dl = deadlineInfo(s.deadline);
-    return '<div class="schol-card">' +
-      '<div class="schol-card-header"><div class="schol-name">' + s.name + '</div><span class="schol-type-badge ' + badgeClass(s.type) + '">' + s.type + '</span></div>' +
-      '<div class="schol-meta">' +
-        '<div class="schol-meta-row"><span class="meta-icon">🌍</span> <strong>' + s.country + '</strong></div>' +
-        '<div class="schol-meta-row"><span class="meta-icon">💰</span> ' + s.amount + '</div>' +
-        '<div class="schol-meta-row"><span class="meta-icon">🎓</span> ' + s.level + ' · ' + s.field + '</div>' +
-        (s.notes ? '<div class="schol-meta-row"><span class="meta-icon">📝</span> <span style="font-size:11px;color:var(--text-light)">' + s.notes.substring(0,80) + (s.notes.length>80?'…':'') + '</span></div>' : '') +
-      '</div>' +
-      '<span class="schol-deadline ' + dl.cls + '">📅 ' + dl.label + '</span>' +
-      '<div class="schol-card-footer">' +
-        '<button class="btn-sm outline" onclick="copyInfo(' + s.id + ')">📋 Copy Info</button>' +
-        '<button class="btn-sm danger" onclick="deleteScholarship(' + s.id + ')">🗑 Remove</button>' +
-      '</div></div>';
+  // Latest Friday Report on dashboard
+  const dlr=document.getElementById('d-latest-report');
+  if(dlr){
+    const last=reports[reports.length-1];
+    if(!last){dlr.innerHTML='<div class="empty" style="padding:12px;"><p>No reports submitted yet.</p></div>';}
+    else{dlr.innerHTML=`
+      <div style="padding:8px 0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;">${last.date}</span>
+          <span class="pill ${last.onTime?'p-green':'p-warn'}">${last.onTime?'On Time':'Off-day'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📥 ${last.newLeads} new leads · ✅ ${last.converted} converted</div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">💰 ₦${parseInt(last.revenue||0).toLocaleString()} · 📱 ${last.posts} posts</div>
+        ${last.complaints&&last.complaints!=='None'?`<div style="font-size:12px;color:var(--danger);margin-top:4px;">⚠️ ${last.complaints}</div>`:'<div style="font-size:12px;color:var(--success);">✅ No complaints</div>'}
+      </div>`;}
+  }
+}
+
+// ══ CHECKLIST ══
+function renderChk(){
+  const el=document.getElementById('chk-items');if(!el)return;
+  const today=new Date().toDateString();
+  if(chk.date!==today){chk={date:today};S.set('v5_chk',chk);}
+  const tm={d:'<span class="tag t-d">Daily</span>',w:'<span class="tag t-w">Weekly</span>',s:'<span class="tag t-s">Social</span>'};
+  el.innerHTML=ceTasks.map(t=>{
+    const done=chk[t.id]===true;
+    return `<div class="ci${done?' done':''}" id="ci-${t.id}">
+      <input type="checkbox" id="c-${t.id}" ${done?'checked':''} onchange="togChk(${t.id})">
+      <label for="c-${t.id}">${t.text}</label>${tm[t.tag]||''}</div>`;
+  }).join('');
+  const done=ceTasks.filter(t=>chk[t.id]).length;
+  const prog=document.getElementById('chk-prog');
+  if(prog){const pct=Math.round((done/ceTasks.length)*100);prog.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${ceTasks.length} tasks</span><span>${pct}%</span></div><div class="pb"><div class="pf" style="width:${pct}%"></div></div></div>`;}
+}
+function togChk(id){
+  chk[id]=!chk[id];S.set('v5_chk',chk);renderChk();
+  // Sync checklist state to Google Sheets
+  const done=ceTasks.filter(t=>chk[t.id]).length;
+  const total=ceTasks.length;
+  const pct=Math.round((done/total)*100);
+  syncToSheet('Checklist',[{date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),completed:done,total,percentage:pct+'%',tasks:ceTasks.map(t=>t.text+': '+(chk[t.id]?'✅':'⏳')).join(' | ')}]);
+}
+function resetChk(){chk={date:new Date().toDateString()};S.set('v5_chk',chk);renderChk();toast('Checklist reset for today');}
+
+// ══ LEADS ══
+function renderLeads(){
+  const pct=Math.min(Math.round((leadsAmt/cfg.leadTarget)*100),100);
+  ['ce-lead-b','ce-prog-b'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.width=pct+'%';});
+  const ll=document.getElementById('ce-lead-l');if(ll)ll.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
+  const pl=document.getElementById('ce-prog-l');if(pl)pl.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
+}
+function updateLeads(){
+  const v=parseInt(document.getElementById('lead-i')?.value);if(!v||v<0)return toast('Enter valid amount');
+  leadsAmt=v;S.set('v5_leads',leadsAmt);document.getElementById('lead-i').value='';
+  renderLeads();renderDash();toast('Lead target updated');
+}
+
+// ══ REPORT ══
+function checkReportWindow(){
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const hour=now.getHours();
+  const warn=document.getElementById('report-warning');
+  const wrap=document.getElementById('report-form-wrap');
+  if(!warn||!wrap)return;
+
+  if(day===6&&hour<14){
+    // Saturday before 2pm — window is OPEN
+    warn.className='alert a-success';
+    warn.textContent='✅ Report window is open! Submit before 2pm today (Saturday).';
+    warn.style.display='flex';
+    wrap.style.display='block';
+  } else if(day===6&&hour>=14){
+    // Saturday after 2pm — LOCKED
+    warn.className='alert a-warn';
+    warn.textContent='🔒 Report window is closed. Deadline was Saturday 2pm. This counts as a missed report.';
+    warn.style.display='flex';
+    wrap.style.display='none';
+  } else if(day===5){
+    // Friday — remind her
+    warn.className='alert a-info';
+    warn.textContent='📅 Report is due tomorrow — Saturday before 2pm.';
+    warn.style.display='flex';
+    wrap.style.display='block';
+  } else {
+    // Other days
+    warn.className='alert a-info';
+    warn.textContent='📅 Weekly report is due every Saturday before 2pm.';
+    warn.style.display='flex';
+    wrap.style.display='block';
+  }
+}
+
+function submitReport(){
+  const now=new Date();
+  const day=now.getDay();
+  const hour=now.getHours();
+  // Block submission after Saturday 2pm
+  if(day===6&&hour>=14)return toast('⏰ Report deadline has passed — Saturday 2pm');
+  const vals=['r-nl','r-fu','r-cv','r-rv'].map(f=>document.getElementById(f)?.value?.trim());
+  if(vals.some(v=>!v))return toast('Fill in all required fields');
+  const onTime=day===6&&hour<14;
+  reports.push({id:Date.now(),date:now.toLocaleDateString('en-GB'),newLeads:vals[0],followedUp:vals[1],converted:vals[2],revenue:vals[3],posts:document.getElementById('r-sp')?.value||0,complaints:document.getElementById('r-cc')?.value||'None',pending:document.getElementById('r-pt')?.value||'None',plan:document.getElementById('r-pf')?.value||'',onTime});
+  S.set('v5_reports',reports);
+  ['r-nl','r-fu','r-cv','r-rv','r-sp','r-cc','r-pt','r-pf'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  renderReports();renderDash();toast('Report submitted ✓');
+  syncToSheet('Reports',reports);
+}
+function renderReports(){
+  const el=document.getElementById('reports-list');if(!el)return;
+  if(!reports.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No reports yet.</p></div>';return;}
+  el.innerHTML=[...reports].reverse().map(r=>`
+    <div style="padding:12px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:13px;font-weight:600;">${r.date}</span>
+        <span class="pill ${r.onTime?'p-green':'p-warn'}">${r.onTime?'On Time':'Off-day'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);">${r.newLeads} leads · ${r.converted} converted · ₦${parseInt(r.revenue||0).toLocaleString()} · ${r.posts} posts</div>
+      ${r.complaints&&r.complaints!=='None'?`<div style="font-size:12px;color:var(--danger);margin-top:4px;">⚠️ ${r.complaints}</div>`:''}
+    </div>`).join('');
+}
+
+// ══ FINANCE ══
+function logRev(){
+  const m=document.getElementById('fin-mo')?.value;const a=parseInt(document.getElementById('fin-amt')?.value);
+  if(!m||!a||a<0)return toast('Fill in month and amount');
+  const idx=revHist.findIndex(r=>r.month===m);
+  if(idx>=0)revHist[idx].amount=a;else revHist.push({month:m,amount:a});
+  S.set('v5_rev',revHist);document.getElementById('fin-amt').value='';
+  renderRevHist();renderDash();renderGrowth();toast('Revenue logged');
+  syncToSheet('Revenue',revHist);
+}
+function renderRevHist(){
+  const el=document.getElementById('rev-hist');if(!el)return;
+  const fr=document.getElementById('fin-rev');
+  if(fr&&revHist.length)fr.textContent='₦'+revHist[revHist.length-1].amount.toLocaleString();
+  if(!revHist.length){el.innerHTML='';return;}
+  el.innerHTML='<div style="margin-top:12px;font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">History</div>'+
+    [...revHist].reverse().slice(0,6).map(r=>`<div class="row"><div class="rn">${r.month}</div><div class="ra in">+₦${r.amount.toLocaleString()}</div></div>`).join('');
+}
+function renderFixed(){
+  const el=document.getElementById('fixed-list');if(!el)return;
+  const cc={Salary:'p-green',Personal:'p-blue',Operations:'p-gold',Other:'p-gray'};
+  el.innerHTML=fixed.map(f=>`
+    <div class="row">
+      <div class="rn">${f.name}</div>
+      <span class="pill ${cc[f.cat]||'p-gray'}">${f.cat}</span>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div class="ra out">-₦${f.amount.toLocaleString()}</div>
+        <button class="btn btn-ghost btn-sm" onclick="editFixed(${f.id})" style="padding:3px 8px;font-size:10px;">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="delFixed(${f.id})" style="padding:3px 8px;font-size:10px;">✕</button>
+      </div>
+    </div>`).join('');
+  const total=fixed.reduce((s,f)=>s+f.amount,0);
+  const tel=document.getElementById('fixed-total');if(tel)tel.textContent='-₦'+total.toLocaleString();
+  const ftl=document.getElementById('fin-fixed');if(ftl)ftl.textContent='₦'+total.toLocaleString();
+}
+function editFixed(id){
+  const item=fixed.find(f=>f.id===id);if(!item)return;
+  const n=prompt('Name:',item.name);if(!n)return;
+  const a=parseInt(prompt('Amount (₦):',item.amount));if(!a||a<0)return;
+  item.name=n;item.amount=a;S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Updated ✓');
+}
+function delFixed(id){
+  if(!confirm('Remove this item?'))return;
+  fixed=fixed.filter(f=>f.id!==id);S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Removed');
+}
+function addFixed(){
+  const n=prompt('Name:');if(!n)return;
+  const a=parseInt(prompt('Monthly amount (₦):'));if(!a||a<0)return;
+  const c=prompt('Category (Salary/Personal/Operations/Other):','Salary')||'Other';
+  fixed.push({id:Date.now(),name:n,amount:a,cat:c});
+  S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Item added');
+}
+function addExp(){
+  const n=document.getElementById('ex-n')?.value?.trim();const a=parseInt(document.getElementById('ex-a')?.value);
+  if(!n||!a)return toast('Fill in name and amount');
+  expenses.push({id:Date.now(),name:n,amount:a,cat:document.getElementById('ex-c')?.value,date:document.getElementById('ex-d')?.value});
+  S.set('v5_exp',expenses);document.getElementById('ex-n').value='';document.getElementById('ex-a').value='';
+  renderExp();toast('Expense added');
+  syncToSheet('Expenses',expenses);
+}
+function renderExp(){
+  const el=document.getElementById('exp-list');if(!el)return;
+  if(!expenses.length){el.innerHTML='';return;}
+  el.innerHTML='<div style="margin-top:4px;font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Additional Expenses</div>'+
+    expenses.map(e=>`<div class="row"><div class="rn">${e.name} <span style="font-size:11px;color:var(--text-light);">${e.date||''}</span></div><span class="pill p-gray">${e.cat}</span><div class="ra out">-₦${e.amount.toLocaleString()}</div></div>`).join('');
+}
+
+// ══ CLIENTS ══
+function addClient(){
+  const n=document.getElementById('cl-n')?.value?.trim();if(!n)return toast('Enter client name');
+  clients.push({id:Date.now(),name:n,type:document.getElementById('cl-t')?.value,dest:document.getElementById('cl-d')?.value,status:document.getElementById('cl-s')?.value,paid:parseInt(document.getElementById('cl-p')?.value)||0,balance:parseInt(document.getElementById('cl-b')?.value)||0,drive:document.getElementById('cl-dr')?.value,notes:document.getElementById('cl-no')?.value,added:new Date().toLocaleDateString('en-GB')});
+  S.set('v5_clients',clients);
+  ['cl-n','cl-d','cl-p','cl-b','cl-dr','cl-no'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  renderClients();renderDash();toast('Client added');
+  syncToSheet('Clients',clients);
+}
+function delClient(id){clients=clients.filter(c=>c.id!==id);S.set('v5_clients',clients);renderClients();renderDash();}
+function updStatus(id,s){clients=clients.map(c=>c.id===id?{...c,status:s}:c);S.set('v5_clients',clients);}
+const SC={'New Enquiry':'p-blue','Documents Pending':'p-warn','In Progress':'p-warn','Submitted':'p-blue','Approved':'p-green','Completed':'p-green','On Hold':'p-gray'};
+function renderClients(){
+  const el=document.getElementById('clients-list');if(!el)return;
+  if(!clients.length){el.innerHTML='<div class="empty"><div class="ei">👤</div><p>No clients yet.</p></div>';return;}
+  el.innerHTML=clients.map(c=>`
+    <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div><div style="font-size:14px;font-weight:600;">${c.name}</div><div style="font-size:11px;color:var(--text-light);">${c.type}${c.dest?' → '+c.dest:''} · Added ${c.added}</div></div>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+          <select class="pill ${SC[c.status]||'p-gray'}" onchange="updStatus(${c.id},this.value)" style="border:none;font-size:9px;font-weight:700;text-transform:uppercase;cursor:pointer;padding:2px 8px;border-radius:20px;">
+            ${['New Enquiry','Documents Pending','In Progress','Submitted','Approved','Completed','On Hold'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+          <button class="btn btn-danger btn-sm" onclick="delClient(${c.id})" style="padding:3px 8px;">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${c.paid?`<span class="pill p-green">Paid: ₦${c.paid.toLocaleString()}</span>`:''}
+        ${c.balance?`<span class="pill p-red">Balance: ₦${c.balance.toLocaleString()}</span>`:''}
+        ${c.drive?`<a href="${c.drive}" target="_blank" class="pill p-blue" style="text-decoration:none;">📁 Drive Folder</a>`:''}
+      </div>
+      ${c.notes?`<div style="font-size:12px;color:var(--text-mid);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">${c.notes}</div>`:''}
+    </div>`).join('');
+}
+
+// ══ POSTS ══
+function addPost(){
+  const t=document.getElementById('sm-topic')?.value?.trim();if(!t)return toast('Enter post topic');
+  const rawDate=document.getElementById('sm-date')?.value||'';
+  const cleanDate=rawDate?rawDate.split('T')[0].split('-').reverse().join('/'):new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  posts.push({id:Date.now(),topic:t,date:cleanDate,plat:document.getElementById('sm-plat')?.value,status:document.getElementById('sm-st')?.value,type:document.getElementById('sm-type')?.value});
+  S.set('v5_posts',posts);document.getElementById('sm-topic').value='';
+  renderPosts();buildCal();toast('Post logged');
+  syncToSheet('Posts',posts);
+}
+function delPost(id){posts=posts.filter(p=>p.id!==id);S.set('v5_posts',posts);renderPosts();buildCal();}
+const PC={Instagram:'p-red',TikTok:'p-red',Facebook:'p-blue','All Platforms':'p-blue'};
+const SC2={Scheduled:'p-warn',Published:'p-green','Pending Design':'p-red',Draft:'p-gray'};
+function updPostStatus(id,status){
+  posts=posts.map(p=>p.id==id?{...p,status}:p);
+  S.set('v5_posts',posts);
+  renderPosts();buildCal();
+  syncToSheet('Posts',posts);
+  toast('Status updated to '+status);
+}
+
+function renderPosts(){
+  const el=document.getElementById('posts-list');if(!el)return;
+  const tot=document.getElementById('sm-tot');if(tot)tot.textContent=posts.length;
+  const pub=document.getElementById('sm-pub');if(pub)pub.textContent=posts.filter(p=>p.status==='Published').length;
+  const sch=document.getElementById('sm-sch');if(sch)sch.textContent=posts.filter(p=>p.status==='Scheduled').length;
+  if(!posts.length){el.innerHTML='<div class="empty"><div class="ei">📱</div><p>No posts logged yet.</p></div>';return;}
+  el.innerHTML=[...posts].reverse().map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">${p.topic}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="pill ${PC[p.plat]||'p-gray'}" style="font-size:9px;">${p.plat}</span>
+          <span class="pill p-gray" style="font-size:9px;">${p.type}</span>
+          <span style="font-size:11px;color:var(--text-light);">${p.date||''}</span>
+        </div>
+      </div>
+      <select onchange="updPostStatus(${p.id},this.value)" style="padding:4px 8px;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;color:var(--text);background:var(--cream);cursor:pointer;outline:none;">
+        ${['Draft','Scheduled','Published','Pending Design'].map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <button class="btn btn-danger btn-sm" onclick="delPost(${p.id})" style="padding:3px 8px;">✕</button>
+    </div>`).join('');
+}
+
+// ══ WAKA ══
+function addWaka(){
+  const h=document.getElementById('wk-h')?.value?.trim();if(!h)return toast('Enter hook/title');
+  waka.push({id:Date.now(),hook:h,date:document.getElementById('wk-dt')?.value,plat:document.getElementById('wk-pl')?.value,status:document.getElementById('wk-st')?.value,pillar:document.getElementById('wk-pi')?.value});
+  S.set('v5_waka',waka);document.getElementById('wk-h').value='';renderWaka();toast('Content logged');
+  syncToSheet('Waka',waka);
+}
+function delWaka(id){waka=waka.filter(p=>p.id!==id);S.set('v5_waka',waka);renderWaka();}
+function renderWaka(){
+  const el=document.getElementById('waka-list');if(!el)return;
+  const tot=document.getElementById('wk-tot');if(tot)tot.textContent=waka.length;
+  const pub=document.getElementById('wk-pub');if(pub)pub.textContent=waka.filter(p=>p.status==='Published').length;
+  const pend=document.getElementById('wk-pend');if(pend)pend.textContent=waka.filter(p=>['Idea','To Film','Filmed'].includes(p.status)).length;
+  if(!waka.length){el.innerHTML='<div class="empty"><div class="ei">✈️</div><p>No content yet.</p></div>';return;}
+  const st={Published:'p-green',Scheduled:'p-warn',Filmed:'p-blue','To Film':'p-warn',Idea:'p-gray'};
+  el.innerHTML=[...waka].reverse().map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">${p.hook}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="pill p-blue" style="font-size:9px;">${p.plat}</span>
+          <span class="pill p-gray" style="font-size:9px;">${p.pillar}</span>
+          <span style="font-size:11px;color:var(--text-light);">${p.date||''}</span>
+        </div>
+      </div>
+      <span class="pill ${st[p.status]||'p-gray'}">${p.status}</span>
+      <button class="btn btn-danger btn-sm" onclick="delWaka(${p.id})" style="padding:3px 8px;">✕</button>
+    </div>`).join('');
+}
+
+// ══ GROWTH ══
+function renderGrowth(){
+  const el=document.getElementById('gr-chart');if(!el)return;
+  if(!revHist.length){el.innerHTML='<div class="empty"><p>Log revenue in Finance to see chart.</p></div>';return;}
+  const sorted=[...revHist].sort((a,b)=>a.month.localeCompare(b.month));
+  const max=Math.max(...sorted.map(r=>r.amount),cfg.growthGoal);
+  const best=Math.max(...sorted.map(r=>r.amount));
+  const bel=document.getElementById('gr-best');if(bel)bel.textContent='₦'+best.toLocaleString();
+  el.innerHTML=sorted.map(r=>{
+    const pct=Math.round((r.amount/max)*100);
+    const cls=r.amount>=cfg.growthGoal?'green':r.amount>=cfg.breakEven?'':'gold';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:600;min-width:80px;">${r.month}</div>
+      <div style="flex:1;"><div class="pb"><div class="pf ${cls}" style="width:${pct}%"></div></div></div>
+      <div style="font-size:13px;font-weight:700;color:var(--blue);min-width:110px;text-align:right;">₦${r.amount.toLocaleString()}</div>
+    </div>`;
   }).join('');
 }
 
-function updateStats() {
-  document.getElementById('stat-total').textContent = scholarships.length;
-  document.getElementById('stat-full').textContent = scholarships.filter(function(s){return s.type==='Fully Funded';}).length;
-  document.getElementById('stat-partial').textContent = scholarships.filter(function(s){return s.type==='Partial';}).length;
-  document.getElementById('stat-tuition').textContent = scholarships.filter(function(s){return s.type==='Tuition Only';}).length;
+// ══ GOALS ══
+function addGoal(){
+  const t=document.getElementById('goal-t')?.value?.trim();if(!t)return toast('Enter goal');
+  goals.push({id:Date.now(),text:t,date:document.getElementById('goal-d')?.value,done:false});
+  S.set('v5_goals',goals);document.getElementById('goal-t').value='';renderGoals();toast('Goal added');
+  syncToSheet('Goals',goals);
+}
+function togGoal(id){goals=goals.map(g=>g.id===id?{...g,done:!g.done}:g);S.set('v5_goals',goals);renderGoals();}
+function renderGoals(){
+  const el=document.getElementById('goals-list');if(!el)return;
+  if(!goals.length){el.innerHTML='<div class="empty" style="padding:12px;"><p>No goals yet.</p></div>';return;}
+  el.innerHTML=goals.map(g=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
+      <input type="checkbox" ${g.done?'checked':''} onchange="togGoal(${g.id})" style="width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;">
+      <div style="flex:1;font-size:13px;${g.done?'text-decoration:line-through;color:var(--text-light)':'color:var(--text)'}">${g.text}</div>
+      ${g.date?`<span style="font-size:11px;color:var(--text-light);">${g.date}</span>`:''}
+      <span class="pill ${g.done?'p-green':'p-warn'}">${g.done?'Done':'In Progress'}</span>
+    </div>`).join('');
 }
 
-function deleteScholarship(id) {
-  if (!confirm('Remove this scholarship?')) return;
-  scholarships = scholarships.filter(function(s){return s.id !== id;});
-  renderCards(); updateStats();
+// ══ TODOS ══
+function addTodo(){
+  const inp=document.getElementById('todo-i');const t=inp?.value?.trim();if(!t)return;
+  const newTodo={id:Date.now(),text:t,done:false};
+  todos.push(newTodo);
+  S.set('v5_todos',todos);inp.value='';renderTodos();
+  syncToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done===true?'TRUE':'FALSE'})));
+}
+function togTodo(id){
+  todos=todos.map(t=>{
+    if(t.id==id||t.id==String(id)){
+      return {...t,done:!(t.done===true||String(t.done).toLowerCase()==='true')};
+    }
+    return t;
+  });
+  S.set('v5_todos',todos);
+  renderTodos();
+  const payload=todos.map(t=>({
+    id:String(t.id),
+    text:t.text,
+    done:t.done===true?'TRUE':'FALSE'
+  }));
+  syncToSheet('Todos',payload);
+}
+function delTodo(id){
+  todos=todos.filter(t=>t.id!==id);
+  S.set('v5_todos',todos);
+  renderTodos();
+  syncToSheet('Todos',todos.map(t=>({id:t.id,text:t.text,done:t.done?'true':'false'})));
+}
+function renderTodos(){
+  const el=document.getElementById('todo-list');if(!el)return;
+  if(!todos.length){el.innerHTML='<div class="empty"><div class="ei">✅</div><p>No tasks yet.</p></div>';return;}
+  el.innerHTML=todos.map(t=>{
+    const isDone=t.done===true||String(t.done).toLowerCase()==='true';
+    return `
+    <div class="ti">
+      <input type="checkbox" ${isDone?'checked':''} onchange="togTodo(${t.id})">
+      <span class="ti-t${isDone?' done':''}">${t.text}</span>
+      <button class="btn btn-danger btn-sm" onclick="delTodo(${t.id})" style="padding:3px 8px;">✕</button>
+    </div>`;}).join('');
 }
 
-function copyInfo(id) {
-  var s = scholarships.find(function(s){return s.id===id;});
-  if (!s) return;
-  var text = '🎓 ' + s.name + '\n🌍 Country: ' + s.country + '\n💰 Award: ' + s.amount + '\n📚 Level: ' + s.level + ' | Field: ' + s.field + '\n📅 Deadline: ' + (s.deadline||'TBC') + '\n📝 ' + s.notes;
-  navigator.clipboard.writeText(text).then(function(){ alert('Copied to clipboard!'); });
+// ══ TOAST ══
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
+
+function logout(){
+  S.set('v5_session',null);
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pwd').value='';
+}
+
+// ══ SCHOLARSHIPS ══
+let scholFilter='all';
+let scholarships=S.get('v5_schols',[]);
+
+function saveSchol(){
+  const name=document.getElementById('sn-name')?.value?.trim();
+  const country=document.getElementById('sn-country')?.value?.trim();
+  const type=document.getElementById('sn-type')?.value;
+  if(!name||!country||!type){toast('Please fill in Name, Country and Type');return;}
+  scholarships.push({
+    id:Date.now(),name,country,type,
+    amount:document.getElementById('sn-amount')?.value?.trim()||'Not specified',
+    deadline:document.getElementById('sn-deadline')?.value||'',
+    level:document.getElementById('sn-level')?.value||'Any',
+    field:document.getElementById('sn-field')?.value?.trim()||'Any',
+    notes:document.getElementById('sn-notes')?.value?.trim()||''
+  });
+  S.set('v5_schols',scholarships);
+  document.getElementById('schol-modal').style.display='none';
+  ['sn-name','sn-country','sn-amount','sn-deadline','sn-field','sn-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sn-type').value='';
+  document.getElementById('sn-level').value='';
+  renderSchols();toast('Scholarship added ✓');
+}
+
+function filterSchol(f,btn){
+  scholFilter=f;
+  document.querySelectorAll('.btn-ghost.btn-sm').forEach(b=>b.style.borderColor='');
+  if(btn)btn.style.borderColor='var(--blue)';
+  renderSchols();
+}
+
+function deadlineInfo(dateStr){
+  if(!dateStr)return{label:'No deadline',cls:'p-gray'};
+  const today=new Date();today.setHours(0,0,0,0);
+  const dl=new Date(dateStr);
+  const days=Math.round((dl-today)/86400000);
+  if(days<0)return{label:'Closed',cls:'p-red'};
+  if(days<=30)return{label:days+'d left',cls:'p-red'};
+  if(days<=90)return{label:days+'d left',cls:'p-warn'};
+  return{label:dl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),cls:'p-green'};
+}
+
+function renderSchols(){
+  const grid=document.getElementById('schol-grid');if(!grid)return;
+  const search=document.getElementById('schol-search')?.value?.toLowerCase()||'';
+  const list=scholarships.filter(s=>{
+    const mf=scholFilter==='all'||s.type===scholFilter;
+    const ms=!search||s.name.toLowerCase().includes(search)||s.country.toLowerCase().includes(search)||s.field.toLowerCase().includes(search);
+    return mf&&ms;
+  });
+  const tc={Salary:'p-green',Personal:'p-blue','Fully Funded':'p-green',Partial:'p-warn','Tuition Only':'p-blue'};
+  if(!list.length){
+    grid.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1;"><div style="font-size:40px;margin-bottom:10px;">🎓</div><p>${scholarships.length?'No scholarships match your filter.':'No scholarships added yet. Click "+ Add Scholarship" to get started.'}</p></div>`;
+    return;
+  }
+  grid.innerHTML=list.map(s=>{
+    const dl=deadlineInfo(s.deadline);
+    return `<div style="background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:18px;transition:all 0.2s;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);flex:1;margin-right:8px;">${s.name}</div>
+        <span class="pill ${tc[s.type]||'p-gray'}">${s.type}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px;">🌍 <strong>${s.country}</strong></div>
+      <div style="font-size:12px;color:var(--text-mid);margin-bottom:4px;">💰 ${s.amount}</div>
+      <div style="font-size:12px;color:var(--text-mid);margin-bottom:8px;">🎓 ${s.level} · ${s.field}</div>
+      ${s.notes?`<div style="font-size:11px;color:var(--text-light);margin-bottom:8px;padding:6px 8px;background:var(--white);border-radius:6px;">${s.notes.substring(0,100)}${s.notes.length>100?'…':''}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        <span class="pill ${dl.cls}">📅 ${dl.label}</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="copySchol(${s.id})" style="padding:4px 10px;">📋 Copy</button>
+          <button class="btn btn-danger btn-sm" onclick="delSchol(${s.id})" style="padding:4px 10px;">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  // Update stats
+  const tot=document.getElementById('ss-total');if(tot)tot.textContent=scholarships.length;
+  const full=document.getElementById('ss-full');if(full)full.textContent=scholarships.filter(s=>s.type==='Fully Funded').length;
+  const part=document.getElementById('ss-partial');if(part)part.textContent=scholarships.filter(s=>s.type==='Partial').length;
+  const tuit=document.getElementById('ss-tuition');if(tuit)tuit.textContent=scholarships.filter(s=>s.type==='Tuition Only').length;
+}
+
+function delSchol(id){
+  if(!confirm('Remove this scholarship?'))return;
+  scholarships=scholarships.filter(s=>s.id!==id);
+  S.set('v5_schols',scholarships);renderSchols();toast('Removed');
+}
+
+function copySchol(id){
+  const s=scholarships.find(s=>s.id===id);if(!s)return;
+  const text=`🎓 ${s.name}\n🌍 Country: ${s.country}\n💰 Award: ${s.amount}\n📚 Level: ${s.level} | Field: ${s.field}\n📅 Deadline: ${s.deadline||'TBC'}\n📝 ${s.notes}`;
+  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard ✓'));
+}
+
+selRole('ceo',document.querySelector('.rtab'));
+// Check if already logged in
+checkSession();
 </script>
 </body>
 </html>
