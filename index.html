@@ -734,16 +734,9 @@ async function loadFromSheet(sheetName){
 }
 
 async function syncAll(){
-  await syncToSheet('Clients',clients);
-  await syncToSheet('Posts',posts);
-  await syncToSheet('Waka',waka);
-  await syncToSheet('Todos',todos);
-  await syncToSheet('Reports',reports);
-  await syncToSheet('Expenses',expenses);
-  await syncToSheet('Revenue',revHist);
-  await syncToSheet('Goals',goals);
-  await syncToSheet('SignIns',signIns);
-  toast('✅ Synced to Google Sheets');
+  toast('⏳ Loading from Google Sheets...');
+  await loadAll();
+  toast('✅ Data loaded from Google Sheets');
 }
 
 async function loadAll(){
