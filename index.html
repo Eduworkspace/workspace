@@ -664,19 +664,21 @@ const GS_URL='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzyga
 
 async function syncToSheet(sheetName, rows){
   try{
-    await fetch(GS_URL,{
+    fetch(GS_URL,{
       method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({sheet:sheetName,rows}),
     });
-  }catch(e){console.log('Sync error:',e);}
+  }catch(e){}
 }
 
 async function loadFromSheet(sheetName){
   try{
-    const res=await fetch(GS_URL+'?sheet='+sheetName);
+    const res=await fetch(GS_URL+'?sheet='+encodeURIComponent(sheetName),{mode:'cors'});
     const data=await res.json();
     return data.rows||[];
-  }catch(e){console.log('Load error:',e);return [];}
+  }catch(e){return [];}
 }
 
 async function syncAll(){
@@ -742,6 +744,11 @@ async function loadAll(){
       S.set('v5_cfg',cfg);
     }
     renderAll();
+    // Re-show current active page after data loads
+    const activePage=document.querySelector('.page.active');
+    if(!activePage){
+      showPage('p-'+(role==='ceo'?'dashboard':'signin'));
+    }
   }catch(e){console.log('Load all error:',e);}
 }
 
@@ -775,26 +782,13 @@ function checkSession(){
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
       initApp();
-      // Make sure dashboard shows
-      setTimeout(()=>{
-        showPage('p-'+(role==='ceo'?'dashboard':'signin'));
-        loadAll();
-      },100);
+      loadAll();
       return true;
     }else{
       S.set('v5_session',null);
     }
   }
   return false;
-}
-
-function updSbSI(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
-  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
-  if(s){if(v)v.textContent=s.onTime==='Yes'?'On time':'Note: Late';if(t)t.textContent=s.time;}
-  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
 }
 
 // ══ INIT ══
@@ -841,7 +835,7 @@ function initApp(){
     el.onclick=()=>showPage('p-'+item.id);
     navEl.appendChild(el);
   });
-  renderAll();buildCal();renderSIPage();showHints();
+  renderAll();buildCal();renderSIPage();
   showPage('p-'+(isCEO?'dashboard':first||'signin'));
   // Auto refresh sign-in board every 2 minutes for CEO
   if(isCEO){
@@ -882,7 +876,7 @@ function savePwds(){
   if(!c||!ce)return toast('Fill in both passwords');
   if(c.length<4||ce.length<4)return toast('Passwords must be at least 4 characters');
   cfg.pwdCEO=c;cfg.pwdCE=ce;S.set('v5_cfg',cfg);
-  showHints();renderConfig();toast('Passwords updated ✓');
+  renderConfig();toast('Passwords updated ✓');
 }
 function saveTargets(){
   const l=parseInt(document.getElementById('set-lead')?.value);
@@ -1043,6 +1037,17 @@ function renderSIPage(){
     hist.innerHTML=mine.map(s=>`<div class="row"><div class="rn">${s.date}</div><span style="font-size:12px;color:var(--text-light);">${s.time}</span><span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span></div>`).join('');
   }
 }
+function renderAttLog(){
+  const el=document.getElementById('att-log');if(!el)return;
+  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
+  el.innerHTML=[...signIns].reverse().slice(0,20).map(s=>`
+    <div class="row">
+      <div class="rn">${s.role==='CEO'?'Aminat (CEO)':'Client Executive'}</div>
+      <span style="font-size:12px;color:var(--text-light);">${s.date||''} ${s.time?'· '+s.time:''}</span>
+      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+    </div>`).join('');
+}
+
 function renderSIBoard(){
   const el=document.getElementById('si-board');if(!el)return;
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
