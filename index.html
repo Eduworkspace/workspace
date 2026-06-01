@@ -694,7 +694,7 @@ async function syncAll(){
 
 async function loadAll(){
   try{
-    const [c,p,w,t,r,e,rv,g,s]=await Promise.all([
+    const [c,p,w,t,r,e,rv,g,s,config]=await Promise.all([
       loadFromSheet('Clients'),
       loadFromSheet('Posts'),
       loadFromSheet('Waka'),
@@ -704,6 +704,7 @@ async function loadAll(){
       loadFromSheet('Revenue'),
       loadFromSheet('Goals'),
       loadFromSheet('SignIns'),
+      loadFromSheet('Config'),
     ]);
     if(c.length){clients=c;S.set('v5_clients',clients);}
     if(p.length){posts=p;S.set('v5_posts',posts);}
@@ -730,6 +731,15 @@ async function loadAll(){
         onTime:si.onTime
       })).filter(si=>si.time&&!si.time.includes('1899'));
       if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
+    }
+    // Load config/passwords from sheets
+    if(config&&config.length&&config[0]&&config[0].pwdCEO){
+      cfg.pwdCEO=config[0].pwdCEO;
+      cfg.pwdCE=config[0].pwdCE;
+      if(config[0].breakEven)cfg.breakEven=parseInt(config[0].breakEven)||cfg.breakEven;
+      if(config[0].leadTarget)cfg.leadTarget=parseInt(config[0].leadTarget)||cfg.leadTarget;
+      if(config[0].growthGoal)cfg.growthGoal=parseInt(config[0].growthGoal)||cfg.growthGoal;
+      S.set('v5_cfg',cfg);
     }
     renderAll();
   }catch(e){console.log('Load all error:',e);}
@@ -979,36 +989,69 @@ function renderCETasks(){
 async function doSignIn(){
   const now=new Date();
   const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  // Check if already signed in today
   const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
   if(existing){toast('Already signed in today');return;}
   const entry={
     id:String(Date.now()),
     role:roleLabel,
     date:today,
-    signin:today+' — '+roleLabel,
+    time:timeStr,
+    record:today+' | '+timeStr+' | '+roleLabel+' | '+(onTime?'On Time':'Late'),
     onTime:onTime?'Yes':'No'
   };
   signIns.push(entry);
   S.set('v5_signins',signIns);
-  // Write to Google Sheets
   await syncToSheet('SignIns',signIns.map(s=>({
     id:String(s.id),
     role:String(s.role),
     date:String(s.date),
-    signin:String(s.signin||s.date),
+    time:String(s.time||''),
+    record:String(s.record||s.date),
     onTime:String(s.onTime)
   })));
   renderSIPage();renderSIBoard();updSbSI();renderAttLog();
-  toast(onTime?'Signed in on time Done':'Signed in — noted as late ⚠️');
+  toast(onTime?'Signed in on time':'Signed in — noted as late');
 }
 
 async function autoSignIn(){
   const now=new Date();
   const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
+  try{
+    const latest=await loadFromSheet('SignIns');
+    if(latest&&latest.length){
+      const clean=latest.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T')&&!String(s.record||'').includes('1899'));
+      if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
+    }
+  }catch(e){}
+  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
+  if(!existing){
+    const entry={
+      id:String(Date.now()),
+      role:roleLabel,
+      date:today,
+      time:timeStr,
+      record:today+' | '+timeStr+' | '+roleLabel+' | '+(onTime?'On Time':'Late'),
+      onTime:onTime?'Yes':'No'
+    };
+    signIns.push(entry);
+    S.set('v5_signins',signIns);
+    await syncToSheet('SignIns',signIns.map(s=>({
+      id:String(s.id),
+      role:String(s.role),
+      date:String(s.date),
+      time:String(s.time||''),
+      record:String(s.record||s.date),
+      onTime:String(s.onTime)
+    })));
+  }
+  updSbSI();renderSIBoard();renderAttLog();
+}
   const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
   // First load latest from sheets
   try{
@@ -1074,28 +1117,24 @@ function renderSIBoard(){
       <div class="si-av">${t.av}</div>
       <div class="si-nm">${t.name}</div>
       <div class="si-rl">${t.title}</div>
-      ${s?`<span class="pill p-green">Signed In</span>`:
+      ${s?`<span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+      <div style="font-size:12px;font-weight:600;margin-top:5px;color:var(--text-mid);">${s.time||''}</div>`:
       `<span class="pill p-gray">Not Signed In</span>`}
     </div>`;
   }).join('');
-}
-function renderAttLog(){
-  const el=document.getElementById('att-log');if(!el)return;
-  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
-  el.innerHTML=[...signIns].reverse().slice(0,20).map(s=>`
-    <div class="row">
-      <div class="rn">${s.role==='CEO'?'Aminat (CEO)':'Client Executive'}</div>
-      <span style="font-size:12px;color:var(--text-light);">${s.date||''}</span>
-      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
-    </div>`).join('');
 }
 function updSbSI(){
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
   const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
-  if(s){if(v)v.textContent='Signed in today';if(t)t.textContent='';}
-  else{if(v)v.textContent='Not signed in';if(t)t.textContent='';}
+  if(s){
+    if(v)v.textContent=s.onTime==='Yes'?'On Time':'Late';
+    if(t)t.textContent=s.time||'';
+  }else{
+    if(v)v.textContent='Not signed in';
+    if(t)t.textContent='';
+  }
 }
 
 // ══ CALENDAR ══
@@ -1601,11 +1640,17 @@ function saveSettings(){
   if(newLeadTarget&&newLeadTarget>0)cfg.leadTarget=newLeadTarget;
   if(newGrowthGoal&&newGrowthGoal>0)cfg.growthGoal=newGrowthGoal;
   S.set('v5_cfg',cfg);
-  // Clear password fields after saving
   ['s-pwd-ceo','s-pwd-ce'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  // Sync to Google Sheets so all devices get updated passwords
+  syncToSheet('Config',[{
+    pwdCEO:cfg.pwdCEO,
+    pwdCE:cfg.pwdCE,
+    breakEven:String(cfg.breakEven),
+    leadTarget:String(cfg.leadTarget),
+    growthGoal:String(cfg.growthGoal)
+  }]);
   renderConfig();renderDash();
-  toast('Settings saved Done');
-  // Update session with new role info
+  toast('Settings saved — all devices updated');
   S.set('v5_session',{role,time:Date.now()});
 }
 
