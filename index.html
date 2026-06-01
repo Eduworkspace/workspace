@@ -1165,6 +1165,15 @@ function renderExpenses(){
     </div>`).join('');
 }
 
+function editFixed(id){
+  const f=fixed.find(x=>x.id==id);if(!f)return;
+  const name=prompt('Edit name:',f.name);if(!name)return;
+  const amt=parseInt(prompt('Edit amount:',f.amount));if(!amt)return;
+  fixed=fixed.map(x=>x.id==id?{...x,name,amount:amt}:x);
+  S.set('edu_fixed',fixed);
+  renderFixed();toast('Updated');
+}
+
 function renderFixed(){
   const el=document.getElementById('fixed-list');if(!el)return;
   const total=fixed.reduce((a,b)=>a+b.amount,0);
@@ -1172,6 +1181,7 @@ function renderFixed(){
     <div class="row">
       <div class="rn">${f.name}</div>
       <div class="ra out">₦${f.amount.toLocaleString()}</div>
+      <button class="btn btn-ghost btn-sm" onclick="editFixed(${f.id})">Edit</button>
     </div>`).join('')+`<div class="row"><div class="rn" style="font-weight:700;">Total Fixed</div><div class="ra out" style="font-weight:700;">₦${total.toLocaleString()}</div></div>`;
 }
 
