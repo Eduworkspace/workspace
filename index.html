@@ -775,7 +775,11 @@ function checkSession(){
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='block';
       initApp();
-      loadAll();
+      // Make sure dashboard shows
+      setTimeout(()=>{
+        showPage('p-'+(role==='ceo'?'dashboard':'signin'));
+        loadAll();
+      },100);
       return true;
     }else{
       S.set('v5_session',null);
