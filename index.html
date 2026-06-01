@@ -545,7 +545,12 @@ const GS='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzygaX37h
 
 function pushToSheet(sheet,rows){
   try{
-    fetch(GS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({sheet,rows})});
+    const body=JSON.stringify({sheet,rows});
+    fetch(GS,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body
+    }).catch(()=>{});
   }catch(e){}
 }
 
@@ -656,6 +661,7 @@ function startApp(){
   renderAll();
   autoSignIn();
   loadFromSheets();
+  startAutoRefresh();
 }
 
 function buildNav(){
