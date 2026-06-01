@@ -215,7 +215,7 @@ body{font-family:'Rubik',sans-serif;background:var(--cream);color:var(--text);mi
           <p>Your Eduvoyage command centre overview.</p>
         </div>
         <div class="card">
-          <div class="card-hd">Team Sign-In — Today</div>
+          <div class="card-hd">Team Sign-In — Today <button class="btn btn-ghost btn-sm" onclick="refreshSignIns()" style="margin-left:auto;">Refresh</button></div>
           <div class="si-board" id="si-board"></div>
         </div>
         <div class="g4" style="margin-bottom:16px;">
@@ -1432,6 +1432,28 @@ async function loadFromSheets(){
     renderAll();
     toast('Data loaded from Google Sheets');
   }catch(e){console.log('Load error:',e);}
+}
+
+async function refreshSignIns(){
+  try{
+    toast('Refreshing...');
+    const siData=await pullFromSheet('SignIns');
+    if(siData&&siData.length){
+      const cleanSI=siData.filter(s=>s.role&&s.date&&
+        !String(s.date).includes('1899')&&
+        !String(s.date).includes('T'));
+      if(cleanSI.length){
+        const sheetsIds=new Set(cleanSI.map(s=>String(s.id)));
+        const localOnly=signIns.filter(s=>!sheetsIds.has(String(s.id)));
+        signIns=[...cleanSI,...localOnly];
+        S.set('edu_signins',signIns);
+        renderSIBoard();
+        renderAttLog();
+        updSbSI();
+        toast('Sign-ins updated');
+      }
+    }
+  }catch(e){toast('Could not refresh');}
 }
 
 function startAutoRefresh(){
