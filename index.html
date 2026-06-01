@@ -730,9 +730,10 @@ function autoSignIn(){
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   const already=signIns.find(s=>s.role===roleLabel&&s.date===today);
   if(!already){
-    const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
+    const entry={id:String(Date.now()),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
     signIns.push(entry);
     S.set('edu_signins',signIns);
+    // Push ALL sign-ins to sheet including this new one
     pushToSheet('SignIns',signIns);
   }
   renderSIBoard();
@@ -745,7 +746,7 @@ function doSignIn(){
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   const already=signIns.find(s=>s.role===roleLabel&&s.date===today);
   if(already){toast('Already signed in today');return;}
-  const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
+  const entry={id:String(Date.now()),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
   signIns.push(entry);
   S.set('edu_signins',signIns);
   pushToSheet('SignIns',signIns);
@@ -1398,12 +1399,14 @@ async function loadFromSheets(){
       S.set('edu_cfg',cfg);
     }
     const siData=await pullFromSheet('SignIns');
-    if(siData.length){
-      const cleanSI=siData.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+    if(siData&&siData.length){
+      const cleanSI=siData.filter(s=>s.role&&s.date&&
+        !String(s.date).includes('1899')&&
+        !String(s.date).includes('T'));
       if(cleanSI.length){
-        const localToday=signIns.filter(s=>s.date===today);
-        const sheetsOther=cleanSI.filter(s=>s.date!==today);
-        signIns=[...sheetsOther,...localToday];
+        const sheetsIds=new Set(cleanSI.map(s=>String(s.id)));
+        const localOnly=signIns.filter(s=>!sheetsIds.has(String(s.id)));
+        signIns=[...cleanSI,...localOnly];
         S.set('edu_signins',signIns);
       }
     }
@@ -1437,18 +1440,23 @@ function startAutoRefresh(){
     try{
       const today=todayStr();
       const siData=await pullFromSheet('SignIns');
-      if(siData.length){
-        const cleanSI=siData.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+      if(siData&&siData.length){
+        const cleanSI=siData.filter(s=>s.role&&s.date&&
+          !String(s.date).includes('1899')&&
+          !String(s.date).includes('T'));
         if(cleanSI.length){
-          const localToday=signIns.filter(s=>s.date===today);
-          const sheetsOther=cleanSI.filter(s=>s.date!==today);
-          signIns=[...sheetsOther,...localToday];
+          // Merge: keep all from sheets, add any local ones not in sheets
+          const sheetsIds=new Set(cleanSI.map(s=>String(s.id)));
+          const localOnly=signIns.filter(s=>!sheetsIds.has(String(s.id)));
+          signIns=[...cleanSI,...localOnly];
           S.set('edu_signins',signIns);
-          renderSIBoard();renderAttLog();updSbSI();
+          renderSIBoard();
+          renderAttLog();
+          updSbSI();
         }
       }
     }catch(e){}
-  },60000);
+  },30000);// Every 30 seconds
 }
 
 async function doSyncAll(){
