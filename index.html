@@ -725,14 +725,21 @@ async function loadAll(){
     if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
     if(g.length){goals=g;S.set('v5_goals',goals);}
     if(s.length){
+      const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
       const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
         id:si.id,
         role:si.role,
         date:si.date,
         time:si.signin?si.signin.split(' at ')[1]||String(si.time||''):String(si.time||'').replace(/30\/12\/1899,?\s?/,''),
         onTime:si.onTime
-      })).filter(si=>si.time&&!si.time.includes('1899'));
-      if(cleanSignIns.length){signIns=cleanSignIns;S.set('v5_signins',signIns);}
+      })).filter(si=>!String(si.time||'').includes('1899'));
+      if(cleanSignIns.length){
+        // Keep local today's sign-ins, merge with sheets historical data
+        const localToday=signIns.filter(si=>si.date===today);
+        const sheetsOther=cleanSignIns.filter(si=>si.date!==today);
+        signIns=[...sheetsOther,...localToday];
+        S.set('v5_signins',signIns);
+      }
     }
     // Load config/passwords from sheets
     if(config&&config.length&&config[0]&&config[0].pwdCEO){
