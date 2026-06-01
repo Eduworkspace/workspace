@@ -4,197 +4,154 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eduvoyage — Command Centre</title>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --blue:#c0440a;--blue-mid:#d4541a;--blue-light:#e06530;
-  --blue-pale:#fdf0ea;--cream:#faf8f4;--cream-dark:#f0ece4;
-  --gold:#c9a84c;--gold-light:#e8c96a;--white:#ffffff;
-  --text:#1a2640;--text-mid:#4a5568;--text-light:#8896ab;--border:#dde4f0;
-  --success:#1a7f5a;--success-bg:#e8f7f1;
-  --danger:#c0392b;--danger-bg:#fdf0ef;
-  --warning:#b7770d;--warning-bg:#fef8ec;
-  --shadow:0 2px 16px rgba(192,68,10,0.08);
-  --shadow-lg:0 8px 40px rgba(192,68,10,0.18);
-  --r:12px;--sw:228px;
-}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Rubik',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden;font-weight:500;}
-
-#login-screen{min-height:100vh;display:flex;background:linear-gradient(135deg,#7a2a05 0%,var(--blue) 50%,var(--blue-mid) 100%);align-items:center;justify-content:center;position:relative;overflow:hidden;}
-#login-screen::before{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(201,168,76,0.10) 0%,transparent 65%);top:-200px;right:-150px;border-radius:50%;}
-#login-screen::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 70%);bottom:-100px;left:-80px;border-radius:50%;}
-.lbox{background:var(--white);border-radius:24px;padding:52px 44px;width:420px;max-width:94vw;box-shadow:var(--shadow-lg);position:relative;z-index:2;animation:fadeUp 0.5s ease;}
-.llogo{text-align:center;margin-bottom:6px;}
-.llogo .wm{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--blue);}
-.llogo .wm span{color:var(--gold);}
-.llogo .tl{font-size:10px;color:var(--text-light);letter-spacing:2.5px;text-transform:uppercase;margin-top:4px;}
-.ldiv{height:1px;background:var(--border);margin:22px 0;}
-.ltitle{font-size:16px;font-weight:600;margin-bottom:3px;}
-.lsub{font-size:12px;color:var(--text-light);margin-bottom:20px;}
-.rtabs{display:flex;gap:7px;margin-bottom:18px;}
-.rtab{flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:9px;background:transparent;font-family:'Rubik',sans-serif;font-size:12px;font-weight:500;color:var(--text-light);cursor:pointer;transition:all 0.2s;text-align:center;}
-.rtab.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);font-weight:600;}
-.linp{margin-bottom:14px;}
-.linp label{display:block;font-size:10px;font-weight:700;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
-.linp input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all 0.2s;background:var(--cream);}
-.linp input:focus{border-color:var(--blue);background:var(--white);}
-.lbtn{width:100%;padding:13px;background:var(--blue);color:var(--white);border:none;border-radius:9px;font-family:'Rubik',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.lbtn:hover{background:var(--blue-light);}
-.lerr{color:var(--danger);font-size:12px;margin-top:8px;text-align:center;display:none;}
-.lhint{font-size:10px;color:var(--text-light);text-align:center;margin-top:16px;line-height:1.8;}
-
-#app{display:none;min-height:100vh;}
-.sidebar{position:fixed;left:0;top:0;width:var(--sw);height:100vh;background:var(--blue);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
-.sb-top{padding:26px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07);}
-.sb-wm{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:var(--white);}
-.sb-wm span{color:var(--gold);}
-.sb-badge{display:inline-block;margin-top:6px;padding:2px 10px;background:rgba(201,168,76,0.15);border-radius:20px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;}
-.sb-si{margin:12px 16px 0;padding:10px 13px;background:rgba(255,255,255,0.05);border-radius:9px;border:1px solid rgba(255,255,255,0.09);}
-.sb-si-l{font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
-.sb-si-v{font-size:11px;color:rgba(255,255,255,0.7);}
-.sb-si-t{font-size:10px;color:var(--gold);margin-top:2px;}
-.sb-nav{padding:10px 10px;flex:1;}
-.sb-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,0.22);letter-spacing:2px;text-transform:uppercase;padding:0 9px;margin:14px 0 4px;}
-.nv{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all 0.15s;margin-bottom:1px;}
-.nv:hover{background:rgba(255,255,255,0.06);}
-.nv.active{background:rgba(61,111,196,0.35);border-left:2px solid var(--gold);}
-.nv .ic{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
-.nv .lb{font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);}
-.nv.active .lb{color:var(--white);font-weight:600;}
-.sb-foot{padding:14px 10px;border-top:1px solid rgba(255,255,255,0.07);}
-.sb-out{width:100%;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.35);font-family:'Rubik',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;}
-.sb-out:hover{background:rgba(192,57,43,0.15);color:#e74c3c;}
-
-.main{margin-left:var(--sw);padding:30px 34px;min-height:100vh;}
-.page{display:none;animation:fadeIn 0.3s ease;}
-.page.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-
-.ph{margin-bottom:26px;}
-.ph-tag{display:inline-block;padding:3px 12px;background:var(--blue-pale);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);margin-bottom:7px;}
-.ph h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--blue);letter-spacing:-0.5px;line-height:1.1;}
-.ph p{font-size:13px;color:var(--text-light);margin-top:4px;}
-
-.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);margin-bottom:18px;border:1px solid var(--border);}
-.card-hd{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:7px;}
-.card-hd .dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0;}
-
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-
-.sc{background:var(--white);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
-.sc-l{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
-.sc-v{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--text);}
-.sc-v.blue{color:var(--blue);}.sc-v.gold{color:var(--gold);}.sc-v.green{color:var(--success);}
-.sc-s{font-size:11px;color:var(--text-light);margin-top:3px;}
-
-.pw{margin:8px 0;}
-.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-bottom:5px;}
-.pb{height:6px;background:var(--cream-dark);border-radius:20px;overflow:hidden;}
-.pf{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-light));border-radius:20px;transition:width 0.6s ease;}
-.pf.gold{background:linear-gradient(90deg,var(--gold),var(--gold-light));}
-.pf.green{background:linear-gradient(90deg,var(--success),#2ecc71);}
-
-.fr{margin-bottom:14px;}
-.fr label{display:block;font-size:10px;font-weight:700;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px;}
-.fr input,.fr textarea,.fr select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;color:var(--text);outline:none;transition:all 0.2s;background:var(--cream);}
-.fr input:focus,.fr textarea:focus,.fr select:focus{border-color:var(--blue);background:var(--white);}
-.fr textarea{resize:vertical;min-height:72px;}
-
-.btn{padding:10px 20px;border:none;border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.btn:hover{transform:translateY(-1px);}
-.btn-blue{background:var(--blue);color:var(--white);}.btn-blue:hover{background:var(--blue-light);}
-.btn-gold{background:var(--gold);color:var(--white);}.btn-gold:hover{background:var(--blue);}
-.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-mid);}.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
-.btn-danger{background:var(--danger-bg);color:var(--danger);border:none;}.btn-danger:hover{background:var(--danger);color:white;}
-.btn-success{background:var(--success-bg);color:var(--success);border:none;}
-.btn-sm{padding:6px 12px;font-size:11px;}
-.btn-warn{background:var(--warning-bg);color:var(--warning);border:none;}
-
-.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
-.p-blue{background:var(--blue-pale);color:var(--blue);}
-.p-gold{background:rgba(201,168,76,0.12);color:var(--gold);}
-.p-green{background:var(--success-bg);color:var(--success);}
-.p-red{background:var(--danger-bg);color:var(--danger);}
-.p-gray{background:var(--cream-dark);color:var(--text-light);}
-.p-warn{background:var(--warning-bg);color:var(--warning);}
-
-.alert{padding:11px 14px;border-radius:9px;font-size:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
-.a-info{background:var(--blue-pale);color:var(--blue-mid);border-left:3px solid var(--blue);}
-.a-warn{background:var(--warning-bg);color:var(--warning);border-left:3px solid var(--gold);}
-.a-success{background:var(--success-bg);color:var(--success);border-left:3px solid var(--success);}
-
-.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
-.row:last-child{border-bottom:none;}
-.rn{flex:1;font-size:13px;color:var(--text);}
-.ra{font-size:13px;font-weight:600;}
-.ra.out{color:var(--danger);}.ra.in{color:var(--success);}
-
-.ci{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
-.ci:last-child{border-bottom:none;}
-.ci input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;margin-top:2px;flex-shrink:0;}
-.ci label{font-size:13px;color:var(--text);cursor:pointer;line-height:1.4;flex:1;}
-.ci.done label{text-decoration:line-through;color:var(--text-light);}
-.tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;text-transform:uppercase;flex-shrink:0;}
-.t-d{background:var(--blue-pale);color:var(--blue);}
-.t-w{background:var(--warning-bg);color:var(--warning);}
-.t-s{background:rgba(201,168,76,0.12);color:var(--gold);}
-
-.ti{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
-.ti:last-child{border-bottom:none;}
-.ti input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;}
-.ti-t{flex:1;font-size:13px;color:var(--text);}
-.ti-t.done{text-decoration:line-through;color:var(--text-light);}
-
-.si-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
-.si-card{background:var(--white);border-radius:var(--r);padding:20px;border:1.5px solid var(--border);box-shadow:var(--shadow);text-align:center;transition:all 0.2s;}
-.si-card.signed{border-color:var(--success);background:var(--success-bg);}
-.si-av{width:48px;height:48px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin:0 auto 10px;letter-spacing:1px;}
-.si-nm{font-size:14px;font-weight:600;margin-bottom:2px;}
-.si-rl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
-.si-tm{font-size:13px;font-weight:700;margin-top:5px;}
-.si-tm.ok{color:var(--success);}.si-tm.lt{color:var(--warning);}
-
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px;}
-.cal-hd{font-size:9px;font-weight:700;color:var(--text-light);text-align:center;padding:4px 0;letter-spacing:1px;text-transform:uppercase;}
-.cal-d{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:8px 6px;cursor:pointer;transition:all 0.2s;min-height:68px;}
-.cal-d:hover{border-color:var(--blue-light);}
-.cal-d.has{border-color:var(--gold);background:rgba(201,168,76,0.04);}
-.cal-d.today{border-color:var(--blue);background:var(--blue-pale);}
-.cal-dn{font-size:8px;color:var(--text-light);text-transform:uppercase;margin-bottom:2px;}
-.cal-dt{font-size:16px;font-weight:700;color:var(--blue);font-family:'Cormorant Garamond',serif;}
-.cal-dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px;}
-.cdot{width:6px;height:6px;border-radius:50%;}
-.c-ig{background:#e1306c;}.c-tt{background:#ff2d55;}.c-fb{background:#1877f2;}
-
-.div{height:1px;background:var(--border);margin:16px 0;}
-.empty{text-align:center;padding:28px;color:var(--text-light);}
-.empty .ei{font-size:32px;margin-bottom:8px;}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--blue);color:var(--white);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;display:none;animation:fadeUp 0.3s ease;}
-.toast.show{display:block;}
-
-/* SETTINGS TOGGLE */
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
-.setting-row:last-child{border-bottom:none;}
-.setting-info .setting-lbl{font-size:13px;font-weight:600;color:var(--text);}
-.setting-info .setting-sub{font-size:11px;color:var(--text-light);margin-top:2px;}
-.setting-val{font-size:13px;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:6px;}
-.setting-val:hover{color:var(--gold);}
-
-@media(max-width:800px){
-  :root{--sw:0px;}
-  .sidebar{transform:translateX(-228px);width:228px;transition:transform 0.3s;}
-  .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;padding:16px;}
-  .g2,.g3,.g4{grid-template-columns:1fr 1fr;}
-  .si-grid{grid-template-columns:1fr 1fr;}
-  .cal{grid-template-columns:repeat(4,1fr);}
-  .mob{display:flex!important;}
+:root{
+  --navy:#1a3a5c;--navy-mid:#2a5298;--navy-light:#3d6fc4;--navy-pale:#eef4fb;
+  --cream:#f7f9fc;--white:#ffffff;--gold:#c9a84c;
+  --text:#1a2640;--text-mid:#4a5568;--text-light:#8896ab;--border:#d0daea;
+  --green:#1a7f5a;--green-bg:#e8f7f1;--red:#c0392b;--red-bg:#fdf0ef;
+  --amber:#b7770d;--amber-bg:#fef8ec;
+  --shadow:0 2px 16px rgba(26,58,92,0.10);--r:12px;--sw:220px;
 }
-.mob{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--blue);color:white;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:17px;}
+body{font-family:'Rubik',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden;font-weight:500;}
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;background:linear-gradient(135deg,#0d2240 0%,var(--navy) 50%,var(--navy-mid) 100%);align-items:center;justify-content:center;}
+.lbox{background:white;border-radius:20px;padding:40px;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.llogo{text-align:center;margin-bottom:24px;}
+.llogo h1{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--navy);}
+.llogo h1 span{color:var(--gold);}
+.llogo p{font-size:11px;letter-spacing:2px;color:var(--text-light);text-transform:uppercase;margin-top:4px;}
+.lroles{display:flex;gap:8px;margin-bottom:20px;}
+.rtab{flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:'Rubik',sans-serif;font-size:13px;font-weight:600;color:var(--text-mid);transition:all 0.2s;}
+.rtab.active{border-color:var(--navy);background:var(--navy-pale);color:var(--navy);}
+.lfield label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);display:block;margin-bottom:6px;}
+.lfield input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+.lfield input:focus{border-color:var(--navy);}
+.lbtn{width:100%;padding:14px;background:var(--navy);color:white;border:none;border-radius:8px;font-family:'Rubik',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;transition:background 0.2s;}
+.lbtn:hover{background:var(--navy-mid);}
+.lerr{color:var(--red);font-size:12px;margin-top:8px;display:none;text-align:center;}
+/* APP */
+#app{display:none;min-height:100vh;display:none;}
+.layout{display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sb-logo{padding:24px 20px 16px;}
+.sb-logo h2{font-family:'Cormorant Garamond',serif;font-size:22px;color:white;}
+.sb-logo h2 span{color:var(--gold);}
+.sb-role{background:rgba(255,255,255,0.1);border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:4px;display:inline-block;}
+.sb-si{background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 12px;margin:12px 16px;font-size:11px;}
+.sb-si-label{color:rgba(255,255,255,0.5);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.sb-si-val{color:white;font-weight:600;}
+.sb-nav{flex:1;padding:8px 0;}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);padding:16px 20px 6px;}
+.nv{display:flex;align-items:center;padding:10px 20px;cursor:pointer;border-radius:0;transition:background 0.15s;color:rgba(255,255,255,0.75);font-size:13px;font-weight:500;}
+.nv:hover{background:rgba(255,255,255,0.08);color:white;}
+.nv.active{background:rgba(255,255,255,0.15);color:white;font-weight:700;border-left:3px solid var(--gold);}
+.sb-foot{padding:16px;}
+.sb-out{width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.7);font-family:'Rubik',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:6px;transition:all 0.2s;}
+.sb-out:hover{background:rgba(255,255,255,0.2);color:white;}
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;min-height:100vh;}
+.mob-header{display:none;background:var(--navy);padding:12px 16px;align-items:center;justify-content:space-between;}
+.mob-btn{background:none;border:none;color:white;font-size:20px;cursor:pointer;}
+/* PAGES */
+.page{display:none;padding:32px;}
+.page.active{display:block;}
+.ph{margin-bottom:28px;}
+.ph .date{font-size:12px;font-weight:700;color:var(--navy);background:var(--navy-pale);padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+.ph h1{font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--navy);}
+.ph p{color:var(--text-mid);font-size:14px;margin-top:4px;}
+/* CARDS */
+.card{background:white;border-radius:var(--r);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+.card-hd{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:6px;}
+.card-hd::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+/* STATS */
+.stat{background:white;border-radius:var(--r);padding:20px;box-shadow:var(--shadow);}
+.stat-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;}
+.stat-val{font-size:28px;font-weight:800;color:var(--navy);}
+.stat-sub{font-size:12px;color:var(--text-light);margin-top:4px;}
+/* SIGN IN BOARD */
+.si-board{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0;}
+.si-card{background:white;border-radius:var(--r);padding:24px;text-align:center;box-shadow:var(--shadow);border:2px solid var(--border);transition:border-color 0.3s;}
+.si-card.signed{border-color:var(--green);}
+.si-av{width:52px;height:52px;border-radius:50%;background:var(--navy);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin:0 auto 12px;}
+.si-nm{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.si-rl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);margin-bottom:10px;}
+/* PILLS */
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.p-green{background:var(--green-bg);color:var(--green);}
+.p-warn{background:var(--amber-bg);color:var(--amber);}
+.p-red{background:var(--red-bg);color:var(--red);}
+.p-blue{background:var(--navy-pale);color:var(--navy);}
+.p-gray{background:#f0f2f5;color:var(--text-light);}
+/* PROGRESS */
+.pw{margin-bottom:12px;}
+.pl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.pb{height:6px;background:#e8edf5;border-radius:3px;overflow:hidden;}
+.pf{height:100%;background:var(--navy);border-radius:3px;transition:width 0.5s;}
+.pf.gold{background:var(--gold);}
+.pf.green{background:var(--green);}
+/* FORMS */
+.fr{margin-bottom:14px;}
+.fr label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;}
+.fr input,.fr select,.fr textarea{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;background:white;}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--navy);}
+.fr textarea{min-height:80px;resize:vertical;}
+/* BUTTONS */
+.btn{padding:10px 18px;border-radius:8px;border:none;font-family:'Rubik',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-navy{background:var(--navy);color:white;}
+.btn-navy:hover{background:var(--navy-mid);}
+.btn-gold{background:var(--gold);color:white;}
+.btn-gold:hover{background:#b8953e;}
+.btn-green{background:var(--green);color:white;}
+.btn-ghost{background:transparent;border:2px solid var(--border);color:var(--text-mid);}
+.btn-ghost:hover{border-color:var(--navy);color:var(--navy);}
+.btn-red{background:var(--red);color:white;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+/* ROWS */
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.rn{flex:1;font-size:13px;font-weight:600;}
+.ra{font-size:13px;font-weight:700;}
+.out{color:var(--red);}
+.inc{color:var(--green);}
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.a-warn{background:var(--amber-bg);color:var(--amber);}
+.a-success{background:var(--green-bg);color:var(--green);}
+.a-info{background:var(--navy-pale);color:var(--navy);}
+/* CHECKLIST */
+.ck-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.ck-item:last-child{border-bottom:none;}
+.ck-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--navy);}
+.ck-text{flex:1;font-size:14px;}
+.ck-text.done{text-decoration:line-through;color:var(--text-light);}
+/* TODO */
+.ti{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.ti input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--navy);}
+.ti-t{flex:1;font-size:13px;}
+.ti-t.done{text-decoration:line-through;color:var(--text-light);}
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--text-light);}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+/* CLIENT CARD */
+.client-card{background:white;border:2px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+/* MOBILE */
+@media(max-width:768px){
+  .sb{transform:translateX(-100%);transition:transform 0.3s;}
+  .sb.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .mob-header{display:flex;}
+  .page{padding:16px;}
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -203,1236 +160,896 @@ body{font-family:'Rubik',sans-serif;background:var(--cream);color:var(--text);mi
 <div id="login-screen">
   <div class="lbox">
     <div class="llogo">
-      <div class="wm">Edu<span>voyage</span></div>
-      <div class="tl">Expert Guidance · Exceptional Journeys</div>
+      <h1>Edu<span>voyage</span></h1>
+      <p>Expert Guidance · Exceptional Journeys</p>
     </div>
-    <div class="ldiv"></div>
-    <div class="ltitle">Command Centre</div>
-    <div class="lsub">Select your role and sign in</div>
-    <div class="rtabs">
-      <button class="rtab active" onclick="selRole('ceo',this)">CEO</button>
-      <button class="rtab" onclick="selRole('ce',this)">Client Executive</button>
+    <div style="height:1px;background:var(--border);margin-bottom:24px;"></div>
+    <p style="font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:12px;">Command Centre — Select your role</p>
+    <div class="lroles">
+      <button class="rtab active" id="tab-ceo" onclick="selRole('ceo',this)">CEO</button>
+      <button class="rtab" id="tab-ce" onclick="selRole('ce',this)">Client Executive</button>
     </div>
-    <div class="linp">
+    <div class="lfield">
       <label>Password</label>
-      <input type="password" id="pwd" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="pwd" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="lbtn" onclick="doLogin()">Sign In →</button>
+    <button class="lbtn" onclick="doLogin()">Sign In</button>
     <div class="lerr" id="lerr">Incorrect password. Please try again.</div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <button class="mob" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
-  <div class="sidebar" id="sidebar">
-    <div class="sb-top">
-      <div class="sb-wm">Edu<span>voyage</span></div>
-      <div class="sb-badge" id="sb-role">CEO</div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sb" id="sidebar">
+      <div class="sb-logo">
+        <h2>Edu<span>voyage</span></h2>
+        <div class="sb-role" id="sb-role">CEO — Aminat</div>
+      </div>
+      <div class="sb-si">
+        <div class="sb-si-label">Today's Sign In</div>
+        <div class="sb-si-val" id="sb-si-v">Not signed in</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);" id="sb-si-t"></div>
+      </div>
+      <div class="sb-nav" id="sb-nav"></div>
+      <div class="sb-foot">
+        <button class="sb-out" onclick="doSyncAll()">Sync to Sheets</button>
+        <button class="sb-out" onclick="logout()">Sign Out</button>
+      </div>
     </div>
-    <div class="sb-si">
-      <div class="sb-si-l">Today's Sign In</div>
-      <div class="sb-si-v" id="sb-si-v">Not signed in</div>
-      <div class="sb-si-t" id="sb-si-t"></div>
-    </div>
-    <nav class="sb-nav" id="sb-nav"></nav>
-    <div class="sb-foot">
-      <button class="sb-out" onclick="syncAll()" style="margin-bottom:6px;color:rgba(255,255,255,0.5);background:rgba(26,127,90,0.15);border-color:rgba(26,127,90,0.3);">Sync to Sheets</button>
-      <button class="sb-out" onclick="logout()">Sign Out</button>
-    </div>
-  </div>
+    <!-- MAIN -->
+    <div class="main">
+      <div class="mob-header">
+        <button class="mob-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+        <span style="color:white;font-size:14px;font-weight:700;">Eduvoyage Command Centre</span>
+        <span></span>
+      </div>
 
-  <div class="main">
-
-    <!-- DASHBOARD -->
-    <div class="page" id="p-dashboard">
-      <div class="ph">
-        <div class="ph-tag" id="dash-date"></div>
-        <h1>Good day, Aminat</h1>
-        <p>Your Eduvoyage command centre overview.</p>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Team Sign-In — Today</div>
-        <div class="si-grid" id="si-board"></div>
-      </div>
-      <div class="g4" style="margin-bottom:18px;">
-        <div class="sc"><div class="sc-l">Monthly Revenue</div><div class="sc-v blue" id="d-rev">₦0</div><div class="sc-s" id="d-rev-sub">Break even: ₦0</div></div>
-        <div class="sc"><div class="sc-l">CE Lead Target</div><div class="sc-v gold" id="d-lead">0%</div><div class="sc-s" id="d-lead-sub">of ₦0</div></div>
-        <div class="sc"><div class="sc-l">Active Clients</div><div class="sc-v" id="d-clients">0</div><div class="sc-s">In progress</div></div>
-        <div class="sc"><div class="sc-l">Friday Report</div><div class="sc-v" id="d-report" style="font-size:18px;">—</div><div class="sc-s">This week</div></div>
-      </div>
-      <div class="g2">
-        <div class="card">
-          <div class="card-hd"><span class="dot"></span>Revenue vs Targets</div>
-          <div class="pw"><div class="pl"><span>Revenue vs Break Even</span><span id="d-rev-l">₦0</span></div><div class="pb"><div class="pf" id="d-rev-b" style="width:0%"></div></div></div>
-          <div class="pw"><div class="pl"><span>CE Lead Target</span><span id="d-lead-l">₦0</span></div><div class="pb"><div class="pf gold" id="d-lead-b" style="width:0%"></div></div></div>
-          <div class="pw"><div class="pl"><span>Growth Goal</span><span id="d-gr-l">₦0</span></div><div class="pb"><div class="pf green" id="d-gr-b" style="width:0%"></div></div></div>
+      <!-- CEO PAGES -->
+      <!-- DASHBOARD -->
+      <div class="page" id="p-dashboard">
+        <div class="ph">
+          <div class="date" id="dash-date"></div>
+          <h1>Good day, Aminat</h1>
+          <p>Your Eduvoyage command centre overview.</p>
         </div>
         <div class="card">
-          <div class="card-hd"><span class="dot"></span>CE Daily Checklist — Today</div>
-          <div id="d-chk-prog" style="margin-bottom:12px;"></div>
-          <div id="d-chk-items"></div>
+          <div class="card-hd">Team Sign-In — Today</div>
+          <div class="si-board" id="si-board"></div>
+        </div>
+        <div class="g4" style="margin-bottom:16px;">
+          <div class="stat"><div class="stat-label">Monthly Revenue</div><div class="stat-val" id="d-rev">₦0</div><div class="stat-sub">Break even: <span id="d-be">₦460,000</span></div></div>
+          <div class="stat"><div class="stat-label">CE Lead Target</div><div class="stat-val" id="d-lead-pct">0%</div><div class="stat-sub">of <span id="d-lead-target">₦500,000</span></div></div>
+          <div class="stat"><div class="stat-label">Active Clients</div><div class="stat-val" id="d-clients">0</div><div class="stat-sub">In progress</div></div>
+          <div class="stat"><div class="stat-label">Weekly Report</div><div class="stat-val" id="d-report-icon">-</div><div class="stat-sub" id="d-report-sub">This week</div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd">Revenue vs Targets</div>
+            <div class="pw"><div class="pl"><span>vs Break Even</span><span id="d-rev-l">₦0</span></div><div class="pb"><div class="pf" id="d-rev-b" style="width:0%"></div></div></div>
+            <div class="pw"><div class="pl"><span>CE Lead Target</span><span id="d-lead-l">₦0</span></div><div class="pb"><div class="pf gold" id="d-lead-b" style="width:0%"></div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd">CE Daily Checklist — Today</div>
+            <div id="d-chk-prog"></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd">Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-navy" onclick="showPage('p-clients')" style="text-align:left;">Add New Client</button>
+              <button class="btn btn-gold" onclick="showPage('p-finance')" style="text-align:left;">Log Revenue</button>
+              <button class="btn btn-ghost" onclick="showPage('p-social')" style="text-align:left;">Social Media</button>
+              <button class="btn btn-ghost" onclick="showPage('p-todo')" style="text-align:left;">My To-Do</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Latest Weekly Report</div>
+            <div id="d-latest-report"><div class="empty">No reports yet.</div></div>
+          </div>
         </div>
       </div>
-      <div class="g2" style="margin-top:0;">
-        <div class="card">
-          <div class="card-hd"><span class="dot"></span>Quick Actions</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <button class="btn btn-blue" onclick="showPage('p-clients')" style="text-align:left;padding:12px 16px;">Add New Client</button>
-            <button class="btn btn-gold" onclick="showPage('p-finance')" style="text-align:left;padding:12px 16px;">Log Revenue</button>
-            <button class="btn btn-ghost" onclick="showPage('p-social')" style="text-align:left;padding:12px 16px;">Social Media Tracker</button>
-            <button class="btn btn-ghost" onclick="showPage('p-todo')" style="text-align:left;padding:12px 16px;">My To-Do List</button>
+
+      <!-- CE MANAGEMENT -->
+      <div class="page" id="p-ce">
+        <div class="ph"><h1>CE Management</h1><p>Manage your Client Executive.</p></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd">Targets & Settings</div>
+            <div class="fr"><label>Monthly Lead Target (₦)</label><input type="number" id="cfg-lead" placeholder="500000"></div>
+            <div class="fr"><label>Break Even (₦)</label><input type="number" id="cfg-be" placeholder="460000"></div>
+            <div class="fr"><label>Growth Goal (₦)</label><input type="number" id="cfg-gg" placeholder="1000000"></div>
+            <button class="btn btn-navy" onclick="saveTargets()">Save Targets</button>
+          </div>
+          <div class="card">
+            <div class="card-hd">Change Passwords</div>
+            <div class="fr"><label>CEO Password</label><input type="password" id="cfg-pwd-ceo" placeholder="New CEO password"></div>
+            <div class="fr"><label>CE Password</label><input type="password" id="cfg-pwd-ce" placeholder="New CE password"></div>
+            <button class="btn btn-navy" onclick="savePwds()">Update Passwords</button>
           </div>
         </div>
         <div class="card">
-          <div class="card-hd"><span class="dot"></span>Latest Friday Report</div>
-          <div id="d-latest-report"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SIGN IN -->
-    <div class="page" id="p-signin">
-      <div class="ph">
-        <div class="ph-tag" id="si-date"></div>
-        <h1>Daily Sign In</h1>
-        <p>Sign in every morning by 9am.</p>
-      </div>
-      <div class="card" style="max-width:460px;margin:0 auto 20px;">
-        <div class="card-hd"><span class="dot"></span>Sign In for Today</div>
-        <div style="text-align:center;padding:16px 0;">
-          <div style="font-size:52px;margin-bottom:12px;" id="si-icon"></div>
-          <div style="font-size:16px;font-weight:600;margin-bottom:4px;" id="si-msg">You haven't signed in yet today.</div>
-          <div style="font-size:12px;color:var(--text-light);margin-bottom:22px;" id="si-sub">Sign in before 9am to be marked on time.</div>
-          <button class="btn btn-blue" onclick="doSignIn()" id="si-btn" style="padding:13px 36px;font-size:15px;">Sign In Now ✓</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>My Sign-In History</div>
-        <div id="si-hist"></div>
-      </div>
-    </div>
-
-    <!-- CE CHECKLIST -->
-    <div class="page" id="p-checklist">
-      <div class="ph">
-        <div class="ph-tag" id="ce-date"></div>
-        <h1>Daily Checklist</h1>
-        <p>Complete every task before 6pm.</p>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Today's Tasks</div>
-        <div id="chk-prog" style="margin-bottom:14px;"></div>
-        <div id="chk-items"></div>
-        <div style="margin-top:16px;"><button class="btn btn-gold btn-sm" onclick="resetChk()">Reset for New Day</button></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Monthly Lead Target</div>
-        <div class="alert a-info">Your monthly target is <strong id="ce-target-display">₦400,000</strong> in converted leads.</div>
-        <div class="pw"><div class="pl"><span>Progress this month</span><span id="ce-lead-l">₦0</span></div><div class="pb"><div class="pf" id="ce-lead-b" style="width:0%"></div></div></div>
-      </div>
-    </div>
-
-    <!-- FRIDAY REPORT -->
-    <div class="page" id="p-report">
-      <div class="ph">
-        <h1>Weekly Report</h1>
-        <p>Submit every Saturday before 2pm. No exceptions.</p>
-      </div>
-      <div class="alert a-warn" id="report-warning"></div>
-      <div id="report-form-wrap">
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Weekly Report Form</div>
-        <div class="g2">
-          <div class="fr"><label>New Leads This Week</label><input type="number" id="r-nl" placeholder="e.g. 8"></div>
-          <div class="fr"><label>Leads Followed Up</label><input type="number" id="r-fu" placeholder="e.g. 12"></div>
-        </div>
-        <div class="g2">
-          <div class="fr"><label>Leads Converted</label><input type="number" id="r-cv" placeholder="e.g. 2"></div>
-          <div class="fr"><label>Revenue from Conversions (₦)</label><input type="number" id="r-rv" placeholder="e.g. 150000"></div>
-        </div>
-        <div class="fr"><label>Social Posts Uploaded This Week</label><input type="number" id="r-sp" placeholder="e.g. 5"></div>
-        <div class="fr"><label>Client Complaints / Issues</label><textarea id="r-cc" placeholder="Write 'None' if none."></textarea></div>
-        <div class="fr"><label>Pending Tasks Carried Over</label><textarea id="r-pt" placeholder="Tasks not completed this week."></textarea></div>
-        <div class="fr"><label>Plan for Next Week</label><textarea id="r-pf" placeholder="What are you focusing on next week?"></textarea></div>
-        <button class="btn btn-gold" onclick="submitReport()">Submit Report ✓</button>
-      </div>
-      </div>
-    </div>
-
-    <!-- SOCIAL MEDIA -->
-    <div class="page" id="p-social">
-      <div class="ph">
-        <h1>Social Media</h1>
-        <p>Content calendar and post tracker.</p>
-      </div>
-      <div class="card">
-        <div class="card-hd" style="justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:7px;"><span class="dot"></span>Content Calendar</div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button class="btn btn-ghost btn-sm" onclick="prevMonth()" style="padding:4px 12px;">← Prev</button>
-            <span style="font-size:12px;font-weight:700;color:var(--blue);min-width:130px;text-align:center;" id="cal-lbl"></span>
-            <button class="btn btn-ghost btn-sm" onclick="nextMonth()" style="padding:4px 12px;">Next →</button>
+          <div class="card-hd">CE Checklist Tasks (CEO Manages)</div>
+          <div id="ce-tasks-list"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <input type="text" id="new-task-txt" placeholder="Add new checklist task..." style="flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;">
+            <button class="btn btn-navy" onclick="addCETask()">Add</button>
           </div>
         </div>
-        <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
-          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-ig" style="display:inline-block;"></span>Instagram</span>
-          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-tt" style="display:inline-block;"></span>TikTok</span>
-          <span style="font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:5px;"><span class="cdot c-fb" style="display:inline-block;"></span>Facebook</span>
+        <div class="card">
+          <div class="card-hd">Fine Policy</div>
+          <div id="fine-list"></div>
         </div>
-        <div id="cal-grid" class="cal"></div>
       </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Log a Post</div>
-        <div class="g2">
-          <div class="fr"><label>Post Topic / Caption</label><input type="text" id="sm-topic" placeholder="e.g. 5 visa tips for Nigerians"></div>
-          <div class="fr"><label>Date</label><input type="date" id="sm-date"></div>
-        </div>
-        <div class="g2">
-          <div class="fr"><label>Platform</label><select id="sm-plat"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>All Platforms</option></select></div>
-          <div class="fr"><label>Status</label><select id="sm-st"><option>Scheduled</option><option>Published</option><option>Pending Design</option><option>Draft</option></select></div>
-        </div>
-        <div class="fr"><label>Post Type</label><select id="sm-type"><option>Reel/Video</option><option>Carousel</option><option>Static Post</option><option>Story</option></select></div>
-        <button class="btn btn-gold btn-sm" onclick="addPost()">Log Post</button>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Post Log</div>
-        <div class="g3" style="margin-bottom:16px;">
-          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Total Posts</div><div class="sc-v blue" id="sm-tot" style="font-size:22px;">0</div></div>
-          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Published</div><div class="sc-v green" id="sm-pub" style="font-size:22px;">0</div></div>
-          <div class="sc" style="padding:14px 16px;"><div class="sc-l">Scheduled</div><div class="sc-v gold" id="sm-sch" style="font-size:22px;">0</div></div>
-        </div>
-        <div id="posts-list"></div>
-      </div>
-    </div>
 
-    <!-- FINANCE -->
-    <div class="page" id="p-finance">
-      <div class="ph"><h1>Finance Tracker</h1><p>Revenue, salaries and expenses.</p></div>
-      <div class="g3" style="margin-bottom:18px;">
-        <div class="sc"><div class="sc-l">CEO Monthly Salary</div><div class="sc-v green">₦300,000</div><div class="sc-s">Paid 1st of every month</div></div>
-        <div class="sc"><div class="sc-l">Fixed Outgoings</div><div class="sc-v blue" id="fin-fixed">₦0</div><div class="sc-s">This month</div></div>
-        <div class="sc"><div class="sc-l">This Month Revenue</div><div class="sc-v" id="fin-rev">₦0</div><div class="sc-s">Log below</div></div>
-      </div>
-      <div class="g2">
+      <!-- REPORTS & ATTENDANCE -->
+      <div class="page" id="p-reports">
+        <div class="ph"><h1>Reports & Attendance</h1><p>CE sign-in history and weekly reports.</p></div>
         <div class="card">
-          <div class="card-hd"><span class="dot"></span>Log Monthly Revenue</div>
-          <div class="fr"><label>Month</label><input type="month" id="fin-mo"></div>
-          <div class="fr"><label>Revenue Amount (₦)</label><input type="number" id="fin-amt" placeholder="e.g. 800000"></div>
-          <button class="btn btn-gold" onclick="logRev()">Log Revenue</button>
-          <div id="rev-hist" style="margin-top:16px;"></div>
+          <div class="card-hd">Sign-In Log</div>
+          <div id="att-log"><div class="empty">No sign-ins yet.</div></div>
         </div>
         <div class="card">
-          <div class="card-hd"><span class="dot"></span>Fixed Monthly Outgoings</div>
+          <div class="card-hd">Weekly Reports</div>
+          <div id="reports-list"><div class="empty">No reports submitted yet.</div></div>
+        </div>
+      </div>
+
+      <!-- CLIENT WORK -->
+      <div class="page" id="p-clients">
+        <div class="ph"><h1>Client Work</h1><p>Manage all active clients.</p></div>
+        <div class="card">
+          <div class="card-hd">Add New Client</div>
+          <div class="g2">
+            <div class="fr"><label>Client Name</label><input type="text" id="cl-name" placeholder="Full name"></div>
+            <div class="fr"><label>Service Type</label><select id="cl-type"><option>Study Abroad</option><option>Visa Processing</option><option>Travel & Tours</option><option>Flight Booking</option><option>Hotel Booking</option><option>Scholarship Advisory</option></select></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Destination</label><input type="text" id="cl-dest" placeholder="e.g. Canada, UK"></div>
+            <div class="fr"><label>Status</label><select id="cl-status"><option>New Enquiry</option><option>Documents Pending</option><option>In Progress</option><option>Submitted</option><option>Approved</option><option>Completed</option><option>On Hold</option></select></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Amount Paid (₦)</label><input type="number" id="cl-paid" placeholder="0"></div>
+            <div class="fr"><label>Balance (₦)</label><input type="number" id="cl-balance" placeholder="0"></div>
+          </div>
+          <div class="fr"><label>Google Drive Folder Link</label><input type="text" id="cl-drive" placeholder="Paste Google Drive link"></div>
+          <div class="fr"><label>Notes</label><textarea id="cl-notes" placeholder="Any notes about this client..."></textarea></div>
+          <button class="btn btn-navy" onclick="addClient()">Add Client</button>
+        </div>
+        <div id="clients-list"></div>
+      </div>
+
+      <!-- SOCIAL MEDIA -->
+      <div class="page" id="p-social">
+        <div class="ph"><h1>Social Media</h1><p>Content calendar and post tracker.</p></div>
+        <div class="card">
+          <div class="card-hd">Log a Post</div>
+          <div class="g2">
+            <div class="fr"><label>Post Topic / Caption</label><input type="text" id="sm-topic" placeholder="e.g. 5 visa tips for Nigerians"></div>
+            <div class="fr"><label>Date</label><input type="date" id="sm-date"></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Platform</label><select id="sm-plat"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>All Platforms</option></select></div>
+            <div class="fr"><label>Status</label><select id="sm-st"><option>Draft</option><option>Scheduled</option><option>Published</option><option>Pending Design</option></select></div>
+          </div>
+          <div class="fr"><label>Post Type</label><select id="sm-type"><option>Reel/Video</option><option>Carousel</option><option>Static Post</option><option>Story</option></select></div>
+          <button class="btn btn-gold" onclick="addPost()">Log Post</button>
+        </div>
+        <div class="card">
+          <div class="card-hd">Post Log</div>
+          <div class="g3" style="margin-bottom:16px;">
+            <div class="stat"><div class="stat-label">Total Posts</div><div class="stat-val" id="sm-tot">0</div></div>
+            <div class="stat"><div class="stat-label">Published</div><div class="stat-val" id="sm-pub">0</div></div>
+            <div class="stat"><div class="stat-label">Scheduled</div><div class="stat-val" id="sm-sch">0</div></div>
+          </div>
+          <div id="posts-list"></div>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="page" id="p-finance">
+        <div class="ph"><h1>Finance</h1><p>Revenue and expense tracking.</p></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd">Log Revenue</div>
+            <div class="fr"><label>Amount (₦)</label><input type="number" id="rev-amt" placeholder="0"></div>
+            <div class="fr"><label>Source</label><input type="text" id="rev-src" placeholder="e.g. Mr Wahab — Visa"></div>
+            <div class="fr"><label>Month</label><input type="month" id="rev-mo"></div>
+            <button class="btn btn-green" onclick="addRevenue()">Log Revenue</button>
+          </div>
+          <div class="card">
+            <div class="card-hd">Add Expense</div>
+            <div class="fr"><label>Description</label><input type="text" id="exp-name" placeholder="e.g. Office supplies"></div>
+            <div class="fr"><label>Amount (₦)</label><input type="number" id="exp-amt" placeholder="0"></div>
+            <div class="fr"><label>Category</label><select id="exp-cat"><option>Operations</option><option>Marketing</option><option>Salary</option><option>Tools</option><option>Other</option></select></div>
+            <button class="btn btn-ghost" onclick="addExpense()">Add Expense</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Fixed Monthly Outgoings</div>
           <div id="fixed-list"></div>
-          <div class="div"></div>
-          <div class="row"><div class="rn" style="font-weight:700;">Total Fixed</div><div class="ra out" id="fixed-total" style="font-size:15px;">-₦0</div></div>
-          <div style="margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="addFixed()">+ Add Item</button></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Revenue History</div>
+          <div id="rev-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Expenses</div>
+          <div id="exp-list"></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Log Additional Expense</div>
-        <div class="g2">
-          <div class="fr"><label>Expense Name</label><input type="text" id="ex-n" placeholder="e.g. Domain renewal"></div>
-          <div class="fr"><label>Amount (₦)</label><input type="number" id="ex-a" placeholder="e.g. 15000"></div>
-        </div>
-        <div class="g2">
-          <div class="fr"><label>Category</label><select id="ex-c"><option>Operations</option><option>Marketing</option><option>Personal</option><option>Other</option></select></div>
-          <div class="fr"><label>Date</label><input type="date" id="ex-d"></div>
-        </div>
-        <button class="btn btn-blue btn-sm" onclick="addExp()">Add Expense</button>
-        <div id="exp-list" style="margin-top:14px;"></div>
-      </div>
-    </div>
 
-    <!-- CLIENTS -->
-    <div class="page" id="p-clients">
-      <div class="ph"><h1>Client Work</h1><p>Track all active clients, status and documents.</p></div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Add New Client</div>
-        <div class="g2">
-          <div class="fr"><label>Client Name</label><input type="text" id="cl-n" placeholder="Full name"></div>
-          <div class="fr"><label>Service Type</label><select id="cl-t"><option>Study Abroad</option><option>Visa Processing</option><option>Travel Package</option><option>Flight Booking</option><option>Hotel Booking</option><option>Airport Transfer</option><option>Scholarship Advisory</option><option>Other</option></select></div>
+      <!-- GROWTH -->
+      <div class="page" id="p-growth">
+        <div class="ph"><h1>Growth</h1><p>Goals and business metrics.</p></div>
+        <div class="card">
+          <div class="card-hd">Add Goal</div>
+          <div class="g2">
+            <div class="fr"><label>Goal</label><input type="text" id="goal-txt" placeholder="e.g. Get 10 new clients"></div>
+            <div class="fr"><label>Deadline</label><input type="date" id="goal-date"></div>
+          </div>
+          <button class="btn btn-navy" onclick="addGoal()">Add Goal</button>
         </div>
-        <div class="g2">
-          <div class="fr"><label>Destination</label><input type="text" id="cl-d" placeholder="e.g. Canada, UK"></div>
-          <div class="fr"><label>Status</label><select id="cl-s"><option>New Enquiry</option><option>Documents Pending</option><option>In Progress</option><option>Submitted</option><option>Approved</option><option>Completed</option><option>On Hold</option></select></div>
-        </div>
-        <div class="g2">
-          <div class="fr"><label>Amount Paid (₦)</label><input type="number" id="cl-p" placeholder="e.g. 150000"></div>
-          <div class="fr"><label>Balance Due (₦)</label><input type="number" id="cl-b" placeholder="e.g. 50000"></div>
-        </div>
-        <div class="fr"><label>Google Drive Folder Link</label><input type="url" id="cl-dr" placeholder="Paste Google Drive folder link"></div>
-        <div class="fr"><label>Notes</label><textarea id="cl-no" placeholder="Important notes..."></textarea></div>
-        <button class="btn btn-gold" onclick="addClient()">Add Client</button>
-      </div>
-      <div class="card"><div class="card-hd"><span class="dot"></span>Active Clients</div><div id="clients-list"></div></div>
-    </div>
-
-    <!-- WAKA -->
-    <div class="page" id="p-waka">
-      <div class="ph"><h1>WakawithAmi</h1><p>Your personal content — completely separate from Eduvoyage.</p></div>
-      <div class="g3" style="margin-bottom:18px;">
-        <div class="sc"><div class="sc-l">Total Content</div><div class="sc-v blue" id="wk-tot">0</div></div>
-        <div class="sc"><div class="sc-l">Published</div><div class="sc-v green" id="wk-pub">0</div></div>
-        <div class="sc"><div class="sc-l">Pending</div><div class="sc-v gold" id="wk-pend">0</div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Log Content</div>
-        <div class="g2">
-          <div class="fr"><label>Hook / Video Title</label><input type="text" id="wk-h" placeholder="e.g. The cheapest day to fly from Lagos"></div>
-          <div class="fr"><label>Date</label><input type="date" id="wk-dt"></div>
-        </div>
-        <div class="g2">
-          <div class="fr"><label>Platform</label><select id="wk-pl"><option>TikTok</option><option>Instagram</option><option>Twitter/X</option><option>All Platforms</option></select></div>
-          <div class="fr"><label>Status</label><select id="wk-st"><option>Idea</option><option>To Film</option><option>Filmed</option><option>Scheduled</option><option>Published</option></select></div>
-        </div>
-        <div class="fr"><label>Content Pillar</label><select id="wk-pi"><option>Hidden Gems</option><option>Practical Tips</option><option>Story-Led</option><option>Culture & POV</option><option>Hot Takes</option></select></div>
-        <button class="btn btn-gold btn-sm" onclick="addWaka()">Log Content</button>
-      </div>
-      <div class="card"><div class="card-hd"><span class="dot"></span>Content Log</div><div id="waka-list"></div></div>
-    </div>
-
-    <!-- GROWTH -->
-    <div class="page" id="p-growth">
-      <div class="ph"><h1>Company Growth</h1><p>Monthly performance and goals tracker.</p></div>
-      <div class="g3" style="margin-bottom:18px;">
-        <div class="sc"><div class="sc-l">Best Month</div><div class="sc-v gold" id="gr-best">₦0</div></div>
-        <div class="sc"><div class="sc-l">Total Clients</div><div class="sc-v blue" id="gr-clients">0</div></div>
-        <div class="sc"><div class="sc-l">Monthly Goal</div><div class="sc-v green" id="gr-goal-display">₦0</div></div>
-      </div>
-      <div class="card"><div class="card-hd"><span class="dot"></span>Revenue History</div><div id="gr-chart"></div></div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Company Goals</div>
         <div id="goals-list"></div>
-        <div class="div"></div>
+      </div>
+
+      <!-- WAKAWITHAMI -->
+      <div class="page" id="p-waka">
+        <div class="ph"><h1>WakawithAmi</h1><p>Personal content creator tracker — separate from Eduvoyage.</p></div>
+        <div class="card">
+          <div class="card-hd">Log Content</div>
+          <div class="g2">
+            <div class="fr"><label>Content Hook / Title</label><input type="text" id="wk-hook" placeholder="e.g. POV: You finally booked the trip"></div>
+            <div class="fr"><label>Date</label><input type="date" id="wk-date"></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Platform</label><select id="wk-plat"><option>TikTok</option><option>Instagram Reels</option><option>Twitter/X</option></select></div>
+            <div class="fr"><label>Status</label><select id="wk-st"><option>Idea</option><option>Filming</option><option>Editing</option><option>Published</option></select></div>
+          </div>
+          <button class="btn btn-gold" onclick="addWaka()">Log Content</button>
+        </div>
+        <div class="card">
+          <div class="card-hd">Content Log</div>
+          <div id="waka-list"></div>
+        </div>
+      </div>
+
+      <!-- MY TO-DO -->
+      <div class="page" id="p-todo">
+        <div class="ph"><h1>My To-Do</h1><p>Your personal task list.</p></div>
+        <div class="card">
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <input type="text" id="todo-inp" placeholder="Add a task..." style="flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTodo()">
+            <button class="btn btn-navy" onclick="addTodo()">Add</button>
+          </div>
+          <div id="todo-list"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="p-settings">
+        <div class="ph"><h1>Settings</h1><p>System configuration.</p></div>
         <div class="g2">
-          <div class="fr"><label>New Goal</label><input type="text" id="goal-t" placeholder="e.g. Hit ₦1M in July 2026"></div>
-          <div class="fr"><label>Target Date</label><input type="date" id="goal-d"></div>
-        </div>
-        <button class="btn btn-blue btn-sm" onclick="addGoal()">Add Goal</button>
-      </div>
-    </div>
-
-    <!-- TODO -->
-    <div class="page" id="p-todo">
-      <div class="ph"><h1>CEO To-Do</h1><p>Your personal task list.</p></div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>My Tasks</div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <input type="text" id="todo-i" placeholder="Add a task..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);" onkeydown="if(event.key==='Enter')addTodo()">
-          <button class="btn btn-gold" onclick="addTodo()" style="font-size:20px;padding:8px 16px;">+</button>
-        </div>
-        <div id="todo-list"></div>
-      </div>
-    </div>
-
-    <!-- REPORTS (CEO) -->
-    <div class="page" id="p-reports">
-      <div class="ph"><h1>Friday Reports</h1><p>Review CE weekly submissions and attendance.</p></div>
-      <div class="card"><div class="card-hd"><span class="dot"></span>Submitted Reports</div><div id="reports-list"></div></div>
-      <div class="card"><div class="card-hd"><span class="dot"></span>Sign-In Attendance Log</div><div id="att-log"></div></div>
-    </div>
-
-    <!-- CE MANAGEMENT -->
-    <div class="page" id="p-ce">
-      <div class="ph"><h1>CE Management</h1><p>Targets, responsibilities and checklist tasks.</p></div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Update Monthly Lead Target</div>
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-          <div style="flex:1;"><div class="fr"><label>Leads Achieved This Month (₦)</label><input type="number" id="lead-i" placeholder="e.g. 150000"></div></div>
-          <button class="btn btn-gold" onclick="updateLeads()" style="margin-bottom:14px;">Update</button>
-        </div>
-        <div class="pw"><div class="pl"><span>Monthly Lead Target</span><span id="ce-prog-l">₦0</span></div><div class="pb"><div class="pf" id="ce-prog-b" style="width:0%"></div></div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>CE Checklist Tasks <span style="font-size:9px;color:var(--text-light);font-weight:400;margin-left:4px;">— Add or remove tasks</span></div>
-        <div id="ce-tasks-list"></div>
-        <div class="div"></div>
-        <div style="display:flex;gap:8px;margin-top:4px;">
-          <input type="text" id="new-task-txt" placeholder="New task description..." style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);">
-          <select id="new-task-tag" style="padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--cream);">
-            <option value="d">Daily</option><option value="w">Weekly</option><option value="s">Social</option>
-          </select>
-          <button class="btn btn-blue btn-sm" onclick="addCETask()" style="padding:10px 16px;">Add</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS (CEO ONLY) -->
-    <div class="page" id="p-settings">
-      <div class="ph"><h1>Settings</h1><p>Edit passwords, targets and workspace configuration.</p></div>
-
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Passwords</div>
-        <div class="g2">
-          <div class="fr"><label>CEO Password</label><input type="text" id="set-pwd-ceo" placeholder="New CEO password"></div>
-          <div class="fr"><label>Client Executive Password</label><input type="text" id="set-pwd-ce" placeholder="New CE password"></div>
-        </div>
-        <button class="btn btn-blue btn-sm" onclick="savePwds()">Save Passwords</button>
-      </div>
-
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Targets & Goals</div>
-        <div class="g2">
-          <div class="fr"><label>CE Monthly Lead Target (₦)</label><input type="number" id="set-lead" placeholder="e.g. 400000"></div>
-          <div class="fr"><label>Break Even Target (₦)</label><input type="number" id="set-breakeven" placeholder="e.g. 460000"></div>
-        </div>
-        <div class="fr"><label>Company Growth Goal (₦)</label><input type="number" id="set-growth" placeholder="e.g. 1000000"></div>
-        <button class="btn btn-gold btn-sm" onclick="saveTargets()">Save Targets</button>
-      </div>
-
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Fine Policy <span style="font-size:9px;color:var(--text-light);font-weight:400;margin-left:4px;">— for your reference only</span></div>
-        <div id="fines-policy-list"></div>
-        <div class="div"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="fp-rsn" placeholder="Fine reason..." style="flex:2;min-width:150px;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;background:var(--cream);">
-          <input type="number" id="fp-amt" placeholder="₦ Amount" style="flex:1;min-width:110px;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;background:var(--cream);">
-          <button class="btn btn-warn btn-sm" onclick="addFinePolicy()">Add Fine</button>
+          <div class="card">
+            <div class="card-hd">Passwords</div>
+            <div class="fr"><label>CEO Password</label><input type="password" id="s-ceo-pwd" placeholder="New CEO password"></div>
+            <div class="fr"><label>CE Password</label><input type="password" id="s-ce-pwd" placeholder="New CE password"></div>
+            <button class="btn btn-navy" onclick="savePasswords()">Update Passwords</button>
+          </div>
+          <div class="card">
+            <div class="card-hd">Targets</div>
+            <div class="fr"><label>CE Monthly Lead Target (₦)</label><input type="number" id="s-lead" placeholder="500000"></div>
+            <div class="fr"><label>Break Even (₦)</label><input type="number" id="s-be" placeholder="460000"></div>
+            <div class="fr"><label>Growth Goal (₦)</label><input type="number" id="s-gg" placeholder="1000000"></div>
+            <button class="btn btn-navy" onclick="saveTargets()">Save Targets</button>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-hd"><span class="dot"></span>Clear Sign-In History</div>
-        <div class="alert a-warn">Note: This will clear all sign-in records from this device. Use this to fix date display issues.</div>
-        <button class="btn btn-danger" onclick="clearSignIns()">🗑️ Clear Sign-In History</button>
+      <!-- CE PAGES -->
+      <!-- CE SIGN IN -->
+      <div class="page" id="p-signin">
+        <div class="ph"><h1>Sign In</h1><p>Sign in to start your day.</p></div>
+        <div class="card" style="text-align:center;padding:40px;">
+          <div id="si-icon" style="font-size:48px;margin-bottom:16px;">🕐</div>
+          <div id="si-msg" style="font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px;">You haven't signed in yet today.</div>
+          <div id="si-sub" style="color:var(--text-light);margin-bottom:24px;">Sign in before 9am to be marked on time.</div>
+          <button class="btn btn-navy" id="si-btn" onclick="doSignIn()" style="padding:14px 40px;font-size:15px;">Sign In Now</button>
+        </div>
       </div>
-    </div>
 
-  </div>
-</div>
+      <!-- CE DAILY CHECKLIST -->
+      <div class="page" id="p-checklist">
+        <div class="ph"><h1>Daily Checklist</h1><p>Your tasks for today.</p></div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+              <div id="chk-progress-text" style="font-size:13px;font-weight:600;color:var(--text-mid);">0/0 completed</div>
+              <div class="pb" style="width:200px;margin-top:6px;"><div class="pf" id="chk-progress-bar" style="width:0%"></div></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="resetChecklist()">Reset for Today</button>
+          </div>
+          <div id="checklist-items"></div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <input type="text" id="chk-new" placeholder="Add task for today..." style="flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:13px;outline:none;">
+            <button class="btn btn-navy" onclick="addChecklistItem()">Add</button>
+          </div>
+        </div>
+      </div>
 
-<div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
+      <!-- CE WEEKLY REPORT -->
+      <div class="page" id="p-report">
+        <div class="ph"><h1>Weekly Report</h1><p>Submit every Saturday before 2pm.</p></div>
+        <div class="alert a-info" id="report-status"></div>
+        <div class="card" id="report-form">
+          <div class="card-hd">Weekly Report Form</div>
+          <div class="g2">
+            <div class="fr"><label>New Leads This Week</label><input type="number" id="r-leads" placeholder="0"></div>
+            <div class="fr"><label>Leads Followed Up</label><input type="number" id="r-followup" placeholder="0"></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Leads Converted</label><input type="number" id="r-converted" placeholder="0"></div>
+            <div class="fr"><label>Revenue from Conversions (₦)</label><input type="number" id="r-revenue" placeholder="0"></div>
+          </div>
+          <div class="fr"><label>Social Posts This Week</label><input type="number" id="r-posts" placeholder="0"></div>
+          <div class="fr"><label>Client Complaints / Issues</label><textarea id="r-complaints" placeholder="Write 'None' if none."></textarea></div>
+          <div class="fr"><label>Pending Tasks</label><textarea id="r-pending" placeholder="Tasks not completed this week."></textarea></div>
+          <div class="fr"><label>Plan for Next Week</label><textarea id="r-plan" placeholder="What are you focusing on next week?"></textarea></div>
+          <button class="btn btn-gold" onclick="submitReport()">Submit Report</button>
+        </div>
+      </div>
+
+      <!-- CE SOCIAL MEDIA -->
+      <div class="page" id="p-ce-social">
+        <div class="ph"><h1>Social Media</h1><p>Log posts for Eduvoyage.</p></div>
+        <div class="card">
+          <div class="card-hd">Log a Post</div>
+          <div class="g2">
+            <div class="fr"><label>Post Topic</label><input type="text" id="ce-sm-topic" placeholder="e.g. Visa tips carousel"></div>
+            <div class="fr"><label>Date</label><input type="date" id="ce-sm-date"></div>
+          </div>
+          <div class="g2">
+            <div class="fr"><label>Platform</label><select id="ce-sm-plat"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>All Platforms</option></select></div>
+            <div class="fr"><label>Status</label><select id="ce-sm-st"><option>Draft</option><option>Scheduled</option><option>Published</option><option>Pending Design</option></select></div>
+          </div>
+          <div class="fr"><label>Post Type</label><select id="ce-sm-type"><option>Reel/Video</option><option>Carousel</option><option>Static Post</option><option>Story</option></select></div>
+          <button class="btn btn-gold" onclick="addCEPost()">Log Post</button>
+        </div>
+        <div class="card">
+          <div class="card-hd">Your Posts</div>
+          <div id="ce-posts-list"></div>
+        </div>
+      </div>
+
+    </div><!-- end main -->
+  </div><!-- end layout -->
+</div><!-- end app -->
+
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
 
 <script>
-// ══ STORAGE ══
+// ══════════════════════════════════
+// STORAGE
+// ══════════════════════════════════
 const S={
   get:(k,d)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}},
   set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 };
 
-// ══ CONFIG (all editable) ══
-let cfg=S.get('v5_cfg',{
-  pwdCEO:'edu2024',pwdCE:'ce2024',
-  leadTarget:400000,breakEven:460000,growthGoal:1000000,
-});
+// ══════════════════════════════════
+// GOOGLE SHEETS
+// ══════════════════════════════════
+const GS='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzygaX37hDNRrFUcNMaWBF08i7La4AaOHaP1Ke2u6IWUncQg/exec';
 
-let ceTasks=S.get('v5_tasks',[
-  {id:1,text:'Respond to all WhatsApp messages',tag:'d'},
-  {id:2,text:'Respond to Instagram DMs and comments',tag:'d'},
-  {id:3,text:'Respond to TikTok messages',tag:'d'},
-  {id:4,text:'Update Lead Sheet — log all new enquiries',tag:'d'},
-  {id:5,text:'Update CRM for any client status changes',tag:'d'},
-  {id:6,text:'Upload today\'s social media post',tag:'s'},
-  {id:7,text:'Follow up on all pending leads',tag:'d'},
-  {id:8,text:'Chase outstanding client payments',tag:'d'},
-  {id:9,text:'Submit Friday report by 5pm (Fridays only)',tag:'w'},
-]);
-
-let finePolicy=S.get('v5_fines',[
-  {id:1,reason:'Missing Friday report',amount:5000},
-  {id:2,reason:'Unanswered client message',amount:2000},
-  {id:3,reason:'Lead sheet not updated (per day)',amount:1000},
-  {id:4,reason:'Social media post not uploaded',amount:2000},
-]);
-
-// ══ STATE ══
-let todos=S.get('v5_todos',[]);
-let clients=S.get('v5_clients',[]);
-let posts=S.get('v5_posts',[]);
-let waka=S.get('v5_waka',[]);
-let reports=S.get('v5_reports',[]);
-let expenses=S.get('v5_exp',[]);
-let revHist=S.get('v5_rev',[]);
-let goals=S.get('v5_goals',[]);
-let leadsAmt=S.get('v5_leads',0);
-let chk=S.get('v5_chk',{});
-let signIns=S.get('v5_signins',[]);
-let fixed=S.get('v5_fixed',[
-  {id:1,name:'Aminat — CEO Salary',amount:300000,cat:'Salary'},
-  {id:2,name:'Client Executive',amount:80000,cat:'Salary'},
-  {id:3,name:'Live-in Nanny',amount:80000,cat:'Personal'},
-]);
-
-const TEAM=[{role:'ceo',name:'Aminat',title:'CEO',av:'A'},{role:'ce',name:'Client Executive',title:'Client Executive',av:'CE'}];
-let role='ceo',selR='ceo';
-let calYear,calMonth;
-
-// ══ GOOGLE SHEETS SYNC ══
-const GS_URL='https://script.google.com/macros/s/AKfycbxcxswaAg_FEqZxKM_b8MTzygaX37hDNRrFUcNMaWBF08i7La4AaOHaP1Ke2u6IWUncQg/exec';
-
-async function syncToSheet(sheetName, rows){
+function pushToSheet(sheet,rows){
   try{
-    fetch(GS_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({sheet:sheetName,rows}),
-    });
+    fetch(GS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({sheet,rows})});
   }catch(e){}
 }
 
-async function loadFromSheet(sheetName){
+async function pullFromSheet(sheet){
   try{
-    const res=await fetch(GS_URL+'?sheet='+encodeURIComponent(sheetName),{mode:'cors'});
-    const data=await res.json();
-    return data.rows||[];
+    const r=await fetch(GS+'?sheet='+encodeURIComponent(sheet));
+    const d=await r.json();
+    return Array.isArray(d.rows)?d.rows:[];
   }catch(e){return [];}
 }
 
-async function syncAll(){
-  await syncToSheet('Clients',clients);
-  await syncToSheet('Posts',posts);
-  await syncToSheet('Waka',waka);
-  await syncToSheet('Todos',todos);
-  await syncToSheet('Reports',reports);
-  await syncToSheet('Expenses',expenses);
-  await syncToSheet('Revenue',revHist);
-  await syncToSheet('Goals',goals);
-  await syncToSheet('SignIns',signIns);
-  toast('Synced to Google Sheets');
+// ══════════════════════════════════
+// CONFIG
+// ══════════════════════════════════
+let cfg=S.get('edu_cfg',{
+  pwdCEO:'edu2024',pwdCE:'ce2024',
+  leadTarget:500000,breakEven:460000,growthGoal:1000000
+});
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let role='ceo';
+let selRoleVal='ceo';
+let clients=S.get('edu_clients',[]);
+let posts=S.get('edu_posts',[]);
+let waka=S.get('edu_waka',[]);
+let todos=S.get('edu_todos',[]);
+let reports=S.get('edu_reports',[]);
+let expenses=S.get('edu_exp',[]);
+let revenue=S.get('edu_rev',[]);
+let goals=S.get('edu_goals',[]);
+let signIns=S.get('edu_signins',[]);
+let checklist=S.get('edu_checklist',{items:[],date:''});
+let ceTasks=S.get('edu_cetasks',[
+  {id:1,text:'Respond to all WhatsApp messages'},
+  {id:2,text:'Respond to Instagram DMs and comments'},
+  {id:3,text:'Respond to TikTok messages'},
+  {id:4,text:'Update lead sheet — log all new enquiries'},
+  {id:5,text:'Update CRM for any client status changes'},
+  {id:6,text:'Upload today\'s social media post'},
+  {id:7,text:'Follow up on all pending leads'},
+  {id:8,text:'Chase outstanding client payments'},
+]);
+let fixed=S.get('edu_fixed',[
+  {id:1,name:'CEO Salary — Aminat',amount:300000},
+  {id:2,name:'Client Executive',amount:80000},
+  {id:3,name:'Live-in Nanny',amount:70000},
+]);
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-async function loadAll(){
-  try{
-    const [c,p,w,t,r,e,rv,g,s,config]=await Promise.all([
-      loadFromSheet('Clients'),
-      loadFromSheet('Posts'),
-      loadFromSheet('Waka'),
-      loadFromSheet('Todos'),
-      loadFromSheet('Reports'),
-      loadFromSheet('Expenses'),
-      loadFromSheet('Revenue'),
-      loadFromSheet('Goals'),
-      loadFromSheet('SignIns'),
-      loadFromSheet('Config'),
-    ]);
-    if(c.length){clients=c;S.set('v5_clients',clients);}
-    if(p.length){posts=p;S.set('v5_posts',posts);}
-    if(w.length){waka=w;S.set('v5_waka',waka);}
-    // For todos — restore done state properly from sheets
-    if(t.length){
-      todos=t.map(td=>({
-        id:td.id,
-        text:td.text,
-        done:String(td.done).toUpperCase()==='TRUE'
-      }));
-      S.set('v5_todos',todos);
-    }
-    if(r.length){reports=r;S.set('v5_reports',reports);}
-    if(e.length){expenses=e;S.set('v5_exp',expenses);}
-    if(rv.length){revHist=rv;S.set('v5_rev',revHist);}
-    if(g.length){goals=g;S.set('v5_goals',goals);}
-    if(s.length){
-      const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-      const cleanSignIns=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T')).map(si=>({
-        id:si.id,
-        role:si.role,
-        date:si.date,
-        time:si.signin?si.signin.split(' at ')[1]||String(si.time||''):String(si.time||'').replace(/30\/12\/1899,?\s?/,''),
-        onTime:si.onTime
-      })).filter(si=>!String(si.time||'').includes('1899'));
-      if(cleanSignIns.length){
-        // Keep local today's sign-ins, merge with sheets historical data
-        const localToday=signIns.filter(si=>si.date===today);
-        const sheetsOther=cleanSignIns.filter(si=>si.date!==today);
-        signIns=[...sheetsOther,...localToday];
-        S.set('v5_signins',signIns);
-      }
-    }
-    // Load config/passwords from sheets
-    if(config&&config.length&&config[0]&&config[0].pwdCEO){
-      cfg.pwdCEO=config[0].pwdCEO;
-      cfg.pwdCE=config[0].pwdCE;
-      if(config[0].breakEven)cfg.breakEven=parseInt(config[0].breakEven)||cfg.breakEven;
-      if(config[0].leadTarget)cfg.leadTarget=parseInt(config[0].leadTarget)||cfg.leadTarget;
-      if(config[0].growthGoal)cfg.growthGoal=parseInt(config[0].growthGoal)||cfg.growthGoal;
-      S.set('v5_cfg',cfg);
-    }
-    renderAll();
-    // Re-show current active page after data loads
-    const activePage=document.querySelector('.page.active');
-    if(!activePage){
-      showPage('p-'+(role==='ceo'?'dashboard':'signin'));
-    }
-  }catch(e){console.log('Load all error:',e);}
+// ══════════════════════════════════
+// LOGIN
+// ══════════════════════════════════
+function selRole(r,el){
+  selRoleVal=r;
+  document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
 }
 
-// ══ LOGIN ══
-function selRole(r,el){selR=r;document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 function doLogin(){
   const p=document.getElementById('pwd').value;
   if(p===cfg.pwdCEO){role='ceo';}
   else if(p===cfg.pwdCE){role='ce';}
-  else{const e=document.getElementById('lerr');e.style.display='block';setTimeout(()=>e.style.display='none',3000);return;}
-  // Save session
-  S.set('v5_session',{role,time:Date.now()});
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  initApp();autoSignIn();
-  loadAll();
+  else{
+    const e=document.getElementById('lerr');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+    return;
+  }
+  S.set('edu_session',{role,time:Date.now()});
+  startApp();
 }
 
 function logout(){
-  S.set('v5_session',null);
-  document.getElementById('login-screen').style.display='flex';
+  S.set('edu_session',null);
   document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
   document.getElementById('pwd').value='';
 }
 
 function checkSession(){
-  const session=S.get('v5_session',null);
-  if(session&&session.role){
-    if(Date.now()-session.time < 12*60*60*1000){
-      role=session.role;
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      initApp();
-      loadAll();
-      return true;
-    }else{
-      S.set('v5_session',null);
-    }
+  const sess=S.get('edu_session',null);
+  if(sess&&sess.role&&(Date.now()-sess.time)<43200000){
+    role=sess.role;
+    startApp();
+    return true;
   }
   return false;
 }
 
-// ══ INIT ══
-function initApp(){
+// ══════════════════════════════════
+// START APP
+// ══════════════════════════════════
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  buildNav();
+  renderAll();
+  autoSignIn();
+  loadFromSheets();
+}
+
+function buildNav(){
   const isCEO=role==='ceo';
   document.getElementById('sb-role').textContent=isCEO?'CEO — Aminat':'Client Executive';
-  const now=new Date();
-  if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
-  const ds=now.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  ['dash-date','si-date','ce-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
-  const nf=document.getElementById('not-fri');if(nf)nf.style.display=now.getDay()!==5?'flex':'none';
-  const fm=document.getElementById('fin-mo');if(fm)fm.value=now.toISOString().slice(0,7);
-  const sd=document.getElementById('sm-date');if(sd)sd.value=now.toISOString().slice(0,10);
-  const wd=document.getElementById('wk-dt');if(wd)wd.value=now.toISOString().slice(0,10);
-  const ed=document.getElementById('ex-d');if(ed)ed.value=now.toISOString().slice(0,10);
-
-  // Populate settings fields
-  const sc=document.getElementById('set-pwd-ceo');if(sc)sc.value=cfg.pwdCEO;
-  const sce=document.getElementById('set-pwd-ce');if(sce)sce.value=cfg.pwdCE;
-  const sl=document.getElementById('set-lead');if(sl)sl.value=cfg.leadTarget;
-  const sb=document.getElementById('set-breakeven');if(sb)sb.value=cfg.breakEven;
-  const sg=document.getElementById('set-growth');if(sg)sg.value=cfg.growthGoal;
-
   const ceoNav=[
-    {s:'Overview'},{id:'dashboard',i:'',l:'Dashboard'},
-    {s:'Team'},{id:'ce',i:'',l:'CE Management'},{id:'reports',i:'',l:'Reports & Attendance'},
-    {s:'Business'},{id:'clients',i:'',l:'Client Work'},{id:'social',i:'',l:'Social Media'},{id:'finance',i:'',l:'Finance'},{id:'growth',i:'',l:'Growth'},
-    {s:'Personal'},{id:'waka',i:'',l:'WakawithAmi'},{id:'todo',i:'',l:'My To-Do'},
-    {s:'System'},{id:'settings',i:'',l:'Settings'},
+    {s:'Overview'},{id:'dashboard',l:'Dashboard'},
+    {s:'Team'},{id:'ce',l:'CE Management'},{id:'reports',l:'Reports & Attendance'},
+    {s:'Business'},{id:'clients',l:'Client Work'},{id:'social',l:'Social Media'},{id:'finance',l:'Finance'},{id:'growth',l:'Growth'},
+    {s:'Personal'},{id:'waka',l:'WakawithAmi'},{id:'todo',l:'My To-Do'},
+    {s:'System'},{id:'settings',l:'Settings'},
   ];
   const ceNav=[
-    {s:'Daily'},{id:'signin',i:'',l:'Sign In'},{id:'checklist',i:'',l:'Daily Checklist'},
-    {s:'Weekly'},{id:'report',i:'',l:'Weekly Report'},
-    {s:'Social'},{id:'social',i:'',l:'Social Media'},
+    {s:'Daily'},{id:'signin',l:'Sign In'},{id:'checklist',l:'Daily Checklist'},
+    {s:'Weekly'},{id:'report',l:'Weekly Report'},
+    {s:'Business'},{id:'clients',l:'Client Work'},
+    {s:'Social'},{id:'ce-social',l:'Social Media'},
   ];
   const nav=isCEO?ceoNav:ceNav;
-  const navEl=document.getElementById('sb-nav');navEl.innerHTML='';
+  const el=document.getElementById('sb-nav');
+  el.innerHTML='';
   let first=null;
   nav.forEach(item=>{
-    if(item.s){const el=document.createElement('div');el.className='sb-sec';el.textContent=item.s;navEl.appendChild(el);return;}
+    if(item.s){
+      const s=document.createElement('div');
+      s.className='sb-sec';s.textContent=item.s;el.appendChild(s);return;
+    }
     if(!first)first=item.id;
-    const el=document.createElement('div');el.className='nv';el.id='nav-'+item.id;
-    el.innerHTML=`<span class="ic">${item.i}</span><span class="lb">${item.l}</span>`;
-    el.onclick=()=>showPage('p-'+item.id);
-    navEl.appendChild(el);
+    const d=document.createElement('div');
+    d.className='nv';d.id='nav-'+item.id;
+    d.textContent=item.l;
+    d.onclick=()=>showPage('p-'+item.id);
+    el.appendChild(d);
   });
-  renderAll();buildCal();renderSIPage();
   showPage('p-'+(isCEO?'dashboard':first||'signin'));
-  // Auto refresh sign-in board every 2 minutes for CEO
-  if(isCEO){
-    setInterval(async()=>{
-      try{
-        const s=await loadFromSheet('SignIns');
-        if(s&&s.length){
-          const clean=s.filter(si=>si.role&&si.date&&!String(si.date).includes('1899')&&!String(si.date).includes('T'));
-          if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
-          renderSIBoard();renderAttLog();updSbSI();
-        }
-      }catch(e){}
-    },60000);
-  }
 }
 
 function showPage(pid){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nv').forEach(n=>n.classList.remove('active'));
   const p=document.getElementById(pid);if(p)p.classList.add('active');
-  const n=document.getElementById('nav-'+pid.replace('p-',''));if(n)n.classList.add('active');
+  const navId=pid.replace('p-','');
+  const n=document.getElementById('nav-'+navId);if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
   if(pid==='p-report')checkReportWindow();
+  if(pid==='p-checklist')renderChecklist();
 }
 
-function renderAll(){
-  renderDash();renderChk();renderTodos();renderClients();
-  renderPosts();renderWaka();renderGrowth();renderReports();
-  renderExp();renderRevHist();renderGoals();renderLeads();
-  renderFixed();renderSIBoard();renderAttLog();renderCETasks();
-  renderFinePolicy();renderConfig();
+// ══════════════════════════════════
+// SIGN IN
+// ══════════════════════════════════
+function todayStr(){
+  return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function timeStr(){
+  const n=new Date();
+  return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+}
+function isOnTime(){
+  const n=new Date();
+  return n.getHours()<9||(n.getHours()===9&&n.getMinutes()===0);
 }
 
-// ══ SETTINGS ══
-function savePwds(){
-  const c=document.getElementById('set-pwd-ceo')?.value?.trim();
-  const ce=document.getElementById('set-pwd-ce')?.value?.trim();
-  if(!c||!ce)return toast('Fill in both passwords');
-  if(c.length<4||ce.length<4)return toast('Passwords must be at least 4 characters');
-  cfg.pwdCEO=c;cfg.pwdCE=ce;S.set('v5_cfg',cfg);
-  renderConfig();toast('Passwords updated ✓');
-}
-function saveTargets(){
-  const l=parseInt(document.getElementById('set-lead')?.value);
-  const b=parseInt(document.getElementById('set-breakeven')?.value);
-  const g=parseInt(document.getElementById('set-growth')?.value);
-  if(!l||!b||!g)return toast('Fill in all targets');
-  cfg.leadTarget=l;cfg.breakEven=b;cfg.growthGoal=g;S.set('v5_cfg',cfg);
-  renderDash();renderLeads();renderGrowth();renderConfig();
-  const gd=document.getElementById('gr-goal-display');if(gd)gd.textContent='₦'+g.toLocaleString();
-  const ct=document.getElementById('ce-target-display');if(ct)ct.textContent='₦'+l.toLocaleString();
-  toast('Targets saved ✓');
-}
-function addFinePolicy(){
-  const r=document.getElementById('fp-rsn')?.value?.trim();
-  const a=parseInt(document.getElementById('fp-amt')?.value);
-  if(!r||!a)return toast('Fill in reason and amount');
-  finePolicy.push({id:Date.now(),reason:r,amount:a});
-  S.set('v5_fines',finePolicy);
-  document.getElementById('fp-rsn').value='';document.getElementById('fp-amt').value='';
-  renderFinePolicy();toast('Fine added');
-}
-function delFinePolicy(id){finePolicy=finePolicy.filter(f=>f.id!==id);S.set('v5_fines',finePolicy);renderFinePolicy();}
-function renderFinePolicy(){
-  const el=document.getElementById('fines-policy-list');if(!el)return;
-  if(!finePolicy.length){el.innerHTML='<div class="empty" style="padding:12px;"><p>No fines defined yet.</p></div>';return;}
-  el.innerHTML=finePolicy.map(f=>`
-    <div class="row">
-      <div class="rn">${f.reason}</div>
-      <div class="ra out">-₦${f.amount.toLocaleString()}</div>
-      <button class="btn btn-danger btn-sm" onclick="delFinePolicy(${f.id})" style="padding:3px 8px;">✕</button>
-    </div>`).join('');
-}
-function clearSignIns(){
-  if(!confirm('Clear all sign-in history?'))return;
-  signIns=[];
-  S.set('v5_signins',[]);
-  syncToSheet('SignIns',[]);
-  renderSIBoard();renderAttLog();updSbSI();
-  toast('Sign-in history cleared ✓');
-}
-
-function renderConfig(){
-  const el=document.getElementById('config-display');if(!el)return;
-  el.innerHTML=`
-    <div class="row"><div class="rn">CEO Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCEO}</div></div>
-    <div class="row"><div class="rn">CE Password</div><div style="font-size:13px;font-weight:600;color:var(--blue);">${cfg.pwdCE}</div></div>
-    <div class="row"><div class="rn">CE Lead Target</div><div style="font-size:13px;font-weight:600;color:var(--gold);">₦${cfg.leadTarget.toLocaleString()}</div></div>
-    <div class="row"><div class="rn">Break Even Target</div><div style="font-size:13px;font-weight:600;color:var(--danger);">₦${cfg.breakEven.toLocaleString()}</div></div>
-    <div class="row"><div class="rn">Growth Goal</div><div style="font-size:13px;font-weight:600;color:var(--success);">₦${cfg.growthGoal.toLocaleString()}</div></div>`;
-}
-
-// ══ CE TASKS ══
-function addCETask(){
-  const t=document.getElementById('new-task-txt')?.value?.trim();if(!t)return toast('Enter task description');
-  const tag=document.getElementById('new-task-tag')?.value||'d';
-  ceTasks.push({id:Date.now(),text:t,tag});S.set('v5_tasks',ceTasks);
-  document.getElementById('new-task-txt').value='';
-  renderCETasks();renderChk();toast('Task added');
-}
-function delCETask(id){ceTasks=ceTasks.filter(t=>t.id!==id);S.set('v5_tasks',ceTasks);renderCETasks();renderChk();toast('Task removed');}
-function renderCETasks(){
-  const el=document.getElementById('ce-tasks-list');if(!el)return;
-  const tm={d:'<span class="tag t-d">Daily</span>',w:'<span class="tag t-w">Weekly</span>',s:'<span class="tag t-s">Social</span>'};
-  el.innerHTML=ceTasks.map(t=>`
-    <div class="row">
-      <div class="rn">${t.text}</div>
-      ${tm[t.tag]||''}
-      <button class="btn btn-danger btn-sm" onclick="delCETask(${t.id})" style="padding:3px 8px;">✕</button>
-    </div>`).join('');
-}
-
-// ══ SIGN IN — Google Sheets as single source of truth ══
-async function doSignIn(){
-  const now=new Date();
-  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+function autoSignIn(){
+  const today=todayStr();
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
-  if(existing){toast('Already signed in today');return;}
-  const entry={
-    id:String(Date.now()),
-    role:roleLabel,
-    date:today,
-    time:timeStr,
-    record:today+' | '+timeStr+' | '+roleLabel+' | '+(onTime?'On Time':'Late'),
-    onTime:onTime?'Yes':'No'
-  };
-  signIns.push(entry);
-  S.set('v5_signins',signIns);
-  await syncToSheet('SignIns',signIns.map(s=>({
-    id:String(s.id),
-    role:String(s.role),
-    date:String(s.date),
-    time:String(s.time||''),
-    record:String(s.record||s.date),
-    onTime:String(s.onTime)
-  })));
-  renderSIPage();renderSIBoard();updSbSI();renderAttLog();
-  toast(onTime?'Signed in on time':'Signed in — noted as late');
-}
-
-async function autoSignIn(){
-  const now=new Date();
-  const today=now.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const onTime=now.getHours()<9||(now.getHours()===9&&now.getMinutes()===0);
-  try{
-    const latest=await loadFromSheet('SignIns');
-    if(latest&&latest.length){
-      const clean=latest.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T')&&!String(s.record||'').includes('1899'));
-      if(clean.length){signIns=clean;S.set('v5_signins',signIns);}
-    }
-  }catch(e){}
-  const existing=signIns.find(s=>String(s.role).trim()===roleLabel&&String(s.date).trim()===today);
-  if(!existing){
-    const entry={
-      id:String(Date.now()),
-      role:roleLabel,
-      date:today,
-      time:timeStr,
-      record:today+' | '+timeStr+' | '+roleLabel+' | '+(onTime?'On Time':'Late'),
-      onTime:onTime?'Yes':'No'
-    };
+  const already=signIns.find(s=>s.role===roleLabel&&s.date===today);
+  if(!already){
+    const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
     signIns.push(entry);
-    S.set('v5_signins',signIns);
-    await syncToSheet('SignIns',signIns.map(s=>({
-      id:String(s.id),
-      role:String(s.role),
-      date:String(s.date),
-      time:String(s.time||''),
-      record:String(s.record||s.date),
-      onTime:String(s.onTime)
-    })));
+    S.set('edu_signins',signIns);
+    pushToSheet('SignIns',signIns);
   }
-  updSbSI();renderSIBoard();renderAttLog();
+  renderSIBoard();
+  renderSIPage();
+  updSbSI();
 }
-function renderSIPage(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+function doSignIn(){
+  const today=todayStr();
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const already=signIns.find(s=>s.role===roleLabel&&s.date===today);
+  if(already){toast('Already signed in today');return;}
+  const entry={id:Date.now(),role:roleLabel,date:today,time:timeStr(),onTime:isOnTime()?'Yes':'No'};
+  signIns.push(entry);
+  S.set('edu_signins',signIns);
+  pushToSheet('SignIns',signIns);
+  renderSIBoard();renderSIPage();updSbSI();renderAttLog();
+  toast(isOnTime()?'Signed in on time':'Signed in — marked as late');
+}
+
+function updSbSI(){
+  const today=todayStr();
   const roleLabel=role==='ceo'?'CEO':'Client Executive';
   const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
-  const icon=document.getElementById('si-icon');const msg=document.getElementById('si-msg');
-  const sub=document.getElementById('si-sub');const btn=document.getElementById('si-btn');
-  if(s){
-    if(icon)icon.textContent=s.onTime==='Yes'?'Done':'⚠️';
-    if(msg)msg.textContent=s.onTime==='Yes'?'You are signed in on time!':'Signed in — marked as late.';
-    if(sub)sub.textContent='Signed in at '+s.time+' today.';
-    if(btn)btn.style.display='none';
-  }else{
-    if(icon)icon.textContent='';if(msg)msg.textContent="You haven't signed in yet today.";
-    if(sub)sub.textContent='Sign in before 9am to be on time.';if(btn)btn.style.display='inline-block';
-  }
-  const hist=document.getElementById('si-hist');
-  if(hist){
-    const mine=signIns.filter(s=>s.role===(role==='ceo'?'CEO':'Client Executive')).slice(-10).reverse();
-    if(!mine.length){hist.innerHTML='<div class="empty"><p>No history yet.</p></div>';return;}
-    hist.innerHTML=mine.map(s=>`<div class="row"><div class="rn">${s.date}</div><span style="font-size:12px;color:var(--text-light);">${s.time}</span><span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span></div>`).join('');
-  }
-}
-function renderAttLog(){
-  const el=document.getElementById('att-log');if(!el)return;
-  if(!signIns.length){el.innerHTML='<div class="empty"><p>No sign-ins yet.</p></div>';return;}
-  el.innerHTML=[...signIns].reverse().slice(0,20).map(s=>`
-    <div class="row">
-      <div class="rn">${s.role==='CEO'?'Aminat (CEO)':'Client Executive'}</div>
-      <span style="font-size:12px;color:var(--text-light);">${s.date||''} ${s.time?'· '+s.time:''}</span>
-      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
-    </div>`).join('');
-}
-
-function renderSIBoard(){
-  const el=document.getElementById('si-board');if(!el)return;
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  el.innerHTML=TEAM.map(t=>{
-    const roleLabel=t.role==='ceo'?'CEO':'Client Executive';
-    const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
-    return `<div class="si-card${s?' signed':''}">
-      <div class="si-av">${t.av}</div>
-      <div class="si-nm">${t.name}</div>
-      <div class="si-rl">${t.title}</div>
-      ${s?`<span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
-      <div style="font-size:12px;font-weight:600;margin-top:5px;color:var(--text-mid);">${s.time||''}</div>`:
-      `<span class="pill p-gray">Not Signed In</span>`}
-    </div>`;
-  }).join('');
-}
-function updSbSI(){
-  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const roleLabel=role==='ceo'?'CEO':'Client Executive';
-  const s=signIns.find(si=>String(si.role).trim()===roleLabel&&String(si.date).trim()===today);
-  const v=document.getElementById('sb-si-v');const t=document.getElementById('sb-si-t');
+  const v=document.getElementById('sb-si-v');
+  const t=document.getElementById('sb-si-t');
   if(s){
     if(v)v.textContent=s.onTime==='Yes'?'On Time':'Late';
-    if(t)t.textContent=s.time||'';
+    if(t)t.textContent=s.time;
   }else{
     if(v)v.textContent='Not signed in';
     if(t)t.textContent='';
   }
 }
 
-// ══ CALENDAR ══
-function buildCal(){
-  const el=document.getElementById('cal-grid');if(!el)return;
-  const now=new Date();
-  if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
-  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const firstDay=new Date(calYear,calMonth,1).getDay();
-  const startOffset=firstDay===0?6:firstDay-1;
-  const lbl=document.getElementById('cal-lbl');if(lbl)lbl.textContent=monthNames[calMonth]+' '+calYear;
-  let html=days.map(d=>`<div class="cal-hd">${d}</div>`).join('');
-  for(let i=0;i<startOffset;i++)html+=`<div class="cal-d" style="background:transparent;border-color:transparent;cursor:default;min-height:68px;"></div>`;
-  for(let i=1;i<=daysInMonth;i++){
-    const mm=String(calMonth+1).padStart(2,'0');const dd=String(i).padStart(2,'0');
-    const dateStr=`${calYear}-${mm}-${dd}`;
-    const cleanDateStr=`${dd}/${mm}/${calYear}`;
-    const dp=posts.filter(p=>p.date===cleanDateStr||p.date===dateStr);
-    const isToday=now.getDate()===i&&now.getMonth()===calMonth&&now.getFullYear()===calYear;
-    const dots=dp.map(p=>`<span class="cdot ${p.plat==='Instagram'?'c-ig':p.plat==='TikTok'?'c-tt':'c-fb'}"></span>`).join('');
-    const dayIdx=(startOffset+i-1)%7;
-    html+=`<div class="cal-d${dp.length?' has':''}${isToday?' today':''}" onclick="setDate('${dateStr}')">
-      <div class="cal-dt">${i}</div>
-      <div class="cal-dots">${dots}</div>
-      ${dp.length?`<div style="font-size:8px;color:var(--text-light);margin-top:2px;">${dp.length} post${dp.length>1?'s':''}</div>`:''}
+function renderSIBoard(){
+  const el=document.getElementById('si-board');if(!el)return;
+  const today=todayStr();
+  const team=[{role:'CEO',name:'Aminat',av:'A'},{role:'Client Executive',name:'Client Executive',av:'CE'}];
+  el.innerHTML=team.map(t=>{
+    const s=signIns.find(si=>si.role===t.role&&si.date===today);
+    return `<div class="si-card${s?' signed':''}">
+      <div class="si-av">${t.av}</div>
+      <div class="si-nm">${t.name}</div>
+      <div class="si-rl">${t.role}</div>
+      ${s?`<span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span><div style="font-size:13px;font-weight:700;margin-top:6px;color:var(--navy);">${s.time}</div>`:`<span class="pill p-gray">Not Signed In</span>`}
     </div>`;
-  }
-  el.innerHTML=html;
-}
-function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}buildCal();}
-function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}buildCal();}
-function setDate(d){const el=document.getElementById('sm-date');if(el){el.value=d;document.getElementById('sm-topic')?.focus();}toast('Date set to '+d);}
-
-// ══ DASHBOARD ══
-function renderDash(){
-  const rev=revHist.length?revHist[revHist.length-1].amount:0;
-  const el=document.getElementById('d-rev');if(el)el.textContent='₦'+rev.toLocaleString();
-  const rs=document.getElementById('d-rev-sub');if(rs)rs.textContent='Break even: ₦'+cfg.breakEven.toLocaleString();
-  const pct=Math.min(Math.round((leadsAmt/cfg.leadTarget)*100),100);
-  const lel=document.getElementById('d-lead');if(lel)lel.textContent=pct+'%';
-  const ls=document.getElementById('d-lead-sub');if(ls)ls.textContent='of ₦'+cfg.leadTarget.toLocaleString();
-  const ac=clients.filter(c=>c.status!=='Completed').length;
-  const cel=document.getElementById('d-clients');if(cel)cel.textContent=ac;
-  const rep=reports[reports.length-1];
-  const rel=document.getElementById('d-report');if(rel)rel.textContent=rep?'Done':'-';
-  const rb=document.getElementById('d-rev-b');if(rb)rb.style.width=Math.min((rev/cfg.breakEven)*100,100)+'%';
-  const rl=document.getElementById('d-rev-l');if(rl)rl.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.breakEven.toLocaleString();
-  const lb=document.getElementById('d-lead-b');if(lb)lb.style.width=pct+'%';
-  const ll=document.getElementById('d-lead-l');if(ll)ll.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
-  const gb=document.getElementById('d-gr-b');if(gb)gb.style.width=Math.min((rev/cfg.growthGoal)*100,100)+'%';
-  const gl=document.getElementById('d-gr-l');if(gl)gl.textContent='₦'+rev.toLocaleString()+' / ₦'+cfg.growthGoal.toLocaleString();
-  const gc=document.getElementById('gr-clients');if(gc)gc.textContent=clients.length;
-  const gd=document.getElementById('gr-goal-display');if(gd)gd.textContent='₦'+cfg.growthGoal.toLocaleString();
-  const ct=document.getElementById('ce-target-display');if(ct)ct.textContent='₦'+cfg.leadTarget.toLocaleString();
-
-  // CE Checklist on dashboard
-  const dcp=document.getElementById('d-chk-prog');
-  const dci=document.getElementById('d-chk-items');
-  if(dcp&&dci){
-    const done=ceTasks.filter(t=>chk[t.id]).length;
-    const total=ceTasks.length;
-    const pct=Math.round((done/total)*100);
-    dcp.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${total} tasks completed</span><span style="font-weight:700;color:${pct===100?'var(--success)':pct>=50?'var(--gold)':'var(--danger)'};">${pct}%</span></div><div class="pb"><div class="pf ${pct===100?'green':pct>=50?'gold':''}" style="width:${pct}%"></div></div></div>`;
-    dci.innerHTML=ceTasks.map(t=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
-        <span style="font-size:14px;">${chk[t.id]?'Done':'-'}</span>
-        <span style="flex:1;color:${chk[t.id]?'var(--text-light)':'var(--text)'};${chk[t.id]?'text-decoration:line-through;':''}">${t.text}</span>
-      </div>`).join('');
-  }
-
-  // Latest Friday Report on dashboard
-  const dlr=document.getElementById('d-latest-report');
-  if(dlr){
-    const last=reports[reports.length-1];
-    if(!last){dlr.innerHTML='<div class="empty" style="padding:12px;"><p>No reports submitted yet.</p></div>';}
-    else{dlr.innerHTML=`
-      <div style="padding:8px 0;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:13px;font-weight:600;">${last.date}</span>
-          <span class="pill ${last.onTime?'p-green':'p-warn'}">${last.onTime?'On Time':'Off-day'}</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">${last.newLeads} new leads · ${last.converted} converted</div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">₦${parseInt(last.revenue||0).toLocaleString()} · ${last.posts} posts</div>
-        ${last.complaints&&last.complaints!=='None'?`<div style="font-size:12px;color:var(--danger);margin-top:4px;">Note: ${last.complaints}</div>`:'<div style="font-size:12px;color:var(--success);">No complaints</div>'}
-      </div>`;}
-  }
-}
-
-// ══ CHECKLIST ══
-function renderChk(){
-  const el=document.getElementById('chk-items');if(!el)return;
-  const today=new Date().toDateString();
-  if(chk.date!==today){chk={date:today};S.set('v5_chk',chk);}
-  const tm={d:'<span class="tag t-d">Daily</span>',w:'<span class="tag t-w">Weekly</span>',s:'<span class="tag t-s">Social</span>'};
-  el.innerHTML=ceTasks.map(t=>{
-    const done=chk[t.id]===true;
-    return `<div class="ci${done?' done':''}" id="ci-${t.id}">
-      <input type="checkbox" id="c-${t.id}" ${done?'checked':''} onchange="togChk(${t.id})">
-      <label for="c-${t.id}">${t.text}</label>${tm[t.tag]||''}</div>`;
   }).join('');
-  const done=ceTasks.filter(t=>chk[t.id]).length;
-  const prog=document.getElementById('chk-prog');
-  if(prog){const pct=Math.round((done/ceTasks.length)*100);prog.innerHTML=`<div class="pw" style="margin:0"><div class="pl"><span>${done}/${ceTasks.length} tasks</span><span>${pct}%</span></div><div class="pb"><div class="pf" style="width:${pct}%"></div></div></div>`;}
 }
+
+function renderSIPage(){
+  const today=todayStr();
+  const roleLabel=role==='ceo'?'CEO':'Client Executive';
+  const s=signIns.find(si=>si.role===roleLabel&&si.date===today);
+  const icon=document.getElementById('si-icon');
+  const msg=document.getElementById('si-msg');
+  const sub=document.getElementById('si-sub');
+  const btn=document.getElementById('si-btn');
+  if(s){
+    if(icon)icon.textContent=s.onTime==='Yes'?'✅':'⚠️';
+    if(msg)msg.textContent=s.onTime==='Yes'?'Signed in on time!':'Signed in — marked as late.';
+    if(sub)sub.textContent='Signed in at '+s.time+' today.';
+    if(btn)btn.style.display='none';
+  }else{
+    if(icon)icon.textContent='🕐';
+    if(msg)msg.textContent="You haven't signed in yet today.";
+    if(sub)sub.textContent='Sign in before 9am to be on time.';
+    if(btn)btn.style.display='inline-block';
+  }
+}
+
+function renderAttLog(){
+  const el=document.getElementById('att-log');if(!el)return;
+  if(!signIns.length){el.innerHTML='<div class="empty">No sign-ins yet.</div>';return;}
+  el.innerHTML=[...signIns].reverse().slice(0,30).map(s=>`
+    <div class="row">
+      <div class="rn">${s.role==='CEO'?'Aminat (CEO)':'Client Executive'}</div>
+      <span style="font-size:12px;color:var(--text-light);">${s.date} · ${s.time}</span>
+      <span class="pill ${s.onTime==='Yes'?'p-green':'p-warn'}">${s.onTime==='Yes'?'On Time':'Late'}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════
+function renderChecklist(){
+  const el=document.getElementById('checklist-items');if(!el)return;
+  const today=todayStr();
+  if(checklist.date!==today){
+    checklist={items:ceTasks.map(t=>({id:t.id,text:t.text,done:false})),date:today};
+    S.set('edu_checklist',checklist);
+  }
+  const done=checklist.items.filter(i=>i.done).length;
+  const total=checklist.items.length;
+  const pct=total?Math.round((done/total)*100):0;
+  const prog=document.getElementById('chk-progress-text');
+  const bar=document.getElementById('chk-progress-bar');
+  if(prog)prog.textContent=`${done}/${total} completed — ${pct}%`;
+  if(bar)bar.style.width=pct+'%';
+  el.innerHTML=checklist.items.map(item=>`
+    <div class="ck-item">
+      <input type="checkbox" ${item.done?'checked':''} onchange="togChk(${item.id})">
+      <span class="ck-text${item.done?' done':''}">${item.text}</span>
+      <button class="btn btn-ghost btn-sm" onclick="delChkItem(${item.id})">✕</button>
+    </div>`).join('');
+  renderDashChecklist();
+  pushToSheet('Checklist',[{date:today,completed:done,total,pct:pct+'%',items:checklist.items.map(i=>i.text+':'+(i.done?'Done':'Pending')).join('|')}]);
+}
+
 function togChk(id){
-  chk[id]=!chk[id];S.set('v5_chk',chk);renderChk();
-  // Sync checklist state to Google Sheets
-  const done=ceTasks.filter(t=>chk[t.id]).length;
-  const total=ceTasks.length;
-  const pct=Math.round((done/total)*100);
-  syncToSheet('Checklist',[{date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),completed:done,total,percentage:pct+'%',tasks:ceTasks.map(t=>t.text+': '+(chk[t.id]?'Done':'-')).join(' | ')}]);
-}
-function resetChk(){chk={date:new Date().toDateString()};S.set('v5_chk',chk);renderChk();toast('Checklist reset for today');}
-
-// ══ LEADS ══
-function renderLeads(){
-  const pct=Math.min(Math.round((leadsAmt/cfg.leadTarget)*100),100);
-  ['ce-lead-b','ce-prog-b'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.width=pct+'%';});
-  const ll=document.getElementById('ce-lead-l');if(ll)ll.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
-  const pl=document.getElementById('ce-prog-l');if(pl)pl.textContent='₦'+leadsAmt.toLocaleString()+' / ₦'+cfg.leadTarget.toLocaleString();
-}
-function updateLeads(){
-  const v=parseInt(document.getElementById('lead-i')?.value);if(!v||v<0)return toast('Enter valid amount');
-  leadsAmt=v;S.set('v5_leads',leadsAmt);document.getElementById('lead-i').value='';
-  renderLeads();renderDash();toast('Lead target updated');
+  checklist.items=checklist.items.map(i=>i.id===id?{...i,done:!i.done}:i);
+  S.set('edu_checklist',checklist);
+  renderChecklist();
 }
 
-// ══ REPORT ══
+function delChkItem(id){
+  checklist.items=checklist.items.filter(i=>i.id!==id);
+  S.set('edu_checklist',checklist);
+  renderChecklist();
+}
+
+function addChecklistItem(){
+  const inp=document.getElementById('chk-new');
+  const txt=inp?.value?.trim();if(!txt)return;
+  const newId=Date.now();
+  ceTasks.push({id:newId,text:txt});
+  S.set('edu_cetasks',ceTasks);
+  checklist.items.push({id:newId,text:txt,done:false});
+  S.set('edu_checklist',checklist);
+  inp.value='';
+  renderChecklist();
+  renderCETasks();
+  toast('Task added');
+}
+
+function resetChecklist(){
+  checklist={items:ceTasks.map(t=>({id:t.id,text:t.text,done:false})),date:todayStr()};
+  S.set('edu_checklist',checklist);
+  renderChecklist();
+  toast('Checklist reset');
+}
+
+function renderDashChecklist(){
+  const el=document.getElementById('d-chk-prog');if(!el)return;
+  const today=todayStr();
+  if(checklist.date!==today){el.innerHTML='<div style="color:var(--text-light);font-size:13px;">No checklist data for today.</div>';return;}
+  const done=checklist.items.filter(i=>i.done).length;
+  const total=checklist.items.length;
+  const pct=total?Math.round((done/total)*100):0;
+  el.innerHTML=`
+    <div class="pw"><div class="pl"><span>${done}/${total} tasks</span><span style="font-weight:700;color:${pct===100?'var(--green)':pct>=50?'var(--amber)':'var(--red)'};">${pct}%</span></div><div class="pb"><div class="pf ${pct===100?'green':pct>=50?'gold':''}" style="width:${pct}%"></div></div></div>
+    ${checklist.items.slice(0,5).map(i=>`<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:12px;"><span>${i.done?'✅':'⏳'}</span><span style="${i.done?'text-decoration:line-through;color:var(--text-light);':''}">${i.text}</span></div>`).join('')}`;
+}
+
+// ══════════════════════════════════
+// REPORT
+// ══════════════════════════════════
 function checkReportWindow(){
   const now=new Date();
-  const day=now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const day=now.getDay();// 6=Sat
   const hour=now.getHours();
-  const warn=document.getElementById('report-warning');
-  const wrap=document.getElementById('report-form-wrap');
-  if(!warn||!wrap)return;
-
+  const el=document.getElementById('report-status');
+  const form=document.getElementById('report-form');
+  if(!el)return;
   if(day===6&&hour<14){
-    // Saturday before 2pm — window is OPEN
-    warn.className='alert a-success';
-    warn.textContent='Report window is open! Submit before 2pm today (Saturday).';
-    warn.style.display='flex';
-    wrap.style.display='block';
-  } else if(day===6&&hour>=14){
-    // Saturday after 2pm — LOCKED
-    warn.className='alert a-warn';
-    warn.textContent='🔒 Report window is closed. Deadline was Saturday 2pm. This counts as a missed report.';
-    warn.style.display='flex';
-    wrap.style.display='none';
-  } else if(day===5){
-    // Friday — remind her
-    warn.className='alert a-info';
-    warn.textContent='📅 Report is due tomorrow — Saturday before 2pm.';
-    warn.style.display='flex';
-    wrap.style.display='block';
-  } else {
-    // Other days
-    warn.className='alert a-info';
-    warn.textContent='📅 Weekly report is due every Saturday before 2pm.';
-    warn.style.display='flex';
-    wrap.style.display='block';
+    el.className='alert a-success';el.textContent='Report window is open — submit before 2pm today (Saturday).';
+    if(form)form.style.display='block';
+  }else if(day===6&&hour>=14){
+    el.className='alert a-warn';el.textContent='Report window closed — deadline was Saturday 2pm.';
+    if(form)form.style.display='none';
+  }else if(day===5){
+    el.className='alert a-info';el.textContent='Report due tomorrow — Saturday before 2pm.';
+    if(form)form.style.display='block';
+  }else{
+    el.className='alert a-info';el.textContent='Weekly report is due every Saturday before 2pm.';
+    if(form)form.style.display='block';
   }
 }
 
 function submitReport(){
   const now=new Date();
-  const day=now.getDay();
-  const hour=now.getHours();
-  // Block submission after Saturday 2pm
-  if(day===6&&hour>=14)return toast(' Report deadline has passed — Saturday 2pm');
-  const vals=['r-nl','r-fu','r-cv','r-rv'].map(f=>document.getElementById(f)?.value?.trim());
-  if(vals.some(v=>!v))return toast('Fill in all required fields');
-  const onTime=day===6&&hour<14;
-  reports.push({id:Date.now(),date:now.toLocaleDateString('en-GB'),newLeads:vals[0],followedUp:vals[1],converted:vals[2],revenue:vals[3],posts:document.getElementById('r-sp')?.value||0,complaints:document.getElementById('r-cc')?.value||'None',pending:document.getElementById('r-pt')?.value||'None',plan:document.getElementById('r-pf')?.value||'',onTime});
-  S.set('v5_reports',reports);
-  ['r-nl','r-fu','r-cv','r-rv','r-sp','r-cc','r-pt','r-pf'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
-  renderReports();renderDash();toast('Report submitted ✓');
-  syncToSheet('Reports',reports);
+  if(now.getDay()===6&&now.getHours()>=14){toast('Deadline passed — Saturday 2pm');return;}
+  const vals={
+    leads:document.getElementById('r-leads')?.value||0,
+    followup:document.getElementById('r-followup')?.value||0,
+    converted:document.getElementById('r-converted')?.value||0,
+    revenue:document.getElementById('r-revenue')?.value||0,
+    posts:document.getElementById('r-posts')?.value||0,
+    complaints:document.getElementById('r-complaints')?.value||'None',
+    pending:document.getElementById('r-pending')?.value||'None',
+    plan:document.getElementById('r-plan')?.value||'',
+  };
+  reports.push({id:Date.now(),date:todayStr(),...vals,onTime:now.getDay()===6&&now.getHours()<14});
+  S.set('edu_reports',reports);
+  pushToSheet('Reports',reports);
+  ['r-leads','r-followup','r-converted','r-revenue','r-posts','r-complaints','r-pending','r-plan'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  renderReports();renderDash();
+  toast('Report submitted');
 }
+
 function renderReports(){
   const el=document.getElementById('reports-list');if(!el)return;
-  if(!reports.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No reports yet.</p></div>';return;}
+  if(!reports.length){el.innerHTML='<div class="empty">No reports yet.</div>';return;}
   el.innerHTML=[...reports].reverse().map(r=>`
-    <div style="padding:12px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:13px;font-weight:600;">${r.date}</span>
-        <span class="pill ${r.onTime?'p-green':'p-warn'}">${r.onTime?'On Time':'Off-day'}</span>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-weight:700;">${r.date}</span>
+        <span class="pill ${r.onTime?'p-green':'p-warn'}">${r.onTime?'On Time':'Late'}</span>
       </div>
-      <div style="font-size:12px;color:var(--text-light);">${r.newLeads} leads · ${r.converted} converted · ₦${parseInt(r.revenue||0).toLocaleString()} · ${r.posts} posts</div>
-      ${r.complaints&&r.complaints!=='None'?`<div style="font-size:12px;color:var(--danger);margin-top:4px;">Note: ${r.complaints}</div>`:''}
+      <div style="font-size:12px;color:var(--text-mid);">
+        ${r.leads} new leads · ${r.converted} converted · ₦${parseInt(r.revenue||0).toLocaleString()} · ${r.posts} posts
+      </div>
+      ${r.complaints&&r.complaints!=='None'?`<div style="font-size:12px;color:var(--red);margin-top:4px;">Issues: ${r.complaints}</div>`:''}
     </div>`).join('');
 }
 
-// ══ FINANCE ══
-function logRev(){
-  const m=document.getElementById('fin-mo')?.value;const a=parseInt(document.getElementById('fin-amt')?.value);
-  if(!m||!a||a<0)return toast('Fill in month and amount');
-  const idx=revHist.findIndex(r=>r.month===m);
-  if(idx>=0)revHist[idx].amount=a;else revHist.push({month:m,amount:a});
-  S.set('v5_rev',revHist);document.getElementById('fin-amt').value='';
-  renderRevHist();renderDash();renderGrowth();toast('Revenue logged');
-  syncToSheet('Revenue',revHist);
-}
-function renderRevHist(){
-  const el=document.getElementById('rev-hist');if(!el)return;
-  const fr=document.getElementById('fin-rev');
-  if(fr&&revHist.length)fr.textContent='₦'+revHist[revHist.length-1].amount.toLocaleString();
-  if(!revHist.length){el.innerHTML='';return;}
-  el.innerHTML='<div style="margin-top:12px;font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">History</div>'+
-    [...revHist].reverse().slice(0,6).map(r=>`<div class="row"><div class="rn">${r.month}</div><div class="ra in">+₦${r.amount.toLocaleString()}</div></div>`).join('');
-}
-function renderFixed(){
-  const el=document.getElementById('fixed-list');if(!el)return;
-  const cc={Salary:'p-green',Personal:'p-blue',Operations:'p-gold',Other:'p-gray'};
-  el.innerHTML=fixed.map(f=>`
-    <div class="row">
-      <div class="rn">${f.name}</div>
-      <span class="pill ${cc[f.cat]||'p-gray'}">${f.cat}</span>
-      <div style="display:flex;align-items:center;gap:5px;">
-        <div class="ra out">-₦${f.amount.toLocaleString()}</div>
-        <button class="btn btn-ghost btn-sm" onclick="editFixed(${f.id})" style="padding:3px 8px;font-size:10px;">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="delFixed(${f.id})" style="padding:3px 8px;font-size:10px;">✕</button>
-      </div>
-    </div>`).join('');
-  const total=fixed.reduce((s,f)=>s+f.amount,0);
-  const tel=document.getElementById('fixed-total');if(tel)tel.textContent='-₦'+total.toLocaleString();
-  const ftl=document.getElementById('fin-fixed');if(ftl)ftl.textContent='₦'+total.toLocaleString();
-}
-function editFixed(id){
-  const item=fixed.find(f=>f.id===id);if(!item)return;
-  const n=prompt('Name:',item.name);if(!n)return;
-  const a=parseInt(prompt('Amount (₦):',item.amount));if(!a||a<0)return;
-  item.name=n;item.amount=a;S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Updated ✓');
-}
-function delFixed(id){
-  if(!confirm('Remove this item?'))return;
-  fixed=fixed.filter(f=>f.id!==id);S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Removed');
-}
-function addFixed(){
-  const n=prompt('Name:');if(!n)return;
-  const a=parseInt(prompt('Monthly amount (₦):'));if(!a||a<0)return;
-  const c=prompt('Category (Salary/Personal/Operations/Other):','Salary')||'Other';
-  fixed.push({id:Date.now(),name:n,amount:a,cat:c});
-  S.set('v5_fixed',fixed);renderFixed();renderDash();toast('Item added');
-}
-function addExp(){
-  const n=document.getElementById('ex-n')?.value?.trim();const a=parseInt(document.getElementById('ex-a')?.value);
-  if(!n||!a)return toast('Fill in name and amount');
-  expenses.push({id:Date.now(),name:n,amount:a,cat:document.getElementById('ex-c')?.value,date:document.getElementById('ex-d')?.value});
-  S.set('v5_exp',expenses);document.getElementById('ex-n').value='';document.getElementById('ex-a').value='';
-  renderExp();toast('Expense added');
-  syncToSheet('Expenses',expenses);
-}
-function editExp(id){
-  const e=expenses.find(x=>x.id==id);if(!e)return;
-  const name=prompt('Edit expense name:',e.name);if(name===null)return;
-  const amount=prompt('Edit amount:',e.amount);if(amount===null)return;
-  expenses=expenses.map(x=>x.id==id?{...x,name,amount:parseInt(amount)||x.amount}:x);
-  S.set('v5_exp',expenses);renderExp();syncToSheet('Expenses',expenses);toast('Expense updated');
-}
-function delExp(id){expenses=expenses.filter(e=>e.id!==id);S.set('v5_exp',expenses);renderExp();syncToSheet('Expenses',expenses);}
-function renderExp(){
-  const el=document.getElementById('exp-list');if(!el)return;
-  if(!expenses.length){el.innerHTML='';return;}
-  el.innerHTML='<div style="margin-top:4px;font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Additional Expenses</div>'+
-    expenses.map(e=>`
-      <div class="row">
-        <div class="rn">${e.name} <span style="font-size:11px;color:var(--text-light);">${e.date||''}</span></div>
-        <span class="pill p-gray">${e.cat}</span>
-        <div class="ra out">-₦${e.amount.toLocaleString()}</div>
-        <button class="btn btn-ghost btn-sm" onclick="editExp(${e.id})" style="padding:3px 8px;font-size:10px;">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="delExp(${e.id})" style="padding:3px 8px;">✕</button>
-      </div>`).join('');
-}
-
-// ══ CLIENTS ══
+// ══════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════
 function addClient(){
-  const n=document.getElementById('cl-n')?.value?.trim();if(!n)return toast('Enter client name');
-  clients.push({id:Date.now(),name:n,type:document.getElementById('cl-t')?.value,dest:document.getElementById('cl-d')?.value,status:document.getElementById('cl-s')?.value,paid:parseInt(document.getElementById('cl-p')?.value)||0,balance:parseInt(document.getElementById('cl-b')?.value)||0,drive:document.getElementById('cl-dr')?.value,notes:document.getElementById('cl-no')?.value,added:new Date().toLocaleDateString('en-GB')});
-  S.set('v5_clients',clients);
-  ['cl-n','cl-d','cl-p','cl-b','cl-dr','cl-no'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
-  renderClients();renderDash();toast('Client added');
-  syncToSheet('Clients',clients);
+  const name=document.getElementById('cl-name')?.value?.trim();if(!name)return toast('Enter client name');
+  const client={
+    id:Date.now(),
+    name,
+    type:document.getElementById('cl-type')?.value,
+    dest:document.getElementById('cl-dest')?.value,
+    status:document.getElementById('cl-status')?.value||'New Enquiry',
+    paid:parseInt(document.getElementById('cl-paid')?.value)||0,
+    balance:parseInt(document.getElementById('cl-balance')?.value)||0,
+    drive:document.getElementById('cl-drive')?.value||'',
+    notes:document.getElementById('cl-notes')?.value||'',
+    added:todayStr()
+  };
+  clients.push(client);
+  S.set('edu_clients',clients);
+  pushToSheet('Clients',clients);
+  ['cl-name','cl-dest','cl-paid','cl-balance','cl-drive','cl-notes'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  renderClients();renderDash();
+  toast('Client added');
 }
-function delClient(id){clients=clients.filter(c=>c.id!==id);S.set('v5_clients',clients);renderClients();renderDash();syncToSheet('Clients',clients);}
-function updStatus(id,s){clients=clients.map(c=>c.id==id?{...c,status:s}:c);S.set('v5_clients',clients);syncToSheet('Clients',clients);}
-function updClientNotes(id,notes){clients=clients.map(c=>c.id==id?{...c,notes}:c);S.set('v5_clients',clients);syncToSheet('Clients',clients);}
-function updClientDrive(id,drive){clients=clients.map(c=>c.id==id?{...c,drive}:c);S.set('v5_clients',clients);syncToSheet('Clients',clients);renderClients();}
-function updClientPaid(id,paid){clients=clients.map(c=>c.id==id?{...c,paid:parseInt(paid)||0}:c);S.set('v5_clients',clients);syncToSheet('Clients',clients);}
-function updClientBalance(id,balance){clients=clients.map(c=>c.id==id?{...c,balance:parseInt(balance)||0}:c);S.set('v5_clients',clients);syncToSheet('Clients',clients);}
-const SC={'New Enquiry':'p-blue','Documents Pending':'p-warn','In Progress':'p-warn','Submitted':'p-blue','Approved':'p-green','Completed':'p-green','On Hold':'p-gray'};
+
+function delClient(id){
+  if(!confirm('Delete this client?'))return;
+  clients=clients.filter(c=>c.id!==id);
+  S.set('edu_clients',clients);
+  pushToSheet('Clients',clients);
+  renderClients();renderDash();
+}
+
+function updClient(id,field,val){
+  clients=clients.map(c=>c.id==id?{...c,[field]:val}:c);
+  S.set('edu_clients',clients);
+  pushToSheet('Clients',clients);
+}
+
 function renderClients(){
   const el=document.getElementById('clients-list');if(!el)return;
-  if(!clients.length){el.innerHTML='<div class="empty"><div class="ei">👤</div><p>No clients yet.</p></div>';return;}
+  if(!clients.length){el.innerHTML='<div class="empty">No clients yet.</div>';return;}
+  const statColors={'New Enquiry':'p-blue','Documents Pending':'p-warn','In Progress':'p-warn','Submitted':'p-blue','Approved':'p-green','Completed':'p-green','On Hold':'p-gray'};
   el.innerHTML=clients.map(c=>`
-    <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div><div style="font-size:14px;font-weight:600;">${c.name}</div>
-        <div style="font-size:11px;color:var(--text-light);">${c.type}${c.dest?' → '+c.dest:''} · Added ${c.added}</div></div>
-        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
-          <select class="pill ${SC[c.status]||'p-gray'}" onchange="updStatus(${c.id},this.value)" style="border:none;font-size:9px;font-weight:700;text-transform:uppercase;cursor:pointer;padding:2px 8px;border-radius:20px;">
+    <div class="client-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;">${c.name}</div>
+          <div style="font-size:11px;color:var(--text-light);">${c.type}${c.dest?' → '+c.dest:''} · Added ${c.added}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select class="pill ${statColors[c.status]||'p-gray'}" onchange="updClient(${c.id},'status',this.value)" style="border:none;cursor:pointer;font-size:10px;font-weight:700;text-transform:uppercase;">
             ${['New Enquiry','Documents Pending','In Progress','Submitted','Approved','Completed','On Hold'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}
           </select>
-          <button class="btn btn-danger btn-sm" onclick="delClient(${c.id})" style="padding:3px 8px;">✕</button>
+          <button class="btn btn-red btn-sm" onclick="delClient(${c.id})">✕</button>
         </div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:11px;color:var(--text-light);">Paid ₦</span>
-          <input type="number" value="${c.paid||0}" onchange="updClientPaid(${c.id},this.value)" style="width:90px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Paid ₦</div>
+          <input type="number" value="${c.paid||0}" onchange="updClient(${c.id},'paid',parseInt(this.value)||0)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:13px;font-weight:600;">
         </div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:11px;color:var(--text-light);">Balance ₦</span>
-          <input type="number" value="${c.balance||0}" onchange="updClientBalance(${c.id},this.value)" style="width:90px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;">
+        <div>
+          <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Balance ₦</div>
+          <input type="number" value="${c.balance||0}" onchange="updClient(${c.id},'balance',parseInt(this.value)||0)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:13px;font-weight:600;">
         </div>
       </div>
       <div style="margin-bottom:8px;">
-        <div style="font-size:11px;color:var(--text-light);margin-bottom:3px;">Google Drive Link</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="text" value="${c.drive||''}" placeholder="Paste Drive link here" onchange="updClientDrive(${c.id},this.value)" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;">
-          ${c.drive?`<a href="${c.drive}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="padding:3px 10px;font-size:11px;text-decoration:none;">Open Drive</a>`:''}
+        <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Google Drive Link</div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" value="${c.drive||''}" placeholder="Paste Drive link..." onchange="updClient(${c.id},'drive',this.value)" style="flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:12px;">
+          ${c.drive?`<a href="${c.drive}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="text-decoration:none;white-space:nowrap;">Open Drive</a>`:''}
         </div>
       </div>
       <div>
-        <div style="font-size:11px;color:var(--text-light);margin-bottom:3px;">📝 Notes</div>
-        <textarea onchange="updClientNotes(${c.id},this.value)" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'Rubik',sans-serif;resize:vertical;min-height:50px;">${c.notes||''}</textarea>
+        <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Notes</div>
+        <textarea onchange="updClient(${c.id},'notes',this.value)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:12px;resize:vertical;min-height:50px;">${c.notes||''}</textarea>
       </div>
     </div>`).join('');
 }
 
-// ══ POSTS ══
+// ══════════════════════════════════
+// POSTS
+// ══════════════════════════════════
 function addPost(){
   const t=document.getElementById('sm-topic')?.value?.trim();if(!t)return toast('Enter post topic');
   const rawDate=document.getElementById('sm-date')?.value||'';
-  const cleanDate=rawDate?rawDate.split('T')[0].split('-').reverse().join('/'):new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const cleanDate=rawDate?rawDate.split('-').reverse().join('/'):todayStr();
   posts.push({id:Date.now(),topic:t,date:cleanDate,plat:document.getElementById('sm-plat')?.value,status:document.getElementById('sm-st')?.value,type:document.getElementById('sm-type')?.value});
-  S.set('v5_posts',posts);document.getElementById('sm-topic').value='';
-  renderPosts();buildCal();toast('Post logged');
-  syncToSheet('Posts',posts);
+  S.set('edu_posts',posts);
+  pushToSheet('Posts',posts);
+  document.getElementById('sm-topic').value='';
+  renderPosts();toast('Post logged');
 }
-function delPost(id){posts=posts.filter(p=>p.id!==id);S.set('v5_posts',posts);renderPosts();buildCal();}
-const PC={Instagram:'p-red',TikTok:'p-red',Facebook:'p-blue','All Platforms':'p-blue'};
-const SC2={Scheduled:'p-warn',Published:'p-green','Pending Design':'p-red',Draft:'p-gray'};
+
 function updPostStatus(id,status){
   posts=posts.map(p=>p.id==id?{...p,status}:p);
-  S.set('v5_posts',posts);
-  renderPosts();buildCal();
-  syncToSheet('Posts',posts);
-  toast('Status updated to '+status);
+  S.set('edu_posts',posts);
+  pushToSheet('Posts',posts);
+  renderPosts();
+}
+
+function delPost(id){
+  posts=posts.filter(p=>p.id!==id);
+  S.set('edu_posts',posts);
+  pushToSheet('Posts',posts);
+  renderPosts();
 }
 
 function renderPosts(){
@@ -1440,170 +1057,434 @@ function renderPosts(){
   const tot=document.getElementById('sm-tot');if(tot)tot.textContent=posts.length;
   const pub=document.getElementById('sm-pub');if(pub)pub.textContent=posts.filter(p=>p.status==='Published').length;
   const sch=document.getElementById('sm-sch');if(sch)sch.textContent=posts.filter(p=>p.status==='Scheduled').length;
-  if(!posts.length){el.innerHTML='<div class="empty"><div class="ei">📱</div><p>No posts logged yet.</p></div>';return;}
+  if(!posts.length){el.innerHTML='<div class="empty">No posts yet.</div>';return;}
+  const platColor={'Instagram':'p-warn','TikTok':'p-red','Facebook':'p-navy','All Platforms':'p-blue'};
   el.innerHTML=[...posts].reverse().map(p=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">${p.topic}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <span class="pill ${PC[p.plat]||'p-gray'}" style="font-size:9px;">${p.plat}</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:3px;">${p.topic}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <span class="pill ${platColor[p.plat]||'p-gray'}" style="font-size:9px;">${p.plat}</span>
           <span class="pill p-gray" style="font-size:9px;">${p.type}</span>
-          <span style="font-size:11px;color:var(--text-light);">${p.date||''}</span>
+          <span style="font-size:11px;color:var(--text-light);">${p.date}</span>
         </div>
       </div>
-      <select onchange="updPostStatus(${p.id},this.value)" style="padding:4px 8px;border:1.5px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:11px;font-weight:700;color:var(--text);background:var(--cream);cursor:pointer;outline:none;">
+      <select onchange="updPostStatus(${p.id},this.value)" style="padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
         ${['Draft','Scheduled','Published','Pending Design'].map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}
       </select>
-      <button class="btn btn-danger btn-sm" onclick="delPost(${p.id})" style="padding:3px 8px;">✕</button>
+      <button class="btn btn-red btn-sm" onclick="delPost(${p.id})">✕</button>
     </div>`).join('');
 }
 
-// ══ WAKA ══
-function addWaka(){
-  const h=document.getElementById('wk-h')?.value?.trim();if(!h)return toast('Enter hook/title');
-  waka.push({id:Date.now(),hook:h,date:document.getElementById('wk-dt')?.value,plat:document.getElementById('wk-pl')?.value,status:document.getElementById('wk-st')?.value,pillar:document.getElementById('wk-pi')?.value});
-  S.set('v5_waka',waka);document.getElementById('wk-h').value='';renderWaka();toast('Content logged');
-  syncToSheet('Waka',waka);
+// CE posts
+function addCEPost(){
+  const t=document.getElementById('ce-sm-topic')?.value?.trim();if(!t)return toast('Enter post topic');
+  const rawDate=document.getElementById('ce-sm-date')?.value||'';
+  const cleanDate=rawDate?rawDate.split('-').reverse().join('/'):todayStr();
+  posts.push({id:Date.now(),topic:t,date:cleanDate,plat:document.getElementById('ce-sm-plat')?.value,status:document.getElementById('ce-sm-st')?.value,type:document.getElementById('ce-sm-type')?.value,addedBy:'CE'});
+  S.set('edu_posts',posts);
+  pushToSheet('Posts',posts);
+  document.getElementById('ce-sm-topic').value='';
+  renderCEPosts();toast('Post logged');
 }
-function delWaka(id){waka=waka.filter(p=>p.id!==id);S.set('v5_waka',waka);renderWaka();}
-function renderWaka(){
-  const el=document.getElementById('waka-list');if(!el)return;
-  const tot=document.getElementById('wk-tot');if(tot)tot.textContent=waka.length;
-  const pub=document.getElementById('wk-pub');if(pub)pub.textContent=waka.filter(p=>p.status==='Published').length;
-  const pend=document.getElementById('wk-pend');if(pend)pend.textContent=waka.filter(p=>['Idea','To Film','Filmed'].includes(p.status)).length;
-  if(!waka.length){el.innerHTML='<div class="empty"><div class="ei">✈️</div><p>No content yet.</p></div>';return;}
-  const st={Published:'p-green',Scheduled:'p-warn',Filmed:'p-blue','To Film':'p-warn',Idea:'p-gray'};
-  el.innerHTML=[...waka].reverse().map(p=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">${p.hook}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <span class="pill p-blue" style="font-size:9px;">${p.plat}</span>
-          <span class="pill p-gray" style="font-size:9px;">${p.pillar}</span>
-          <span style="font-size:11px;color:var(--text-light);">${p.date||''}</span>
-        </div>
-      </div>
-      <span class="pill ${st[p.status]||'p-gray'}">${p.status}</span>
-      <button class="btn btn-danger btn-sm" onclick="delWaka(${p.id})" style="padding:3px 8px;">✕</button>
+
+function renderCEPosts(){
+  const el=document.getElementById('ce-posts-list');if(!el)return;
+  if(!posts.length){el.innerHTML='<div class="empty">No posts yet.</div>';return;}
+  el.innerHTML=[...posts].reverse().slice(0,10).map(p=>`
+    <div class="row">
+      <div class="rn">${p.topic}</div>
+      <span style="font-size:11px;color:var(--text-light);">${p.date}</span>
+      <span class="pill p-gray" style="font-size:9px;">${p.status}</span>
     </div>`).join('');
 }
 
-// ══ GROWTH ══
-function renderGrowth(){
-  const el=document.getElementById('gr-chart');if(!el)return;
-  if(!revHist.length){el.innerHTML='<div class="empty"><p>Log revenue in Finance to see chart.</p></div>';return;}
-  const sorted=[...revHist].sort((a,b)=>a.month.localeCompare(b.month));
-  const max=Math.max(...sorted.map(r=>r.amount),cfg.growthGoal);
-  const best=Math.max(...sorted.map(r=>r.amount));
-  const bel=document.getElementById('gr-best');if(bel)bel.textContent='₦'+best.toLocaleString();
-  el.innerHTML=sorted.map(r=>{
-    const pct=Math.round((r.amount/max)*100);
-    const cls=r.amount>=cfg.growthGoal?'green':r.amount>=cfg.breakEven?'':'gold';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:600;min-width:80px;">${r.month}</div>
-      <div style="flex:1;"><div class="pb"><div class="pf ${cls}" style="width:${pct}%"></div></div></div>
-      <div style="font-size:13px;font-weight:700;color:var(--blue);min-width:110px;text-align:right;">₦${r.amount.toLocaleString()}</div>
-    </div>`;
-  }).join('');
+// ══════════════════════════════════
+// FINANCE
+// ══════════════════════════════════
+function addRevenue(){
+  const amt=parseInt(document.getElementById('rev-amt')?.value)||0;if(!amt)return toast('Enter amount');
+  const src=document.getElementById('rev-src')?.value||'';
+  const mo=document.getElementById('rev-mo')?.value||new Date().toISOString().slice(0,7);
+  revenue.push({id:Date.now(),amount:amt,source:src,month:mo,date:todayStr()});
+  S.set('edu_rev',revenue);
+  pushToSheet('Revenue',revenue);
+  document.getElementById('rev-amt').value='';
+  document.getElementById('rev-src').value='';
+  renderRevenue();renderDash();toast('Revenue logged');
 }
 
-// ══ GOALS ══
-function addGoal(){
-  const t=document.getElementById('goal-t')?.value?.trim();if(!t)return toast('Enter goal');
-  goals.push({id:Date.now(),text:t,date:document.getElementById('goal-d')?.value,done:false});
-  S.set('v5_goals',goals);document.getElementById('goal-t').value='';renderGoals();toast('Goal added');
-  syncToSheet('Goals',goals);
-}
-function togGoal(id){goals=goals.map(g=>g.id===id?{...g,done:!g.done}:g);S.set('v5_goals',goals);renderGoals();}
-function renderGoals(){
-  const el=document.getElementById('goals-list');if(!el)return;
-  if(!goals.length){el.innerHTML='<div class="empty" style="padding:12px;"><p>No goals yet.</p></div>';return;}
-  el.innerHTML=goals.map(g=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-      <input type="checkbox" ${g.done?'checked':''} onchange="togGoal(${g.id})" style="width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;">
-      <div style="flex:1;font-size:13px;${g.done?'text-decoration:line-through;color:var(--text-light)':'color:var(--text)'}">${g.text}</div>
-      ${g.date?`<span style="font-size:11px;color:var(--text-light);">${g.date}</span>`:''}
-      <span class="pill ${g.done?'p-green':'p-warn'}">${g.done?'Done':'In Progress'}</span>
+function renderRevenue(){
+  const el=document.getElementById('rev-list');if(!el)return;
+  if(!revenue.length){el.innerHTML='<div class="empty">No revenue logged yet.</div>';return;}
+  el.innerHTML=[...revenue].reverse().map(r=>`
+    <div class="row">
+      <div class="rn">${r.source||'Revenue'} <span style="font-size:11px;color:var(--text-light);">${r.date}</span></div>
+      <div class="ra inc">+₦${r.amount.toLocaleString()}</div>
     </div>`).join('');
 }
 
-// ══ TODOS ══
+function addExpense(){
+  const name=document.getElementById('exp-name')?.value?.trim();if(!name)return toast('Enter description');
+  const amt=parseInt(document.getElementById('exp-amt')?.value)||0;if(!amt)return toast('Enter amount');
+  expenses.push({id:Date.now(),name,amount:amt,cat:document.getElementById('exp-cat')?.value,date:todayStr()});
+  S.set('edu_exp',expenses);
+  pushToSheet('Expenses',expenses);
+  document.getElementById('exp-name').value='';
+  document.getElementById('exp-amt').value='';
+  renderExpenses();toast('Expense added');
+}
+
+function editExpense(id){
+  const e=expenses.find(x=>x.id==id);if(!e)return;
+  const name=prompt('Edit description:',e.name);if(!name)return;
+  const amt=parseInt(prompt('Edit amount:',e.amount));if(!amt)return;
+  expenses=expenses.map(x=>x.id==id?{...x,name,amount:amt}:x);
+  S.set('edu_exp',expenses);
+  pushToSheet('Expenses',expenses);
+  renderExpenses();toast('Expense updated');
+}
+
+function delExpense(id){
+  expenses=expenses.filter(e=>e.id!==id);
+  S.set('edu_exp',expenses);
+  pushToSheet('Expenses',expenses);
+  renderExpenses();
+}
+
+function renderExpenses(){
+  const el=document.getElementById('exp-list');if(!el)return;
+  if(!expenses.length){el.innerHTML='<div class="empty">No expenses yet.</div>';return;}
+  el.innerHTML=expenses.map(e=>`
+    <div class="row">
+      <div class="rn">${e.name} <span style="font-size:11px;color:var(--text-light);">${e.date}</span></div>
+      <span class="pill p-gray">${e.cat}</span>
+      <div class="ra out">-₦${e.amount.toLocaleString()}</div>
+      <button class="btn btn-ghost btn-sm" onclick="editExpense(${e.id})">Edit</button>
+      <button class="btn btn-red btn-sm" onclick="delExpense(${e.id})">✕</button>
+    </div>`).join('');
+}
+
+function renderFixed(){
+  const el=document.getElementById('fixed-list');if(!el)return;
+  const total=fixed.reduce((a,b)=>a+b.amount,0);
+  el.innerHTML=fixed.map(f=>`
+    <div class="row">
+      <div class="rn">${f.name}</div>
+      <div class="ra out">₦${f.amount.toLocaleString()}</div>
+    </div>`).join('')+`<div class="row"><div class="rn" style="font-weight:700;">Total Fixed</div><div class="ra out" style="font-weight:700;">₦${total.toLocaleString()}</div></div>`;
+}
+
+// ══════════════════════════════════
+// TODOS
+// ══════════════════════════════════
 function addTodo(){
-  const inp=document.getElementById('todo-i');const t=inp?.value?.trim();if(!t)return;
-  const newTodo={id:Date.now(),text:t,done:false};
-  todos.push(newTodo);
-  S.set('v5_todos',todos);inp.value='';renderTodos();
-  syncToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done===true?'TRUE':'FALSE'})));
+  const inp=document.getElementById('todo-inp');
+  const txt=inp?.value?.trim();if(!txt)return;
+  todos.push({id:Date.now(),text:txt,done:false});
+  S.set('edu_todos',todos);
+  pushToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE'})));
+  inp.value='';renderTodos();
 }
+
 function togTodo(id){
-  todos=todos.map(t=>{
-    if(t.id==id||t.id==String(id)){
-      return {...t,done:!(t.done===true||String(t.done).toLowerCase()==='true')};
-    }
-    return t;
-  });
-  S.set('v5_todos',todos);
+  todos=todos.map(t=>t.id==id?{...t,done:!t.done}:t);
+  S.set('edu_todos',todos);
+  pushToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE'})));
   renderTodos();
-  const payload=todos.map(t=>({
-    id:String(t.id),
-    text:t.text,
-    done:t.done===true?'TRUE':'FALSE'
-  }));
-  syncToSheet('Todos',payload);
 }
+
 function delTodo(id){
   todos=todos.filter(t=>t.id!==id);
-  S.set('v5_todos',todos);
+  S.set('edu_todos',todos);
+  pushToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE'})));
   renderTodos();
-  syncToSheet('Todos',todos.map(t=>({id:t.id,text:t.text,done:t.done?'true':'false'})));
 }
+
 function renderTodos(){
   const el=document.getElementById('todo-list');if(!el)return;
-  if(!todos.length){el.innerHTML='<div class="empty"><div class="ei">Done</div><p>No tasks yet.</p></div>';return;}
-  el.innerHTML=todos.map(t=>{
-    const isDone=t.done===true||String(t.done).toLowerCase()==='true';
-    return `
+  if(!todos.length){el.innerHTML='<div class="empty">No tasks yet. Add one above!</div>';return;}
+  el.innerHTML=todos.map(t=>`
     <div class="ti">
-      <input type="checkbox" ${isDone?'checked':''} onchange="togTodo(${t.id})">
-      <span class="ti-t${isDone?' done':''}">${t.text}</span>
-      <button class="btn btn-danger btn-sm" onclick="delTodo(${t.id})" style="padding:3px 8px;">✕</button>
-    </div>`;}).join('');
+      <input type="checkbox" ${t.done?'checked':''} onchange="togTodo(${t.id})">
+      <span class="ti-t${t.done?' done':''}">${t.text}</span>
+      <button class="btn btn-red btn-sm" onclick="delTodo(${t.id})">✕</button>
+    </div>`).join('');
 }
 
-// ══ TOAST ══
-function toast(msg){
-  const t=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+// ══════════════════════════════════
+// GOALS
+// ══════════════════════════════════
+function addGoal(){
+  const txt=document.getElementById('goal-txt')?.value?.trim();if(!txt)return toast('Enter goal');
+  goals.push({id:Date.now(),text:txt,date:document.getElementById('goal-date')?.value||'',done:false});
+  S.set('edu_goals',goals);
+  pushToSheet('Goals',goals);
+  document.getElementById('goal-txt').value='';
+  renderGoals();toast('Goal added');
 }
 
-// ══ SETTINGS ══
-function saveSettings(){
-  const newCEOPwd=document.getElementById('s-pwd-ceo')?.value?.trim();
-  const newCEPwd=document.getElementById('s-pwd-ce')?.value?.trim();
-  const newBreakEven=parseInt(document.getElementById('s-be')?.value);
-  const newLeadTarget=parseInt(document.getElementById('s-lt')?.value);
-  const newGrowthGoal=parseInt(document.getElementById('s-gg')?.value);
-  if(newCEOPwd)cfg.pwdCEO=newCEOPwd;
-  if(newCEPwd)cfg.pwdCE=newCEPwd;
-  if(newBreakEven&&newBreakEven>0)cfg.breakEven=newBreakEven;
-  if(newLeadTarget&&newLeadTarget>0)cfg.leadTarget=newLeadTarget;
-  if(newGrowthGoal&&newGrowthGoal>0)cfg.growthGoal=newGrowthGoal;
-  S.set('v5_cfg',cfg);
-  ['s-pwd-ceo','s-pwd-ce'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
-  // Sync to Google Sheets so all devices get updated passwords
-  syncToSheet('Config',[{
-    pwdCEO:cfg.pwdCEO,
-    pwdCE:cfg.pwdCE,
-    breakEven:String(cfg.breakEven),
-    leadTarget:String(cfg.leadTarget),
-    growthGoal:String(cfg.growthGoal)
-  }]);
-  renderConfig();renderDash();
-  toast('Settings saved — all devices updated');
-  S.set('v5_session',{role,time:Date.now()});
+function togGoal(id){
+  goals=goals.map(g=>g.id==id?{...g,done:!g.done}:g);
+  S.set('edu_goals',goals);
+  pushToSheet('Goals',goals);
+  renderGoals();
 }
 
-selRole('ceo',document.querySelector('.rtab'));
-checkSession();
+function renderGoals(){
+  const el=document.getElementById('goals-list');if(!el)return;
+  if(!goals.length){el.innerHTML='<div class="empty">No goals yet.</div>';return;}
+  el.innerHTML=goals.map(g=>`
+    <div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+      <input type="checkbox" ${g.done?'checked':''} onchange="togGoal(${g.id})" style="width:18px;height:18px;cursor:pointer;accent-color:var(--navy);">
+      <div style="flex:1;${g.done?'text-decoration:line-through;color:var(--text-light);':''}">
+        <div style="font-weight:600;">${g.text}</div>
+        ${g.date?`<div style="font-size:11px;color:var(--text-light);">Due: ${g.date}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// WAKA
+// ══════════════════════════════════
+function addWaka(){
+  const h=document.getElementById('wk-hook')?.value?.trim();if(!h)return toast('Enter content hook');
+  const rawDate=document.getElementById('wk-date')?.value||'';
+  const cleanDate=rawDate?rawDate.split('-').reverse().join('/'):todayStr();
+  waka.push({id:Date.now(),hook:h,date:cleanDate,plat:document.getElementById('wk-plat')?.value,status:document.getElementById('wk-st')?.value});
+  S.set('edu_waka',waka);
+  pushToSheet('WakawithAmi',waka);
+  document.getElementById('wk-hook').value='';
+  renderWaka();toast('Content logged');
+}
+
+function renderWaka(){
+  const el=document.getElementById('waka-list');if(!el)return;
+  if(!waka.length){el.innerHTML='<div class="empty">No content logged yet.</div>';return;}
+  el.innerHTML=[...waka].reverse().map(w=>`
+    <div class="row">
+      <div class="rn">${w.hook}</div>
+      <span class="pill p-blue" style="font-size:9px;">${w.plat}</span>
+      <span style="font-size:11px;color:var(--text-light);">${w.date}</span>
+      <span class="pill p-gray" style="font-size:9px;">${w.status}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// CE TASKS (CEO manages)
+// ══════════════════════════════════
+function addCETask(){
+  const inp=document.getElementById('new-task-txt');
+  const txt=inp?.value?.trim();if(!txt)return;
+  ceTasks.push({id:Date.now(),text:txt});
+  S.set('edu_cetasks',ceTasks);
+  inp.value='';renderCETasks();toast('Task added');
+}
+
+function delCETask(id){
+  ceTasks=ceTasks.filter(t=>t.id!==id);
+  S.set('edu_cetasks',ceTasks);
+  renderCETasks();toast('Task removed');
+}
+
+function renderCETasks(){
+  const el=document.getElementById('ce-tasks-list');if(!el)return;
+  el.innerHTML=ceTasks.map(t=>`
+    <div class="row">
+      <div class="rn">${t.text}</div>
+      <button class="btn btn-red btn-sm" onclick="delCETask(${t.id})">x</button>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════
+function savePasswords(){
+  const ceo=document.getElementById('s-ceo-pwd')?.value?.trim();
+  const ce=document.getElementById('s-ce-pwd')?.value?.trim();
+  if(!ceo&&!ce)return toast('Enter at least one password');
+  if(ceo&&ceo.length>=4)cfg.pwdCEO=ceo;
+  if(ce&&ce.length>=4)cfg.pwdCE=ce;
+  S.set('edu_cfg',cfg);
+  pushToSheet('Config',[{pwdCEO:cfg.pwdCEO,pwdCE:cfg.pwdCE,leadTarget:cfg.leadTarget,breakEven:cfg.breakEven,growthGoal:cfg.growthGoal}]);
+  if(document.getElementById('s-ceo-pwd'))document.getElementById('s-ceo-pwd').value='';
+  if(document.getElementById('s-ce-pwd'))document.getElementById('s-ce-pwd').value='';
+  toast('Passwords updated and synced to all devices');
+}
+
+function saveTargets(){
+  const lead=parseInt(document.getElementById('s-lead')?.value||document.getElementById('cfg-lead')?.value||0);
+  const be=parseInt(document.getElementById('s-be')?.value||document.getElementById('cfg-be')?.value||0);
+  const gg=parseInt(document.getElementById('s-gg')?.value||document.getElementById('cfg-gg')?.value||0);
+  if(lead>0)cfg.leadTarget=lead;
+  if(be>0)cfg.breakEven=be;
+  if(gg>0)cfg.growthGoal=gg;
+  S.set('edu_cfg',cfg);
+  pushToSheet('Config',[{pwdCEO:cfg.pwdCEO,pwdCE:cfg.pwdCE,leadTarget:cfg.leadTarget,breakEven:cfg.breakEven,growthGoal:cfg.growthGoal}]);
+  renderDash();toast('Targets saved');
+}
+
+function savePwds(){
+  const ceo=document.getElementById('cfg-pwd-ceo')?.value?.trim();
+  const ce=document.getElementById('cfg-pwd-ce')?.value?.trim();
+  if(ceo&&ceo.length>=4)cfg.pwdCEO=ceo;
+  if(ce&&ce.length>=4)cfg.pwdCE=ce;
+  S.set('edu_cfg',cfg);
+  pushToSheet('Config',[{pwdCEO:cfg.pwdCEO,pwdCE:cfg.pwdCE,leadTarget:cfg.leadTarget,breakEven:cfg.breakEven,growthGoal:cfg.growthGoal}]);
+  if(document.getElementById('cfg-pwd-ceo'))document.getElementById('cfg-pwd-ceo').value='';
+  if(document.getElementById('cfg-pwd-ce'))document.getElementById('cfg-pwd-ce').value='';
+  toast('Passwords updated');
+}
+
+// ══════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════
+function renderDash(){
+  const ds=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dd=document.getElementById('dash-date');if(dd)dd.textContent=ds;
+  const now=new Date();
+  const mo=now.toISOString().slice(0,7);
+  const monthRev=revenue.filter(r=>r.month===mo).reduce((a,b)=>a+(parseInt(b.amount)||0),0);
+  const dr=document.getElementById('d-rev');if(dr)dr.textContent='N'+monthRev.toLocaleString();
+  const dbe=document.getElementById('d-be');if(dbe)dbe.textContent='N'+cfg.breakEven.toLocaleString();
+  const dlt=document.getElementById('d-lead-target');if(dlt)dlt.textContent='N'+cfg.leadTarget.toLocaleString();
+  const leadPct=Math.min(100,Math.round((monthRev/cfg.leadTarget)*100));
+  const dlp=document.getElementById('d-lead-pct');if(dlp)dlp.textContent=leadPct+'%';
+  const revPct=Math.min(100,Math.round((monthRev/cfg.breakEven)*100));
+  const drb=document.getElementById('d-rev-b');if(drb)drb.style.width=revPct+'%';
+  const drl=document.getElementById('d-rev-l');if(drl)drl.textContent='N'+monthRev.toLocaleString()+' / N'+cfg.breakEven.toLocaleString();
+  const dlb=document.getElementById('d-lead-b');if(dlb)dlb.style.width=leadPct+'%';
+  const dll=document.getElementById('d-lead-l');if(dll)dll.textContent='N'+monthRev.toLocaleString()+' / N'+cfg.leadTarget.toLocaleString();
+  const dc=document.getElementById('d-clients');if(dc)dc.textContent=clients.filter(c=>c.status==='In Progress').length;
+  const lastReport=reports[reports.length-1];
+  const dri=document.getElementById('d-report-icon');if(dri)dri.textContent=lastReport?'OK':'-';
+  const dlr=document.getElementById('d-latest-report');
+  if(dlr){
+    if(!lastReport){dlr.innerHTML='<div class="empty" style="padding:12px;">No reports yet.</div>';}
+    else{dlr.innerHTML='<div style="padding:8px 0;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:700;">'+lastReport.date+'</span><span class="pill '+(lastReport.onTime?'p-green':'p-warn')+'">'+(lastReport.onTime?'On Time':'Late')+'</span></div><div style="font-size:12px;color:var(--text-mid);">'+lastReport.leads+' leads - '+lastReport.converted+' converted</div></div>';}
+  }
+  renderSIBoard();
+  renderDashChecklist();
+}
+
+// ══════════════════════════════════
+// LOAD FROM SHEETS
+// ══════════════════════════════════
+async function loadFromSheets(){
+  try{
+    const today=todayStr();
+    const cfgData=await pullFromSheet('Config');
+    if(cfgData.length&&cfgData[0].pwdCEO){
+      cfg.pwdCEO=cfgData[0].pwdCEO;
+      cfg.pwdCE=cfgData[0].pwdCE;
+      if(cfgData[0].leadTarget)cfg.leadTarget=parseInt(cfgData[0].leadTarget)||cfg.leadTarget;
+      if(cfgData[0].breakEven)cfg.breakEven=parseInt(cfgData[0].breakEven)||cfg.breakEven;
+      S.set('edu_cfg',cfg);
+    }
+    const siData=await pullFromSheet('SignIns');
+    if(siData.length){
+      const cleanSI=siData.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+      if(cleanSI.length){
+        const localToday=signIns.filter(s=>s.date===today);
+        const sheetsOther=cleanSI.filter(s=>s.date!==today);
+        signIns=[...sheetsOther,...localToday];
+        S.set('edu_signins',signIns);
+      }
+    }
+    const results=await Promise.all([
+      pullFromSheet('Clients'),
+      pullFromSheet('Posts'),
+      pullFromSheet('Reports'),
+      pullFromSheet('Revenue'),
+      pullFromSheet('Expenses'),
+      pullFromSheet('Todos'),
+      pullFromSheet('Goals'),
+      pullFromSheet('WakawithAmi'),
+    ]);
+    const [cl,po,rp,rv,ex,to,go,wa]=results;
+    if(cl.length){clients=cl;S.set('edu_clients',clients);}
+    if(po.length){posts=po;S.set('edu_posts',posts);}
+    if(rp.length){reports=rp;S.set('edu_reports',reports);}
+    if(rv.length){revenue=rv;S.set('edu_rev',revenue);}
+    if(ex.length){expenses=ex;S.set('edu_exp',expenses);}
+    if(to.length){todos=to.map(t=>({...t,done:String(t.done).toUpperCase()==='TRUE'}));S.set('edu_todos',todos);}
+    if(go.length){goals=go;S.set('edu_goals',goals);}
+    if(wa.length){waka=wa;S.set('edu_waka',waka);}
+    renderAll();
+    toast('Data loaded from Google Sheets');
+  }catch(e){console.log('Load error:',e);}
+}
+
+function startAutoRefresh(){
+  if(role!=='ceo')return;
+  setInterval(async()=>{
+    try{
+      const today=todayStr();
+      const siData=await pullFromSheet('SignIns');
+      if(siData.length){
+        const cleanSI=siData.filter(s=>s.role&&s.date&&!String(s.date).includes('1899')&&!String(s.date).includes('T'));
+        if(cleanSI.length){
+          const localToday=signIns.filter(s=>s.date===today);
+          const sheetsOther=cleanSI.filter(s=>s.date!==today);
+          signIns=[...sheetsOther,...localToday];
+          S.set('edu_signins',signIns);
+          renderSIBoard();renderAttLog();updSbSI();
+        }
+      }
+    }catch(e){}
+  },60000);
+}
+
+async function doSyncAll(){
+  toast('Syncing...');
+  pushToSheet('Clients',clients);
+  pushToSheet('Posts',posts);
+  pushToSheet('Reports',reports);
+  pushToSheet('Revenue',revenue);
+  pushToSheet('Expenses',expenses);
+  pushToSheet('Goals',goals);
+  pushToSheet('WakawithAmi',waka);
+  pushToSheet('SignIns',signIns);
+  pushToSheet('Todos',todos.map(t=>({id:String(t.id),text:t.text,done:t.done?'TRUE':'FALSE'})));
+  pushToSheet('Config',[{pwdCEO:cfg.pwdCEO,pwdCE:cfg.pwdCE,leadTarget:cfg.leadTarget,breakEven:cfg.breakEven,growthGoal:cfg.growthGoal}]);
+  setTimeout(()=>toast('Synced to Google Sheets'),1000);
+}
+
+// ══════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════
+function renderAll(){
+  renderDash();
+  renderClients();
+  renderPosts();
+  renderRevenue();
+  renderExpenses();
+  renderFixed();
+  renderTodos();
+  renderGoals();
+  renderWaka();
+  renderReports();
+  renderCETasks();
+  renderCEPosts();
+  renderAttLog();
+  renderSIBoard();
+  renderChecklist();
+  updSbSI();
+  const now=new Date();
+  const todayISO=now.toISOString().slice(0,10);
+  const moISO=now.toISOString().slice(0,7);
+  ['sm-date','ce-sm-date','wk-date','goal-date'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=todayISO;});
+  const rmo=document.getElementById('rev-mo');if(rmo&&!rmo.value)rmo.value=moISO;
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+if(!checkSession()){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+document.getElementById('tab-ceo').classList.add('active');
 </script>
 </body>
 </html>
