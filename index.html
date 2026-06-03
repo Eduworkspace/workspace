@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduVoyage - With CSV Importer & Google Sheets Sync</title>
+<style>
+:root {
+  --navy: #0A1F44;
+  --dark-navy: #08152E;
+  --gold: #C8A24B;
+  --light-gold: #E4C97E;
+  --white: #FFFFFF;
+  --light-gray: #F6F7FA;
+  --gray: #5A6577;
+  --light-border: #E7EAF0;
+  --ok: #1f9d6b;
+  --warn: #c98a12;
+  --bad: #c8453a;
+  --gdrive: #4285F4;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--light-gray);
+  color: #333;
+}
+
+.login-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--navy), var(--dark-navy));
+  z-index: 1000;
+}
+
+.login-box {
+  background: white;
+  padding: 50px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.login-box h1 {
+  color: var(--navy);
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.login-box .subtitle {
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.login-field {
+  margin-bottom: 15px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 6px;
+}
+
+.login-field input, .login-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid var(--light-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.login-field input:focus, .login-field select:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 4px rgba(10,31,68,0.1);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(180deg, var(--light-gold), var(--gold));
+  color: var(--navy);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+}
+
+.role-hint {
+  background: var(--light-gray);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.app-container {
+  display: none;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-container.show {
+  display: grid;
+}
+
+.sidebar {
+  background: linear-gradient(185deg, var(--navy), var(--dark-navy));
+  color: white;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.logo-icon {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(145deg, var(--light-gold), var(--gold));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.logo-text h2 {
+  color: white;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.logo-text p {
+  color: var(--light-gold);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.nav-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  padding: 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+.nav-item.active {
+  background: rgba(200,162,75,0.18);
+  color: white;
+  border-left-color: var(--gold);
+}
+
+.alert-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--bad);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.user-info .name {
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.user-info .role {
+  color: var(--light-gold);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.logout-btn {
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background 0.2s;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--light-border);
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.topbar h1 {
+  color: var(--navy);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.topbar .spacer {
+  flex: 1;
+}
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray);
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background: var(--light-gray);
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-title {
+  color: var(--navy);
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.page-subtitle {
+  color: var(--gray);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.alert-box {
+  background: #fff3cd;
+  border-left: 4px solid var(--warn);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #856404;
+}
+
+.alert-box.danger {
+  background: #f8d7da;
+  border-left-color: var(--bad);
+  color: #721c24;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--light-border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.stat-card.accent {
+  background: linear-gradient(160deg, var(--navy), #0E2A5C);
+  color: white;
+  border: none;
+}
+
+.stat-card.accent .stat-label {
+  color: var(--light-gold);
+}
+
+.stat-card.accent .stat-value {
+  color: white;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--ok);
+  transition: width 0.3s ease;
+}
+
+.panel {
+  background: white;
+  border: 1px solid var(--light-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--light-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--light-gray);
+}
+
+.panel-header h3 {
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.panel-header .spacer {
+  flex: 1;
+}
+
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.btn-primary:hover {
+  background: var(--light-gold);
+}
+
+.btn-secondary {
+  background: var(--navy);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #0E2A5C;
+}
+
+.btn-success {
+  background: var(--ok);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #1a8659;
+}
+
+.btn-gdrive {
+  background: var(--gdrive);
+  color: white;
+}
+
+.btn-gdrive:hover {
+  background: #3367D6;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.btn-danger {
+  background: #f0f0f0;
+  color: var(--bad);
+}
+
+.btn-danger:hover {
+  background: #e0e0e0;
+}
+
+.panel-body {
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  background: var(--light-gray);
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--gray);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--light-border);
+}
+
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+
+tr:hover {
+  background: #fafafa;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.badge-ok {
+  background: #e6f6ef;
+  color: var(--ok);
+}
+
+.badge-warn {
+  background: #fbf2dd;
+  color: var(--warn);
+}
+
+.badge-info {
+  background: #e7effb;
+  color: #2563c9;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: var(--bad);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--light-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--light-gray);
+}
+
+.modal-header h2 {
+  color: var(--navy);
+  font-size: 18px;
+  margin: 0;
+  flex: 1;
+  font-weight: 700;
+}
+
+.modal-header .close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--gray);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.modal-body .full {
+  grid-column: 1 / -1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid var(--light-border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(10,31,68,0.1);
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid var(--light-border);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  background: var(--light-gray);
+}
+
+.modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.btn-save {
+  background: var(--navy);
+  color: white;
+}
+
+.btn-save:hover {
+  background: #0E2A5C;
+}
+
+.btn-cancel {
+  background: #f0f0f0;
+  color: var(--gray);
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+}
+
+.import-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 15px;
+  border: 2px solid var(--light-border);
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.import-textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.import-help {
+  background: #f0f7ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  color: #003366;
+}
+
+.sync-status {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 12px;
+}
+
+.sync-status.connected {
+  background: #e6f6ef;
+  color: var(--ok);
+  border-left: 4px solid var(--ok);
+}
+
+.sync-status.disconnected {
+  background: #f8d7da;
+  color: var(--bad);
+  border-left: 4px solid var(--bad);
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--light-border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gray);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+  }
+
+  .content-area {
+    padding: 20px;
+  }
+
+  .topbar {
+    padding: 0 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th, td {
+    padding: 8px 10px;
+  }
+}
+</style>
+<!-- Firebase Integration for Real-time Sync (Compat Version for HTML) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+// Firebase Configuration - From EduVoyage Firebase Project
+const firebaseConfig = {
+  apiKey: "AIzaSyBsqj6BT5LQ3UmNERC5oujr_DMg8qh5hSw",
+  authDomain: "eduvoyage-50e7e.firebaseapp.com",
+  databaseURL: "https://eduvoyage-50e7e-default-rtdb.firebaseio.com",
+  projectId: "eduvoyage-50e7e",
+  storageBucket: "eduvoyage-50e7e.firebasestorage.app",
+  messagingSenderId: "106579068625",
+  appId: "1:106579068625:web:10519360095da8198e7f0",
+  measurementId: "G-REWCVE18MW"
+};
+
+// Initialize Firebase
+let db = null;
+let firebaseInitialized = false;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  firebaseInitialized = true;
+  console.log('✅ Firebase initialized successfully');
+} catch(e) {
+  console.log('⚠️ Firebase init error (non-critical):', e);
+}
+</script>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+  <div class="login-box">
+    <h1>EduVoyage</h1>
+    <div class="subtitle">Operations Workspace</div>
+    
+    <div class="login-field">
+      <label>Select Role</label>
+      <select id="roleSelect" onchange="updateLoginHint()">
+        <option value="admin">Admin (Owner)</option>
+        <option value="ce">Client Executive</option>
+      </select>
+    </div>
+    
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Username">
+    </div>
+    
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    
+    <button class="login-btn" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appContainer" class="app-container">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">E</div>
+      <div class="logo-text">
+        <h2>EduVoyage</h2>
+        <p>Workspace</p>
+      </div>
+    </div>
+    
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="switchPage('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" id="ceManagementNav" style="display:none;" onclick="switchPage('ceManagement')">👥 CE Management</div>
+      <div class="nav-item" onclick="switchPage('attendance')">⏰ Attendance</div>
+      <div class="nav-item" onclick="switchPage('clients')">💼 Client Work</div>
+      <div class="nav-item" onclick="switchPage('social')">📱 Social Media</div>
+      <div class="nav-item" id="financesNav" onclick="switchPageWithRestriction('finances', 'admin')">💰 Finances</div>
+      <div class="nav-item" onclick="switchPage('services')">🏷️ Services & Pricing</div>
+      <div class="nav-item" onclick="switchPage('webinars')">🎤 Webinars</div>
+      <div class="nav-item" onclick="switchPage('scholarships')">🏆 Scholarships</div>
+      <div class="nav-item" id="personalNav" style="display:none;" onclick="switchPage('personal')">👤 Personal Workspace</div>
+      <div class="nav-item" onclick="switchPage('todos')">✓ My To-Dos</div>
+      <div class="nav-item" onclick="switchPage('activityLog')">📋 Activity Log</div>
+      <div class="nav-item" onclick="switchPage('settings')">⚙️ Settings</div>
+    </div>
+    
+    <div class="sidebar-footer">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="name" id="userName">User</div>
+        <div class="role" id="userRole">Role</div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()" title="Sign Out">🚪</button>
+    </div>
+  </div>
+  
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="spacer"></div>
+      <div class="sync-indicator">
+        <div class="sync-dot"></div>
+        <span>Live</span>
+      </div>
+    </div>
+    
+    <div class="content-area" id="contentArea">
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="section active">
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-subtitle">Real-time overview of your business operations</p>
+        
+        <div id="alerts"></div>
+        <div class="stats-grid" id="dashboardStats"></div>
+      </div>
+
+      <!-- CLIENT WORK -->
+      <div id="clients" class="section">
+        <h2 class="page-title">Client Work Management</h2>
+        <p class="page-subtitle">Track all clients through their journey</p>
+        
+        <button class="btn btn-primary" onclick="openModal('client')">+ Add Client</button>
+        <button class="btn btn-secondary" onclick="openModal('import')" style="margin-left: 10px;">📥 Import from CSV</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client Name</th>
+                  <th>Service</th>
+                  <th>Country</th>
+                  <th>Assigned CE</th>
+                  <th>Google Drive</th>
+                  <th>Status</th>
+                  <th>Balance</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="clientsBody">
+                <tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--gray);">No clients yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div id="attendance" class="section">
+        <h2 class="page-title">Attendance</h2>
+        <p class="page-subtitle">Monday to Saturday, Sign-in by 9:00 AM</p>
+        
+        <button class="btn btn-primary" onclick="signIn()">+ Sign In Now</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h3>Attendance History</h3>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Staff</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No records</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOCIAL MEDIA -->
+      <div id="social" class="section">
+        <h2 class="page-title">Social Media Management</h2>
+        <p class="page-subtitle">Plan and track social content across platforms</p>
+        
+        <button class="btn btn-primary" onclick="openModal('social')">+ New Post</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Topic</th>
+                  <th>Platform</th>
+                  <th>Status</th>
+                  <th>Scheduled</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="socialBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No posts</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CE MANAGEMENT (ADMIN ONLY) -->
+      <div id="ceManagement" class="section">
+        <h2 class="page-title">👥 CE Management</h2>
+        <p class="page-subtitle">Track CE daily tasks and weekly performance</p>
+        
+        <button class="btn btn-primary" onclick="openModal('ceTask')">+ Add Task</button>
+        <button class="btn btn-success" onclick="generateWeeklyReport()">📊 Generate Weekly Report</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h3>📈 Weekly Progress</h3>
+          </div>
+          <div class="panel-body" style="padding: 20px;">
+            <div style="display: flex; gap: 30px; margin-bottom: 20px;">
+              <div>
+                <p style="color: var(--gray); margin: 0 0 5px 0;">Tasks Completed</p>
+                <h3 id="ceStatsCompleted" style="margin: 0; color: var(--ok);">0</h3>
+              </div>
+              <div>
+                <p style="color: var(--gray); margin: 0 0 5px 0;">Total Tasks</p>
+                <h3 id="ceStatsTotal" style="margin: 0; color: var(--navy);">0</h3>
+              </div>
+              <div style="flex: 1;">
+                <p style="color: var(--gray); margin: 0 0 5px 0;">Completion Rate</p>
+                <div style="background: #f0f0f0; height: 25px; border-radius: 5px; overflow: hidden;">
+                  <div id="ceProgress" style="background: linear-gradient(90deg, var(--ok), var(--warn)); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header">
+            <h3>📋 CE Checklist</h3>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Task</th>
+                  <th>Assigned To</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ceChecklistBody">
+                <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--gray);">No tasks created yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCES (ADMIN ONLY) -->
+      <div id="finances" class="section">
+        <h2 class="page-title">Finance Management</h2>
+        <p class="page-subtitle">Revenue, expenses, and financial reports</p>
+        
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this, 'revenueTab')">Revenue</button>
+          <button class="tab" onclick="switchTab(this, 'expensesTab')">Expenses</button>
+        </div>
+        
+        <div id="revenueTab" class="tab-content active">
+          <div class="stats-grid">
+            <div class="stat-card accent">
+              <div class="stat-label">Total Revenue</div>
+              <div class="stat-value" id="stat-trev">₦0</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('revenue')">+ Log Revenue</button>
+          <div class="panel" style="margin-top: 20px;">
+            <div class="panel-header">
+              <h3>Revenue Log</h3>
+            </div>
+            <div class="panel-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Amount</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="revenueBody">
+                  <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No revenue</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div id="expensesTab" class="tab-content">
+          <button class="btn btn-primary" onclick="openModal('expense')">+ Log Expense</button>
+          <div class="panel" style="margin-top: 20px;">
+            <div class="panel-header">
+              <h3>Expenses</h3>
+            </div>
+            <div class="panel-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="expenseBody">
+                  <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No expenses</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICES & PRICING -->
+      <div id="services" class="section">
+        <h2 class="page-title">Services & Pricing</h2>
+        <p class="page-subtitle">Manage your service catalogue</p>
+        
+        <button class="btn btn-primary" onclick="openModal('service')">+ Add Service</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service Name</th>
+                  <th>Description</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="servicesBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No services</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBINARS -->
+      <div id="webinars" class="section">
+        <h2 class="page-title">Webinars</h2>
+        <p class="page-subtitle">Monthly webinar management</p>
+        
+        <button class="btn btn-primary" onclick="openModal('webinar')">+ Add Webinar</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Speaker</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="webinarsBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No webinars</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHOLARSHIPS -->
+      <div id="scholarships" class="section">
+        <h2 class="page-title">Scholarship Advisory</h2>
+        <p class="page-subtitle">Track scholarship opportunities and deadlines</p>
+        
+        <button class="btn btn-primary" onclick="openModal('scholarship')">+ Add Scholarship</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Country</th>
+                  <th>Deadline</th>
+                  <th>Funding</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="scholarshipsBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No scholarships</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODO -->
+      <div id="todos" class="section">
+        <h2 class="page-title">My To-Dos</h2>
+        <p class="page-subtitle">Task management and tracking</p>
+        
+        <button class="btn btn-primary" onclick="openModal('todo')">+ New Task</button>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="todosBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LOG -->
+      <div id="activityLog" class="section">
+        <h2 class="page-title">Activity Log</h2>
+        <p class="page-subtitle">Track all changes and actions</p>
+        
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Recent Activity</h3>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="activityBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No activity</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settings" class="section">
+        <h2 class="page-title">Settings</h2>
+        <p class="page-subtitle">System configuration and preferences</p>
+        
+        <div class="panel" id="googleSheetsPanel" style="display:none;">
+          <div class="panel-header">
+            <h3>📊 Google Sheets Sync (Admin Only)</h3>
+          </div>
+          <div class="panel-body" style="padding: 20px;">
+            <div id="syncStatus"></div>
+            
+            <div class="form-group full" style="margin-bottom: 15px;">
+              <label>Google Sheet ID</label>
+              <input type="text" id="sheetId" placeholder="Paste Sheet ID from URL" />
+              <small style="color: var(--gray); margin-top: 5px;">Found in: https://docs.google.com/spreadsheets/d/<strong>SHEET_ID</strong>/edit</small>
+            </div>
+            
+            <div class="form-group full" style="margin-bottom: 15px;">
+              <label>Google Apps Script URL</label>
+              <input type="text" id="scriptUrl" placeholder="Paste Script Deployment URL" />
+              <small style="color: var(--gray); margin-top: 5px;">From Apps Script → Deploy → New Deployment → Web app</small>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+              <button class="btn btn-secondary btn-small" onclick="testGoogleConnection()">🔗 Test Connection</button>
+              <button class="btn btn-success btn-small" onclick="saveGoogleSettings()">💾 Save Settings</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+              <label style="margin: 0; cursor: pointer;">
+                <input type="checkbox" id="autoSync" /> Enable Auto-Sync (syncs every add/edit)
+              </label>
+            </div>
+            
+            <button class="btn btn-primary btn-small" onclick="manualSync()">🔄 Sync Now</button>
+            <small id="lastSyncTime" style="display: block; margin-top: 10px; color: var(--gray);">Last sync: Never</small>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-header">
+            <h3>🔐 CE Visibility Settings (Admin Only)</h3>
+          </div>
+          <div class="panel-body" style="padding: 20px;">
+            <p style="color: var(--gray); margin-bottom: 15px;">Control what your Client Executive can see in their dashboard:</p>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+              <input type="checkbox" id="ceCanSeeRevenue" checked /> 
+              <label style="margin: 0; cursor: pointer; flex: 1;">
+                <strong>Revenue Data</strong> - Can CE see income & payment info?
+              </label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+              <input type="checkbox" id="ceCanSeeExpenses" /> 
+              <label style="margin: 0; cursor: pointer; flex: 1;">
+                <strong>Expenses</strong> - Can CE see operational expenses?
+              </label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+              <input type="checkbox" id="ceCanSeeActivity" checked /> 
+              <label style="margin: 0; cursor: pointer; flex: 1;">
+                <strong>Activity Log</strong> - Can CE see what you're doing?
+              </label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+              <input type="checkbox" id="ceCanSeeFinancials" /> 
+              <label style="margin: 0; cursor: pointer; flex: 1;">
+                <strong>Financial Dashboard</strong> - Can CE see profit/loss?
+              </label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+              <input type="checkbox" id="ceCanSeePersonalWorkspace" /> 
+              <label style="margin: 0; cursor: pointer; flex: 1;">
+                <strong>Personal Workspace</strong> - Can CE see your private notes?
+              </label>
+            </div>
+            
+            <button class="btn btn-success btn-small" onclick="saveCEVisibility()">💾 Save CE Permissions</button>
+            <small style="display: block; margin-top: 10px; color: var(--gray);">⚠️ Changes take effect immediately. CE's dashboard will auto-refresh.</small>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Data Management</h3>
+          </div>
+          <div class="panel-body" style="padding: 20px;">
+            <button class="btn btn-secondary" onclick="exportData('all')" style="margin-bottom: 10px;">📥 Export All Data (CSV)</button>
+            <button class="btn btn-danger" onclick="clearAllData()">⚠️ Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Item</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Initialize Data Store
+let DATA = JSON.parse(localStorage.getItem('eduvoyage_with_importer')) || {
+  clients: [],
+  revenue: [],
+  expenses: [],
+  attendance: [],
+  social: [],
+  services: [],
+  webinars: [],
+  scholarships: [],
+  todos: [],
+  activity: [],
+  googleSheetId: '',
+  googleScriptUrl: '',
+  autoSync: false,
+  lastSync: null,
+  ceVisibility: {
+    canSeeRevenue: true,
+    canSeeExpenses: false,
+    canSeeActivity: true,
+    canSeePersonalWorkspace: false,
+    canSeeFinancials: false,
+    canSeeTeamManagement: false
+  },
+  ceChecklist: []  // CE daily tasks
+};
+
+let SESSION = null;
+let CURRENT_PAGE = 'dashboard';
+let MODAL_TYPE = null;
+let EDIT_ID = null;
+
+// Utilities
+const naira = n => '₦' + Number(n).toLocaleString('en-NG');
+const today = () => new Date().toISOString().slice(0, 10);
+const uid = () => Date.now();
+const esc = s => (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Log Activity
+function logActivity(action, details) {
+  DATA.activity.unshift({
+    id: uid(),
+    timestamp: new Date().toLocaleString(),
+    user: SESSION?.name || 'Unknown',
+    action,
+    details
+  });
+  if (DATA.activity.length > 500) DATA.activity = DATA.activity.slice(0, 500);
+}
+
+// Save Data
+function saveData() {
+  localStorage.setItem('eduvoyage_with_importer', JSON.stringify(DATA));
+  if (DATA.autoSync) manualSync();
+  syncToFirebase(); // Sync to Firebase on every save
+  refreshPage();
+}
+
+// Firebase Sync Functions
+function syncToFirebase() {
+  if (!firebaseInitialized || !db) return;
+  
+  try {
+    const timestamp = new Date().toISOString();
+    
+    // Sync all data to Firebase
+    db.ref('workspaces/eduvoyage').update({
+      clients: DATA.clients,
+      revenue: DATA.revenue,
+      expenses: DATA.expenses,
+      attendance: DATA.attendance,
+      social: DATA.social,
+      services: DATA.services,
+      webinars: DATA.webinars,
+      scholarships: DATA.scholarships,
+      todos: DATA.todos,
+      activity: DATA.activity,
+      lastSync: timestamp,
+      lastUser: SESSION?.name || 'Unknown'
+    }).catch(err => console.log('Firebase sync error:', err));
+  } catch(e) {
+    console.log('Firebase sync failed (non-critical):', e);
+  }
+}
+
+function listenToFirebaseUpdates() {
+  if (!firebaseInitialized || !db) return;
+  
+  try {
+    db.ref('workspaces/eduvoyage').on('value', (snapshot) => {
+      const firebaseData = snapshot.val();
+      if (firebaseData && SESSION) {
+        // Update LOCAL data with Firebase data (if it's newer)
+        if (firebaseData.clients) DATA.clients = firebaseData.clients;
+        if (firebaseData.revenue) DATA.revenue = firebaseData.revenue;
+        if (firebaseData.expenses) DATA.expenses = firebaseData.expenses;
+        if (firebaseData.attendance) DATA.attendance = firebaseData.attendance;
+        if (firebaseData.activity) DATA.activity = firebaseData.activity;
+        
+        // Save locally and refresh
+        localStorage.setItem('eduvoyage_with_importer', JSON.stringify(DATA));
+        refreshPage();
+      }
+    });
+  } catch(e) {
+    console.log('Firebase listener setup failed:', e);
+  }
+}
+
+// Login
+function updateLoginHint() {
+  const role = document.getElementById('roleSelect').value;
+  document.getElementById('username').value = role === 'admin' ? 'admin' : 'ce';
+}
+
+function handleLogin() {
+  const role = document.getElementById('roleSelect').value;
+  const user = document.getElementById('username').value;
+  const pass = document.getElementById('password').value;
+  
+  const creds = { admin: { user: 'admin', pass: 'admin' }, ce: { user: 'ce', pass: 'ce' } };
+  const valid = creds[role];
+  
+  if (valid && user === valid.user && pass === valid.pass) {
+    SESSION = { role, user, name: role === 'admin' ? 'Aminat (Admin)' : 'Client Executive' };
+    localStorage.setItem('eduvoyage_session', JSON.stringify(SESSION));
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').classList.add('show');
+    document.getElementById('userName').textContent = SESSION.name;
+    document.getElementById('userRole').textContent = role === 'admin' ? 'Admin' : 'CE';
+    document.getElementById('userAvatar').textContent = SESSION.name[0];
+    
+    if (role === 'admin') {
+      document.getElementById('ceManagementNav').style.display = 'block';
+      document.getElementById('personalNav').style.display = 'block';
+      document.getElementById('googleSheetsPanel').style.display = 'block';
+    }
+    
+    logActivity('LOGIN', `${SESSION.name} logged in`);
+    listenToFirebaseUpdates(); // Start listening to Firebase changes
+    syncToFirebase(); // Initial sync to Firebase
+    refreshPage();
+  } else {
+    alert('Invalid credentials');
+  }
+}
+
+function handleLogout() {
+  if (SESSION) logActivity('LOGOUT', `${SESSION.name} logged out`);
+  SESSION = null;
+  localStorage.removeItem('eduvoyage_session');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContainer').classList.remove('show');
+}
+
+// Navigation
+function switchPageWithRestriction(page, requiredRole) {
+  if (SESSION.role !== requiredRole) {
+    alert('This page is only available to ' + requiredRole + 's.');
+    return;
+  }
+  switchPage(page);
+}
+
+function switchPage(page) {
+  if ((page === 'ceManagement' || page === 'personal' || page === 'finances') && SESSION.role !== 'admin') {
+    alert('This page is only available to admins.');
+    return;
+  }
+  
+  CURRENT_PAGE = page;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event?.target?.closest('.nav-item')?.classList?.add('active');
+  
+  const titles = {
+    dashboard: '📊 Dashboard', clients: '💼 Client Work', attendance: '⏰ Attendance',
+    social: '📱 Social Media', finances: '💰 Finances', services: '🏷️ Services',
+    webinars: '🎤 Webinars', scholarships: '🏆 Scholarships', todos: '✓ My To-Dos',
+    activityLog: '📋 Activity Log', settings: '⚙️ Settings'
+  };
+  
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  refreshPage();
+}
+
+function switchTab(btn, tabId) {
+  btn.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// Dashboard
+function renderDashboard() {
+  const rev = DATA.revenue.reduce((s, r) => s + r.amount, 0);
+  const bal = DATA.clients.reduce((s, c) => s + c.balance, 0);
+  const pending = DATA.todos.filter(t => t.status !== 'Completed').length;
+  
+  let alerts = '';
+  const upcomingScholarships = DATA.scholarships.filter(s => {
+    const deadline = new Date(s.deadline);
+    const today2 = new Date();
+    const daysUntil = Math.ceil((deadline - today2) / (1000 * 60 * 60 * 24));
+    return daysUntil <= 7 && daysUntil > 0;
+  });
+  
+  const overdueBalances = DATA.clients.filter(c => c.balance > 0);
+  
+  if (upcomingScholarships.length > 0) {
+    alerts += `<div class="alert-box danger">🔔 ${upcomingScholarships.length} scholarship(s) closing soon!</div>`;
+  }
+  if (overdueBalances.length > 0) {
+    alerts += `<div class="alert-box">⚠️ ${overdueBalances.length} client(s) with outstanding balance</div>`;
+  }
+  
+  document.getElementById('alerts').innerHTML = alerts;
+  
+  let html = `<div class="stat-card accent"><div class="stat-label">Active Clients</div><div class="stat-value">${DATA.clients.length}</div></div>`;
+  
+  if (SESSION.role === 'admin') {
+    html += `<div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">${naira(rev)}</div></div>`;
+  }
+  
+  html += `
+    <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value">${naira(bal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Pending Tasks</div><div class="stat-value">${pending}</div></div>
+  `;
+  
+  document.getElementById('dashboardStats').innerHTML = html;
+}
+
+// Refresh Page
+function refreshPage() {
+  const page = CURRENT_PAGE;
+  
+  if (page === 'dashboard') {
+    renderDashboard();
+  }
+  else if (page === 'clients') {
+    const filtered = SESSION.role === 'admin' ? DATA.clients : DATA.clients.filter(c => c.assignedCE === SESSION.name);
+    document.getElementById('clientsBody').innerHTML = filtered.length > 0
+      ? filtered.map(c => `<tr>
+        <td>${esc(c.name)}</td>
+        <td>${esc(c.service)}</td>
+        <td>${esc(c.country)}</td>
+        <td>${esc(c.assignedCE || '—')}</td>
+        <td>${c.gdrive ? `<a href="${c.gdrive}" target="_blank" class="btn btn-gdrive btn-small">📁 Drive</a>` : '<span style="color: #ccc;">—</span>'}</td>
+        <td><span class="badge badge-warn">${esc(c.status)}</span></td>
+        <td>${naira(c.balance)}</td>
+        <td><button class="btn btn-primary btn-small" onclick="editClient(${c.id})">✏️ Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('client', ${c.id})">Del</button></td>
+        </tr>`).join('')
+      : '<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--gray);">No clients</td></tr>';
+  }
+  else if (page === 'finances' && SESSION.role === 'admin') {
+    const rev = DATA.revenue.reduce((s, r) => s + r.amount, 0);
+    const exp = DATA.expenses.reduce((s, e) => s + e.amount, 0);
+    
+    document.getElementById('stat-trev').textContent = naira(rev);
+    
+    document.getElementById('revenueBody').innerHTML = DATA.revenue.length > 0
+      ? DATA.revenue.map(r => `<tr><td>${r.date}</td><td>${esc(r.client)}</td><td>${esc(r.service)}</td><td>${naira(r.amount)}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('revenue', ${r.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No revenue</td></tr>';
+      
+    document.getElementById('expenseBody').innerHTML = DATA.expenses.length > 0
+      ? DATA.expenses.map(e => `<tr><td>${e.date}</td><td>${esc(e.name)}</td><td>${esc(e.category)}</td><td>${naira(e.amount)}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('expense', ${e.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No expenses</td></tr>';
+  }
+  else if (page === 'ceManagement' && SESSION.role === 'admin') {
+    // Admin view of CE checklist
+    const tasks = DATA.ceChecklist || [];
+    const completed = tasks.filter(t => t.completed).length;
+    const total = tasks.length;
+    
+    document.getElementById('ceStatsCompleted').textContent = completed;
+    document.getElementById('ceStatsTotal').textContent = total;
+    document.getElementById('ceProgress').style.width = (total > 0 ? (completed/total)*100 : 0) + '%';
+    
+    document.getElementById('ceChecklistBody').innerHTML = tasks.length > 0
+      ? tasks.map(t => `<tr style="background: ${t.completed ? '#f0f9ff' : '#fff9f0'}">
+        <td>${t.date || today()}</td>
+        <td><strong>${esc(t.task)}</strong></td>
+        <td>${esc(t.assignedCE || 'CE Team')}</td>
+        <td><span class="badge ${t.completed ? 'badge-ok' : 'badge-warn'}">${t.completed ? '✅ Done' : '⏳ Pending'}</span></td>
+        <td>${t.notes ? esc(t.notes) : '—'}</td>
+        <td><button class="btn btn-danger btn-small" onclick="deleteItem('ceTask', ${t.id})">Del</button></td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--gray);">No tasks created yet</td></tr>';
+  }
+    document.getElementById('socialBody').innerHTML = DATA.social.length > 0
+      ? DATA.social.map(s => `<tr><td>${esc(s.topic)}</td><td>${esc(s.platform)}</td><td><span class="badge badge-info">${esc(s.status)}</span></td><td>${s.date || '—'}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('social', ${s.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No posts</td></tr>';
+  }
+  else if (page === 'services') {
+    document.getElementById('servicesBody').innerHTML = DATA.services.length > 0
+      ? DATA.services.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.desc)}</td><td>${esc(s.price)}</td><td><span class="badge badge-ok">${esc(s.status)}</span></td><td><button class="btn btn-danger btn-small" onclick="deleteItem('service', ${s.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No services</td></tr>';
+  }
+  else if (page === 'webinars') {
+    document.getElementById('webinarsBody').innerHTML = DATA.webinars.length > 0
+      ? DATA.webinars.map(w => `<tr><td>${esc(w.title)}</td><td>${esc(w.speaker)}</td><td>${w.date}</td><td>${w.time}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('webinar', ${w.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No webinars</td></tr>';
+  }
+  else if (page === 'scholarships') {
+    document.getElementById('scholarshipsBody').innerHTML = DATA.scholarships.length > 0
+      ? DATA.scholarships.map(s => {
+        const deadline = new Date(s.deadline);
+        const today2 = new Date();
+        const daysUntil = Math.ceil((deadline - today2) / (1000 * 60 * 60 * 24));
+        const isUrgent = daysUntil <= 7 && daysUntil > 0;
+        return `<tr><td>${esc(s.name)}</td><td>${esc(s.country)}</td><td>${isUrgent ? '<span class="badge badge-danger">⏰ ' + daysUntil + ' days</span>' : s.deadline}</td><td>${esc(s.funding)}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('scholarship', ${s.id})">Del</button></td></tr>`;
+      }).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No scholarships</td></tr>';
+  }
+  else if (page === 'todos') {
+    document.getElementById('todosBody').innerHTML = DATA.todos.length > 0
+      ? DATA.todos.map(t => `<tr><td>${esc(t.task)}</td><td><span class="badge badge-warn">${esc(t.priority)}</span></td><td>${esc(t.status)}</td><td>${t.due}</td><td><button class="btn btn-danger btn-small" onclick="deleteItem('todo', ${t.id})">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>';
+  }
+  else if (page === 'attendance') {
+    document.getElementById('attendanceBody').innerHTML = DATA.attendance.length > 0
+      ? DATA.attendance.map(a => `<tr><td>${esc(a.name)}</td><td>${a.date}</td><td>${a.time}</td><td><span class="badge badge-ok">Present</span></td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No records</td></tr>';
+  }
+  else if (page === 'activityLog') {
+    const filteredActivity = getFilteredActivityLog();
+    document.getElementById('activityBody').innerHTML = filteredActivity.length > 0
+      ? filteredActivity.map(a => `<tr><td>${a.timestamp}</td><td>${esc(a.user)}</td><td><strong>${esc(a.action)}</strong></td><td>${esc(a.details)}</td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No activity</td></tr>';
+  }
+  else if (page === 'settings') {
+    updateSyncStatus();
+    loadCEVisibilityUI();
+  }
+}
+
+// Sign In
+function signIn() {
+  const now = new Date();
+  DATA.attendance.unshift({
+    id: uid(),
+    name: SESSION.name,
+    date: today(),
+    time: now.toTimeString().slice(0, 5)
+  });
+  logActivity('SIGN IN', `${SESSION.name} signed in at ${now.toTimeString().slice(0, 5)}`);
+  saveData();
+  alert('Signed in successfully!');
+}
+
+// Modal
+function openModal(type, id = null) {
+  MODAL_TYPE = type;
+  EDIT_ID = id;
+  const modal = document.getElementById('modal');
+  const body = document.getElementById('modalBody');
+  
+  let html = '';
+  let title = 'Add Item';
+  let data = null;
+  
+  if (id && type === 'client') data = DATA.clients.find(c => c.id === id);
+  
+  const ceOptions = '<option value="">— Unassigned —</option><option value="Aminat (Admin)">Aminat (Admin)</option><option value="Client Executive">Client Executive</option>';
+  
+  switch(type) {
+    case 'import':
+      title = 'Import Clients from CSV';
+      html = `
+        <div class="import-help">
+          <strong>📋 How to import:</strong><br>
+          1. Open your CSV file (Excel/Sheets)<br>
+          2. Select and copy all client data (Ctrl+A, Ctrl+C)<br>
+          3. Paste below<br>
+          4. Click Import
+        </div>
+        <label style="font-weight: 700; display: block; margin-bottom: 8px;">Paste CSV Data:</label>
+        <textarea id="f-csvData" class="import-textarea" placeholder="Paste CSV data here..."></textarea>
+      `;
+      break;
+    case 'client':
+      title = id ? 'Edit Client' : 'Add Client';
+      html = `
+        <div class="form-group full"><label>Client Name</label><input type="text" id="f-name" value="${data?.name || ''}" /></div>
+        <div class="form-group"><label>Service</label><input type="text" id="f-service" value="${data?.service || ''}" /></div>
+        <div class="form-group"><label>Country</label><input type="text" id="f-country" value="${data?.country || ''}" /></div>
+        <div class="form-group full"><label>Assign to CE</label><select id="f-assignedCE">${ceOptions}</select></div>
+        <div class="form-group full"><label>Google Drive Folder Link</label><input type="url" id="f-gdrive" placeholder="https://drive.google.com/drive/folders/..." value="${data?.gdrive || ''}" /></div>
+        <div class="form-group full"><label>Status</label><select id="f-status">
+          <option value="New Lead" ${data?.status === 'New Lead' ? 'selected' : ''}>New Lead</option>
+          <option value="Consultation" ${data?.status === 'Consultation' ? 'selected' : ''}>Consultation</option>
+          <option value="Application Started" ${data?.status === 'Application Started' ? 'selected' : ''}>Application Started</option>
+          <option value="Processing" ${data?.status === 'Processing' ? 'selected' : ''}>Processing</option>
+          <option value="Completed" ${data?.status === 'Completed' ? 'selected' : ''}>Completed</option>
+        </select></div>
+        <div class="form-group"><label>Amount Paid</label><input type="number" id="f-paid" value="${data?.paid || 0}" /></div>
+        <div class="form-group"><label>Outstanding</label><input type="number" id="f-balance" value="${data?.balance || 0}" /></div>
+        <div class="form-group full"><label>Notes</label><textarea id="f-notes">${data?.notes || ''}</textarea></div>
+      `;
+      if (data) setTimeout(() => { document.getElementById('f-assignedCE').value = data.assignedCE || ''; }, 0);
+      break;
+    case 'revenue':
+      title = 'Log Revenue';
+      html = `
+        <div class="form-group full"><label>Date</label><input type="date" id="f-date" value="${today()}" /></div>
+        <div class="form-group full"><label>Client</label><input type="text" id="f-client" /></div>
+        <div class="form-group full"><label>Service</label><input type="text" id="f-service" /></div>
+        <div class="form-group"><label>Amount</label><input type="number" id="f-amount" /></div>
+      `;
+      break;
+    case 'expense':
+      title = 'Log Expense';
+      html = `
+        <div class="form-group full"><label>Date</label><input type="date" id="f-date" value="${today()}" /></div>
+        <div class="form-group full"><label>Expense Name</label><input type="text" id="f-name" /></div>
+        <div class="form-group"><label>Category</label><select id="f-category"><option>Marketing</option><option>Software</option><option>Operations</option><option>Other</option></select></div>
+        <div class="form-group"><label>Amount</label><input type="number" id="f-amount" /></div>
+      `;
+      break;
+    case 'social':
+      title = 'Add Social Post';
+      html = `
+        <div class="form-group full"><label>Topic</label><input type="text" id="f-topic" /></div>
+        <div class="form-group"><label>Platform</label><select id="f-platform"><option>Instagram</option><option>TikTok</option><option>Facebook</option><option>LinkedIn</option><option>X</option></select></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option>Idea</option><option>Draft</option><option>Ready</option><option>Scheduled</option><option>Posted</option></select></div>
+        <div class="form-group full"><label>Scheduled Date</label><input type="date" id="f-date" /></div>
+      `;
+      break;
+    case 'service':
+      title = 'Add Service';
+      html = `
+        <div class="form-group full"><label>Service Name</label><input type="text" id="f-name" /></div>
+        <div class="form-group full"><label>Description</label><textarea id="f-desc"></textarea></div>
+        <div class="form-group"><label>Price</label><input type="text" id="f-price" /></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option>Active</option><option>Inactive</option></select></div>
+      `;
+      break;
+    case 'webinar':
+      title = 'Add Webinar';
+      html = `
+        <div class="form-group full"><label>Title</label><input type="text" id="f-title" /></div>
+        <div class="form-group full"><label>Speaker</label><input type="text" id="f-speaker" /></div>
+        <div class="form-group"><label>Date</label><input type="date" id="f-date" /></div>
+        <div class="form-group"><label>Time</label><input type="time" id="f-time" /></div>
+      `;
+      break;
+    case 'scholarship':
+      title = 'Add Scholarship';
+      html = `
+        <div class="form-group full"><label>Scholarship Name</label><input type="text" id="f-name" /></div>
+        <div class="form-group"><label>Country</label><input type="text" id="f-country" /></div>
+        <div class="form-group full"><label>Institution</label><input type="text" id="f-institution" /></div>
+        <div class="form-group"><label>Deadline</label><input type="date" id="f-deadline" /></div>
+        <div class="form-group"><label>Funding</label><input type="text" id="f-funding" /></div>
+      `;
+      break;
+    case 'todo':
+      title = 'Add Task';
+      html = `
+        <div class="form-group full"><label>Task</label><input type="text" id="f-task" /></div>
+        <div class="form-group"><label>Priority</label><select id="f-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option>Not Started</option><option>In Progress</option><option>Completed</option></select></div>
+        <div class="form-group full"><label>Due Date</label><input type="date" id="f-due" /></div>
+      `;
+      break;
+  }
+  
+  document.getElementById('modalTitle').textContent = title;
+  body.innerHTML = html;
+  modal.classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  EDIT_ID = null;
+  MODAL_TYPE = null;
+}
+
+function saveItem() {
+  switch(MODAL_TYPE) {
+    case 'import':
+      importFromCSV();
+      break;
+    case 'client':
+      if (EDIT_ID) {
+        const c = DATA.clients.find(x => x.id === EDIT_ID);
+        c.name = document.getElementById('f-name').value;
+        c.service = document.getElementById('f-service').value;
+        c.country = document.getElementById('f-country').value;
+        c.assignedCE = document.getElementById('f-assignedCE').value;
+        c.gdrive = document.getElementById('f-gdrive').value;
+        c.status = document.getElementById('f-status').value;
+        c.paid = Number(document.getElementById('f-paid').value);
+        c.balance = Number(document.getElementById('f-balance').value);
+        c.notes = document.getElementById('f-notes').value;
+        logActivity('UPDATE CLIENT', `Updated ${c.name}`);
+      } else {
+        const newClient = {
+          id: uid(),
+          name: document.getElementById('f-name').value,
+          service: document.getElementById('f-service').value,
+          country: document.getElementById('f-country').value,
+          assignedCE: document.getElementById('f-assignedCE').value,
+          gdrive: document.getElementById('f-gdrive').value,
+          status: document.getElementById('f-status').value,
+          paid: Number(document.getElementById('f-paid').value),
+          balance: Number(document.getElementById('f-balance').value),
+          notes: document.getElementById('f-notes').value
+        };
+        DATA.clients.push(newClient);
+        logActivity('ADD CLIENT', `Added ${newClient.name}`);
+      }
+      break;
+    case 'revenue':
+      DATA.revenue.unshift({
+        id: uid(),
+        date: document.getElementById('f-date').value,
+        client: document.getElementById('f-client').value,
+        service: document.getElementById('f-service').value,
+        amount: Number(document.getElementById('f-amount').value)
+      });
+      logActivity('LOG REVENUE', `Revenue of ${naira(Number(document.getElementById('f-amount').value))}`);
+      break;
+    case 'expense':
+      DATA.expenses.unshift({
+        id: uid(),
+        date: document.getElementById('f-date').value,
+        name: document.getElementById('f-name').value,
+        category: document.getElementById('f-category').value,
+        amount: Number(document.getElementById('f-amount').value)
+      });
+      logActivity('LOG EXPENSE', `Expense of ${naira(Number(document.getElementById('f-amount').value))}`);
+      break;
+    case 'social':
+      DATA.social.unshift({
+        id: uid(),
+        topic: document.getElementById('f-topic').value,
+        platform: document.getElementById('f-platform').value,
+        status: document.getElementById('f-status').value,
+        date: document.getElementById('f-date').value
+      });
+      logActivity('ADD POST', `Scheduled ${document.getElementById('f-platform').value} post`);
+      break;
+    case 'service':
+      DATA.services.push({
+        id: uid(),
+        name: document.getElementById('f-name').value,
+        desc: document.getElementById('f-desc').value,
+        price: document.getElementById('f-price').value,
+        status: document.getElementById('f-status').value
+      });
+      logActivity('ADD SERVICE', `Added ${document.getElementById('f-name').value}`);
+      break;
+    case 'webinar':
+      DATA.webinars.push({
+        id: uid(),
+        title: document.getElementById('f-title').value,
+        speaker: document.getElementById('f-speaker').value,
+        date: document.getElementById('f-date').value,
+        time: document.getElementById('f-time').value
+      });
+      logActivity('ADD WEBINAR', `Added ${document.getElementById('f-title').value}`);
+      break;
+    case 'scholarship':
+      DATA.scholarships.push({
+        id: uid(),
+        name: document.getElementById('f-name').value,
+        country: document.getElementById('f-country').value,
+        institution: document.getElementById('f-institution').value,
+        deadline: document.getElementById('f-deadline').value,
+        funding: document.getElementById('f-funding').value
+      });
+      logActivity('ADD SCHOLARSHIP', `Added ${document.getElementById('f-name').value}`);
+      break;
+    case 'todo':
+      DATA.todos.push({
+        id: uid(),
+        task: document.getElementById('f-task').value,
+        priority: document.getElementById('f-priority').value,
+        status: document.getElementById('f-status').value,
+        due: document.getElementById('f-due').value
+      });
+      logActivity('ADD TASK', `Added task: ${document.getElementById('f-task').value}`);
+      break;
+    case 'ceTask':
+      DATA.ceChecklist = DATA.ceChecklist || [];
+      DATA.ceChecklist.push({
+        id: uid(),
+        date: document.getElementById('f-date').value || today(),
+        task: document.getElementById('f-task').value,
+        assignedCE: document.getElementById('f-assignedCE').value || 'CE Team',
+        notes: document.getElementById('f-notes').value || '',
+        completed: false
+      });
+      logActivity('ADD CE TASK', `Added CE task: ${document.getElementById('f-task').value}`);
+      break;
+  }
+  closeModal();
+  saveData();
+}
+
+// CSV Import
+function importFromCSV() {
+  const csvData = document.getElementById('f-csvData').value;
+  if (!csvData.trim()) {
+    alert('Please paste CSV data');
+    return;
+  }
+  
+  const lines = csvData.trim().split('\n');
+  let count = 0;
+  
+  lines.forEach((line, index) => {
+    if (index === 0 || !line.trim()) return; // skip header
+    
+    const parts = line.split('|').map(p => p.trim());
+    if (parts.length < 3) return;
+    
+    const newClient = {
+      id: uid(),
+      name: parts[0] || '',
+      service: parts[1] || '',
+      country: parts[2] || '',
+      assignedCE: parts[3] || '',
+      gdrive: parts[4] || '',
+      status: parts[5] || 'New Lead',
+      paid: Number(parts[6]) || 0,
+      balance: Number(parts[7]) || 0,
+      notes: parts[8] || ''
+    };
+    
+    if (newClient.name) {
+      DATA.clients.push(newClient);
+      count++;
+    }
+  });
+  
+  if (count > 0) {
+    logActivity('IMPORT CSV', `Imported ${count} clients from CSV`);
+    saveData();
+    alert(`✅ Imported ${count} clients successfully!`);
+  } else {
+    alert('❌ No valid data found. Check CSV format.');
+  }
+}
+
+function editClient(id) {
+  openModal('client', id);
+}
+
+function deleteItem(type, id) {
+  if (!confirm('Delete this item?')) return;
+  if (type === 'client') DATA.clients = DATA.clients.filter(x => x.id !== id);
+  else if (type === 'revenue') DATA.revenue = DATA.revenue.filter(x => x.id !== id);
+  else if (type === 'expense') DATA.expenses = DATA.expenses.filter(x => x.id !== id);
+  else if (type === 'social') DATA.social = DATA.social.filter(x => x.id !== id);
+  else if (type === 'service') DATA.services = DATA.services.filter(x => x.id !== id);
+  else if (type === 'webinar') DATA.webinars = DATA.webinars.filter(x => x.id !== id);
+  else if (type === 'scholarship') DATA.scholarships = DATA.scholarships.filter(x => x.id !== id);
+  else if (type === 'todo') DATA.todos = DATA.todos.filter(x => x.id !== id);
+  logActivity('DELETE', `Deleted item (Type: ${type})`);
+  saveData();
+}
+
+// Google Sheets Sync
+function updateSyncStatus() {
+  const status = document.getElementById('syncStatus');
+  const connected = DATA.googleSheetId && DATA.googleScriptUrl;
+  
+  if (connected) {
+    status.innerHTML = `<div class="sync-status connected">✅ Connected to Google Sheets</div>`;
+  } else {
+    status.innerHTML = `<div class="sync-status disconnected">❌ Not connected to Google Sheets</div>`;
+  }
+  
+  document.getElementById('sheetId').value = DATA.googleSheetId || '';
+  document.getElementById('scriptUrl').value = DATA.googleScriptUrl || '';
+  document.getElementById('autoSync').checked = DATA.autoSync || false;
+  
+  if (DATA.lastSync) {
+    document.getElementById('lastSyncTime').textContent = `Last sync: ${DATA.lastSync}`;
+  }
+}
+
+function saveGoogleSettings() {
+  DATA.googleSheetId = document.getElementById('sheetId').value;
+  DATA.googleScriptUrl = document.getElementById('scriptUrl').value;
+  DATA.autoSync = document.getElementById('autoSync').checked;
+  saveData();
+  alert('✅ Settings saved!');
+}
+
+function saveCEVisibility() {
+  DATA.ceVisibility = {
+    canSeeRevenue: document.getElementById('ceCanSeeRevenue').checked,
+    canSeeExpenses: document.getElementById('ceCanSeeExpenses').checked,
+    canSeeActivity: document.getElementById('ceCanSeeActivity').checked,
+    canSeeFinancials: document.getElementById('ceCanSeeFinancials').checked,
+    canSeePersonalWorkspace: document.getElementById('ceCanSeePersonalWorkspace').checked
+  };
+  saveData();
+  syncToFirebase();
+  alert('✅ CE permissions updated! Dashboard will refresh for CE.');
+}
+
+function generateWeeklyReport() {
+  const tasks = DATA.ceChecklist || [];
+  const completed = tasks.filter(t => t.completed).length;
+  const total = tasks.length;
+  const completionRate = total > 0 ? Math.round((completed/total)*100) : 0;
+  
+  const report = `
+📊 WEEKLY CE PERFORMANCE REPORT
+Date: ${new Date().toLocaleDateString()}
+=====================================
+
+Tasks Completed: ${completed}/${total}
+Completion Rate: ${completionRate}%
+
+Tasks Completed:
+${tasks.filter(t => t.completed).map(t => `✅ ${t.task} (${t.date})`).join('\n') || 'None'}
+
+Tasks Pending:
+${tasks.filter(t => !t.completed).map(t => `⏳ ${t.task} (${t.date})`).join('\n') || 'None'}
+
+Notes: 
+${tasks.filter(t => t.notes).map(t => `- ${t.task}: ${t.notes}`).join('\n') || 'No notes'}
+=====================================
+`;
+
+  // Log to activity
+  logActivity('CE_REPORT', `Weekly CE report generated - ${completionRate}% completion`);
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(report);
+  alert('✅ Weekly report copied to clipboard!\n\n' + report);
+}
+
+function toggleCETask(id) {
+  const task = DATA.ceChecklist.find(t => t.id === id);
+  if (task) {
+    task.completed = !task.completed;
+    logActivity('CE_TASK', `Task "${task.task}" marked as ${task.completed ? 'completed' : 'pending'}`);
+    saveData();
+    syncToFirebase();
+    refreshPage();
+  }
+}
+
+function loadCEVisibilityUI() {
+  if (SESSION && SESSION.role === 'admin') {
+    document.getElementById('ceCanSeeRevenue').checked = DATA.ceVisibility?.canSeeRevenue ?? true;
+    document.getElementById('ceCanSeeExpenses').checked = DATA.ceVisibility?.canSeeExpenses ?? false;
+    document.getElementById('ceCanSeeActivity').checked = DATA.ceVisibility?.canSeeActivity ?? true;
+    document.getElementById('ceCanSeeFinancials').checked = DATA.ceVisibility?.canSeeFinancials ?? false;
+    document.getElementById('ceCanSeePersonalWorkspace').checked = DATA.ceVisibility?.canSeePersonalWorkspace ?? false;
+  }
+}
+
+function getFilteredActivityLog() {
+  if (SESSION && SESSION.role === 'ce' && !DATA.ceVisibility?.canSeeActivity) {
+    return DATA.activity.filter(log => log.user === SESSION.name);
+  }
+  return DATA.activity;
+}
+
+function canCEAccess(permission) {
+  if (SESSION && SESSION.role === 'ce') {
+    return DATA.ceVisibility?.[permission] ?? false;
+  }
+  return true; // Admin can access everything
+}
+
+function testGoogleConnection() {
+  const sheetId = document.getElementById('sheetId').value;
+  const scriptUrl = document.getElementById('scriptUrl').value;
+  
+  if (!sheetId || !scriptUrl) {
+    alert('❌ Please fill in both Sheet ID and Script URL');
+    return;
+  }
+  
+  alert('✅ Configuration saved. Click "Sync Now" to test full sync.');
+}
+
+function manualSync() {
+  const scriptUrl = DATA.googleScriptUrl;
+  if (!scriptUrl) {
+    alert('❌ Please configure Google Apps Script URL first');
+    return;
+  }
+  
+  const payload = DATA.clients.map(c => ({
+    name: c.name,
+    service: c.service,
+    country: c.country,
+    assignedCE: c.assignedCE,
+    gdrive: c.gdrive,
+    status: c.status,
+    paid: c.paid,
+    balance: c.balance,
+    notes: c.notes
+  }));
+  
+  fetch(scriptUrl, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.text())
+  .then(() => {
+    DATA.lastSync = new Date().toLocaleString();
+    localStorage.setItem('eduvoyage_with_importer', JSON.stringify(DATA));
+    alert('✅ Synced to Google Sheets!');
+    updateSyncStatus();
+  })
+  .catch(e => {
+    alert('❌ Sync failed. Check Script URL.\nError: ' + e.message);
+  });
+}
+
+// Export - COMPREHENSIVE BACKUP (ALL DATA)
+function exportData(type) {
+  let csvContent = '';
+  let filename = `EduVoyage_Complete_Backup_${new Date().toISOString().slice(0,10)}.csv`;
+  
+  if (type === 'all') {
+    // HEADER
+    csvContent += '=== EDUVOYAGE COMPLETE BACKUP ===\n';
+    csvContent += `Export Date: ${new Date().toLocaleString()}\n`;
+    csvContent += `Total Clients: ${DATA.clients.length}, Revenue Entries: ${DATA.revenue.length}, Expenses: ${DATA.expenses.length}\n\n`;
+    
+    // SECTION 1: CLIENTS
+    csvContent += '--- CLIENTS (Client Work) ---\n';
+    csvContent += 'Name,Service,Country,Assigned CE,Google Drive,Status,Amount Paid,Outstanding,Notes\n';
+    DATA.clients.forEach(c => {
+      csvContent += `"${c.name}","${c.service}","${c.country}","${c.assignedCE}","${c.gdrive}","${c.status}",${c.paid},${c.balance},"${c.notes}"\n`;
+    });
+    csvContent += '\n';
+    
+    // SECTION 2: REVENUE
+    csvContent += '--- REVENUE ---\n';
+    csvContent += 'Date,Client,Service,Amount,Notes\n';
+    if (DATA.revenue && DATA.revenue.length > 0) {
+      DATA.revenue.forEach(r => {
+        csvContent += `"${r.date}","${r.client}","${r.service}",${r.amount},"${r.notes || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No revenue entries)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 3: EXPENSES
+    csvContent += '--- EXPENSES ---\n';
+    csvContent += 'Date,Category,Description,Amount,Notes\n';
+    if (DATA.expenses && DATA.expenses.length > 0) {
+      DATA.expenses.forEach(e => {
+        csvContent += `"${e.date}","${e.category}","${e.name}",${e.amount},"${e.notes || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No expense entries)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 4: ATTENDANCE
+    csvContent += '--- ATTENDANCE ---\n';
+    csvContent += 'Date,Staff,Time,Status\n';
+    if (DATA.attendance && DATA.attendance.length > 0) {
+      DATA.attendance.forEach(a => {
+        csvContent += `"${a.date}","${a.staff}","${a.time}","${a.status}"\n`;
+      });
+    } else {
+      csvContent += '(No attendance records)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 5: SOCIAL MEDIA
+    csvContent += '--- SOCIAL MEDIA PLANNER ---\n';
+    csvContent += 'Platform,Post Date,Content,Status,Scheduled Date\n';
+    if (DATA.social && DATA.social.length > 0) {
+      DATA.social.forEach(s => {
+        const content = (s.content || '').substring(0, 50).replace(/"/g, '""');
+        csvContent += `"${s.platform}","${s.date}","${content}...","${s.status}","${s.scheduledDate || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No social media posts)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 6: SERVICES & PRICING
+    csvContent += '--- SERVICES & PRICING ---\n';
+    csvContent += 'Service Name,Category,Price,Duration,Description\n';
+    if (DATA.services && DATA.services.length > 0) {
+      DATA.services.forEach(s => {
+        const desc = (s.description || '').substring(0, 50).replace(/"/g, '""');
+        csvContent += `"${s.name}","${s.category}",${s.price},"${s.duration}","${desc}..."\n`;
+      });
+    } else {
+      csvContent += '(No services added)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 7: WEBINARS
+    csvContent += '--- WEBINARS ---\n';
+    csvContent += 'Title,Date,Time,Topic,Status,Link\n';
+    if (DATA.webinars && DATA.webinars.length > 0) {
+      DATA.webinars.forEach(w => {
+        csvContent += `"${w.title}","${w.date}","${w.time}","${w.topic}","${w.status}","${w.link || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No webinars scheduled)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 8: SCHOLARSHIPS
+    csvContent += '--- SCHOLARSHIP DEADLINES ---\n';
+    csvContent += 'Country,Scholarship Name,Deadline,Status,Link\n';
+    if (DATA.scholarships && DATA.scholarships.length > 0) {
+      DATA.scholarships.forEach(s => {
+        csvContent += `"${s.country}","${s.name}","${s.deadline}","${s.status}","${s.link || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No scholarships tracked)\n';
+    }
+    csvContent += '\n';
+    
+    // SECTION 9: TO-DOS
+    csvContent += '--- TO-DO LIST ---\n';
+    csvContent += 'Task,Category,Due Date,Status,Priority,Notes\n';
+    if (DATA.todos && DATA.todos.length > 0) {
+      DATA.todos.forEach(t => {
+        csvContent += `"${t.task}","${t.category}","${t.dueDate}","${t.status}","${t.priority}","${t.notes || ''}"\n`;
+      });
+    } else {
+      csvContent += '(No tasks)\n';
+    }
+    csvContent += '\n\n';
+    
+    csvContent += '=== END OF BACKUP ===\n';
+    csvContent += 'To restore: Import Clients section back into Client Work tab\n';
+  }
+  
+  if (!csvContent) {
+    alert('No data to export!');
+    return;
+  }
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  
+  // Log the export
+  logActivity('Export', `Complete data backup exported with ${DATA.clients.length} clients, ${DATA.revenue.length} revenue entries, ${DATA.expenses.length} expenses`);
+}
+
+function clearAllData() {
+  if (!confirm('Clear ALL data? This cannot be undone!')) return;
+  localStorage.removeItem('eduvoyage_with_importer');
+  location.reload();
+}
+
+updateLoginHint();
+
+// Restore session from localStorage on page load
+function restoreSession() {
+  const savedSession = localStorage.getItem('eduvoyage_session');
+  if (savedSession) {
+    try {
+      SESSION = JSON.parse(savedSession);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appContainer').classList.add('show');
+      document.getElementById('userName').textContent = SESSION.name;
+      document.getElementById('userRole').textContent = SESSION.role === 'admin' ? 'Admin' : 'CE';
+      document.getElementById('userAvatar').textContent = SESSION.name[0];
+      
+      if (SESSION.role === 'admin') {
+        document.getElementById('ceManagementNav').style.display = 'block';
+        document.getElementById('personalNav').style.display = 'block';
+        document.getElementById('googleSheetsPanel').style.display = 'block';
+      }
+      
+      listenToFirebaseUpdates(); // Start listening to Firebase changes
+      refreshPage();
+    } catch (e) {
+      localStorage.removeItem('eduvoyage_session');
+    }
+  }
+}
+
+// Restore session if user was previously logged in
+restoreSession();
+</script>
+
+</body>
+</html>
