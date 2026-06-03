@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVoyage - Operations Workspace</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --navy: #0A1F44;
+      --dark-navy: #08152E;
+      --gold: #C8A24B;
+      --white: #FFFFFF;
+      --light-bg: #F5F7FA;
+      --gray: #6B7280;
+      --border: #E5E7EB;
+      --ok: #10B981;
+      --warn: #F59E0B;
+      --danger: #EF4444;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--navy); color: var(--dark-navy); min-height: 100vh; }
+    .container { display: flex; min-height: 100vh; }
+    .sidebar { width: 280px; background: var(--dark-navy); padding: 30px 0; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; max-height: 100vh; }
+    .logo { padding: 0 25px 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .logo h1 { color: var(--white); font-size: 20px; margin-bottom: 5px; }
+    .logo p { color: var(--gold); font-size: 11px; letter-spacing: 2px; font-weight: 600; }
+    .nav-item { padding: 12px 25px; color: rgba(255,255,255,0.7); cursor: pointer; border-left: 3px solid transparent; transition: all 0.2s; font-size: 14px; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+    .nav-item.active { background: rgba(200,162,75,0.1); border-left-color: var(--gold); color: var(--gold); font-weight: 600; }
+    .nav-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }
+    .main { flex: 1; display: flex; flex-direction: column; background: var(--light-bg); }
+    .header { background: var(--white); padding: 20px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .header h2 { color: var(--dark-navy); font-size: 24px; }
+    .logout-btn { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .content { flex: 1; padding: 40px; overflow-y: auto; }
+    .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--dark-navy) 100%); }
+    .login-box { background: var(--white); padding: 60px 50px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .login-box h1 { color: var(--dark-navy); font-size: 36px; margin-bottom: 10px; }
+    .login-box .subtitle { color: var(--gold); font-size: 12px; letter-spacing: 2px; font-weight: 600; margin-bottom: 40px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; color: var(--gray); font-size: 12px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,162,75,0.1); }
+    .login-btn { width: 100%; padding: 14px; background: var(--gold); color: var(--dark-navy); border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 30px; }
+    .login-btn:hover { background: #B8932A; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: var(--white); padding: 25px; border-radius: 10px; border-left: 4px solid var(--gold); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .stat-label { color: var(--gray); font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .stat-value { color: var(--dark-navy); font-size: 28px; font-weight: 700; }
+    .panel { background: var(--white); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px; }
+    .panel-header { background: var(--light-bg); padding: 20px; border-bottom: 1px solid var(--border); }
+    .panel-header h3 { color: var(--dark-navy); font-size: 16px; margin: 0; }
+    .panel-body { padding: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px; background: var(--light-bg); color: var(--gray); font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .btn { padding: 10px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-block; margin-right: 5px; }
+    .btn-primary { background: var(--gold); color: var(--dark-navy); }
+    .btn-primary:hover { background: #B8932A; }
+    .btn-success { background: var(--ok); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #DC2626; }
+    .btn-secondary { background: var(--gray); color: white; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: var(--white); padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }
+    .modal-header h3 { color: var(--dark-navy); font-size: 20px; margin: 0 0 25px 0; }
+    .modal-body { margin-bottom: 25px; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 20px; }
+    .hidden { display: none !important; }
+    .badge { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-ok { background: var(--ok); color: white; }
+    .badge-warn { background: var(--warn); color: white; }
+    .badge-danger { background: var(--danger); color: white; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+  <div class="login-box">
+    <h1>EduVoyage</h1>
+    <p class="subtitle">OPERATIONS WORKSPACE</p>
+    <div class="form-group">
+      <label>SELECT ROLE</label>
+      <select id="roleSelect">
+        <option value="admin">Admin (Owner)</option>
+        <option value="ce">Client Executive</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>USERNAME</label>
+      <input type="text" id="username" placeholder="admin" />
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" id="password" placeholder="••••••" />
+    </div>
+    <button class="login-btn" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- MAIN WORKSPACE -->
+<div id="workspace" class="container hidden">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo">
+      <h1>EduVoyage</h1>
+      <p>WORKSPACE</p>
+    </div>
+    <div class="nav-item active" onclick="switchPage('dashboard')"> Dashboard</div>
+    <div class="nav-item" onclick="switchPage('attendance')"> Attendance</div>
+    <div class="nav-item" onclick="switchPage('clients')"> Client Work</div>
+    <div class="nav-item" onclick="switchPage('social')"> Social Media</div>
+    <div class="nav-item" onclick="switchPage('ceManagement')"> CE Management</div>
+    <div class="nav-item" onclick="switchPage('todos')"> My To-Dos</div>
+    <div class="nav-item" onclick="switchPage('ceReports')"> CE Reports</div>
+    <div class="nav-item" onclick="switchPage('webinars')"> Webinars</div>
+    <div class="nav-item" onclick="switchPage('services')"> Services & Pricing</div>
+    <div class="nav-item" onclick="switchPage('scholarships')"> Scholarship Advisory</div>
+    <div class="nav-item" onclick="switchPage('settings')"> Settings</div>
+    <div id="adminOnlyNav">
+      <div class="nav-divider"></div>
+      <div class="nav-item" onclick="switchPage('finances')"> Finances</div>
+      <div class="nav-item" onclick="switchPage('personal')"> Personal Workspace</div>
+      <div class="nav-item" onclick="switchPage('activity')"> Activity Log</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="header">
+      <h2 id="pageTitle">Dashboard</h2>
+      <button class="logout-btn" onclick="handleLogout()"> Logout</button>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="page">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Clients</div>
+            <div class="stat-value" id="statClients">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value" id="statRevenue">₦0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Tasks</div>
+            <div class="stat-value" id="statTasks">0</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3> Recent Activity</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Time</th><th>Action</th><th>Details</th></tr></thead>
+              <tbody id="activityBody">
+                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No activity yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div id="attendance" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('attendance')">+ Sign In</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Attendance (Immutable Record)</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Name</th><th>Time In</th></tr></thead>
+              <tbody id="attendanceBody">
+                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No records</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENT WORK -->
+      <div id="clients" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('client')">+ Add Client</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Client Work</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Name</th><th>Service</th><th>Country</th><th>Status</th><th>Balance</th><th>Actions</th></tr></thead>
+              <tbody id="clientsBody">
+                <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--gray);">No clients</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOCIAL MEDIA -->
+      <div id="social" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('social')">+ Add Post</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Social Media</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Platform</th><th>Topic</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="socialBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No posts</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CE MANAGEMENT -->
+      <div id="ceManagement" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('ceTask')">+ Add Task</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> CE Management</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Task</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="ceTasksBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY TO-DOS -->
+      <div id="todos" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('todo')">+ Add To-Do</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> My To-Dos</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Task</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="todosBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CE REPORTS -->
+      <div id="ceReports" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('ceReport')">+ Create Report</button>
+        <button class="btn btn-success" onclick="exportCEReport()" style="margin-left: 10px;"> Export Weekly Report</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> CE Reports</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Week</th><th>Leads</th><th>Converted</th><th>Feedback</th><th>Actions</th></tr></thead>
+              <tbody id="ceReportsBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No reports</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBINARS -->
+      <div id="webinars" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('webinar')">+ Add Webinar</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Webinars</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Title</th><th>Speaker</th><th>Date</th><th>Time</th><th>Actions</th></tr></thead>
+              <tbody id="webinarsBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No webinars</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICES & PRICING -->
+      <div id="services" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('service')">+ Add Service</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Services & Pricing</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Service Name</th><th>Description</th><th>Price</th><th>Actions</th></tr></thead>
+              <tbody id="servicesBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No services</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHOLARSHIP ADVISORY -->
+      <div id="scholarships" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('scholarship')">+ Add Scholarship</button>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Scholarship Advisory</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Country</th><th>Destination</th><th>Deadline</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="scholarshipsBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No scholarships</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCES (ADMIN ONLY) -->
+      <div id="finances" class="page hidden">
+        <button class="btn btn-primary" onclick="openModal('revenue')">+ Add Revenue</button>
+        <button class="btn btn-primary" onclick="openModal('expense')" style="margin-left: 10px;">+ Add Expense</button>
+        <div class="stats-grid" style="margin-top: 20px;">
+          <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value" id="finRevenue">₦0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-value" id="finExpenses">₦0</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3> Revenue</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Client</th><th>Service</th><th>Amount</th><th>Actions</th></tr></thead>
+              <tbody id="revenueBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No revenue</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3> Expenses</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
+              <tbody id="expenseBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No expenses</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERSONAL WORKSPACE (ADMIN ONLY) -->
+      <div id="personal" class="page hidden">
+        <div class="panel">
+          <div class="panel-header"><h3> Eduvoyage Business</h3></div>
+          <div class="panel-body">
+            <button class="btn btn-primary" onclick="openModal('personalEduvoyage')">+ Add Note</button>
+            <table style="margin-top: 20px;">
+              <thead><tr><th>Note</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="personalEduvoyageBody">
+                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No notes</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> WakaWithAmi</h3></div>
+          <div class="panel-body">
+            <button class="btn btn-primary" onclick="openModal('personalWaka')">+ Add Content</button>
+            <table style="margin-top: 20px;">
+              <thead><tr><th>Content</th><th>Type</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="personalWakaBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No content</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settings" class="page hidden">
+        <div class="panel">
+          <div class="panel-header"><h3> General Settings</h3></div>
+          <div class="panel-body">
+            <h4 style="color: var(--dark-navy); margin-bottom: 15px;">Workspace</h4>
+            <p style="color: var(--gray); margin-bottom: 20px;">Current User: <strong>${SESSION.name}</strong> | Role: <strong>${SESSION.role}</strong></p>
+            
+            <button class="btn btn-success" onclick="exportAllData()"> Export All Data (CSV)</button>
+            <button class="btn btn-secondary" onclick="clearAllData()" style="margin-left: 10px;"> Clear All Data</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Data Management</h3></div>
+          <div class="panel-body">
+            <h4 style="color: var(--dark-navy); margin-bottom: 15px;">Backup & Recovery</h4>
+            <p style="color: var(--gray); margin-bottom: 20px;">Download your workspace data as backup or transfer to another system.</p>
+            
+          <div class="form-group" style="margin-top: 20px;">
+            <label>Upload Backup File</label>
+            <input type="file" id="backupFile" accept=".json" />
+            <button class="btn btn-primary" onclick="restoreBackup()" style="margin-top: 10px;">Upload & Restore</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-header"><h3> Workspace Info</h3></div>
+          <div class="panel-body">
+            <table style="width: 100%;">
+              <tr>
+                <td style="padding: 10px 0;"><strong>Total Clients:</strong></td>
+                <td style="padding: 10px 0;" id="infoClients">0</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0;"><strong>Total Revenue:</strong></td>
+                <td style="padding: 10px 0;" id="infoRevenue">0</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0;"><strong>Total Attendance Records:</strong></td>
+                <td style="padding: 10px 0;" id="infoAttendance">0</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0;"><strong>Activity Log Entries:</strong></td>
+                <td style="padding: 10px 0;" id="infoActivity">0</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LOG (ADMIN ONLY) -->
+      <div id="activity" class="page hidden">
+        <div class="panel">
+          <div class="panel-header"><h3> Activity Log (Admin Only)</h3></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+              <tbody id="fullActivityBody">
+                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No activity</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Add Item</h3>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATA
+let DATA = {
+  clients: [], attendance: [], social: [], ceTasks: [], todos: [],
+  ceReports: [], webinars: [], services: [], scholarships: [],
+  revenue: [], expenses: [], personalEduvoyage: [], personalWaka: [],
+  activity: []
+};
+
+let SESSION = null;
+let CURRENT_PAGE = 'dashboard';
+let MODAL_TYPE = null;
+let EDIT_ID = null;
+
+// LOAD DATA
+function loadData() {
+  const saved = localStorage.getItem('eduvoyage_workspace');
+  if (saved) DATA = JSON.parse(saved);
+}
+
+function saveData() {
+  localStorage.setItem('eduvoyage_workspace', JSON.stringify(DATA));
+}
+
+function uid() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// LOGIN
+function handleLogin() {
+  const role = document.getElementById('roleSelect').value;
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    alert('Please enter credentials');
+    return;
+  }
+
+  if ((role === 'admin' && username === 'admin' && password === 'admin') ||
+      (role === 'ce' && username === 'ce' && password === 'ce')) {
+    SESSION = { role, name: username };
+    localStorage.setItem('eduvoyage_session', JSON.stringify(SESSION));
+    showWorkspace();
+  } else {
+    alert(' Invalid credentials');
+  }
+}
+
+// LOGOUT
+function handleLogout() {
+  SESSION = null;
+  localStorage.removeItem('eduvoyage_session');
+  location.reload();
+}
+
+// SHOW WORKSPACE
+function showWorkspace() {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('workspace').classList.remove('hidden');
+  
+  // HIDE ADMIN-ONLY NAV FOR CE
+  if (SESSION.role === 'ce') {
+    document.getElementById('adminOnlyNav').style.display = 'none';
+  }
+  
+  refreshPage();
+}
+
+// SWITCH PAGE
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById(page).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  CURRENT_PAGE = page;
+  const titles = {
+    dashboard: ' Dashboard', attendance: ' Attendance', clients: ' Client Work',
+    social: ' Social Media', ceManagement: ' CE Management', todos: ' My To-Dos',
+    ceReports: ' CE Reports', webinars: ' Webinars', services: ' Services & Pricing',
+    scholarships: ' Scholarship Advisory', settings: ' Settings', finances: ' Finances',
+    personal: ' Personal Workspace', activity: ' Activity Log'
+  };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  
+  refreshPage();
+}
+
+// REFRESH PAGE
+function refreshPage() {
+  if (CURRENT_PAGE === 'dashboard') {
+    document.getElementById('statClients').textContent = DATA.clients.length;
+    const rev = DATA.revenue.reduce((s, r) => s + (r.amount || 0), 0);
+    document.getElementById('statRevenue').textContent = '₦' + rev.toLocaleString();
+    document.getElementById('statTasks').textContent = DATA.todos.filter(t => t.status !== 'Completed').length;
+    document.getElementById('activityBody').innerHTML = DATA.activity.length > 0
+      ? DATA.activity.slice(-5).reverse().map(a => `<tr><td>${a.time}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('')
+      : '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No activity</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'attendance') {
+    document.getElementById('attendanceBody').innerHTML = DATA.attendance.length > 0
+      ? DATA.attendance.map(a => `<tr><td>${a.date}</td><td>${a.name}</td><td>${a.timeIn}</td></tr>`).join('')
+      : '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No records</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'clients') {
+    const filtered = SESSION.role === 'ce' ? DATA.clients.filter(c => c.assignedCE === SESSION.name) : DATA.clients;
+    document.getElementById('clientsBody').innerHTML = filtered.length > 0
+      ? filtered.map(c => `<tr><td>${c.name}</td><td>${c.service}</td><td>${c.country}</td><td>${c.status}</td><td>₦${(c.balance || 0).toLocaleString()}</td><td><button class="btn btn-primary btn-small" onclick="editItem('client', '${c.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('client', '${c.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--gray);">No clients</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'social') {
+    document.getElementById('socialBody').innerHTML = DATA.social.length > 0
+      ? DATA.social.map(s => `<tr><td>${s.platform}</td><td>${s.topic}</td><td>${s.date}</td><td><span class="badge ${s.status === 'Published' ? 'badge-ok' : 'badge-warn'}">${s.status}</span></td><td><button class="btn btn-primary btn-small" onclick="editItem('social', '${s.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('social', '${s.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No posts</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'ceManagement') {
+    document.getElementById('ceTasksBody').innerHTML = DATA.ceTasks.length > 0
+      ? DATA.ceTasks.map(t => `<tr><td>${t.date}</td><td>${t.task}</td><td><span class="badge ${t.completed ? 'badge-ok' : 'badge-warn'}">${t.completed ? 'Done' : 'Pending'}</span></td><td><button class="btn btn-primary btn-small" onclick="editItem('ceTask', '${t.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('ceTask', '${t.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'todos') {
+    document.getElementById('todosBody').innerHTML = DATA.todos.length > 0
+      ? DATA.todos.map(t => `<tr><td>${t.task}</td><td><span class="badge ${t.priority === 'High' ? 'badge-danger' : t.priority === 'Medium' ? 'badge-warn' : 'badge-ok'}">${t.priority}</span></td><td>${t.due}</td><td>${t.status}</td><td><button class="btn btn-primary btn-small" onclick="editItem('todo', '${t.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('todo', '${t.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No tasks</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'ceReports') {
+    document.getElementById('ceReportsBody').innerHTML = DATA.ceReports.length > 0
+      ? DATA.ceReports.map(r => `<tr><td>${r.week}</td><td>${r.leads}</td><td>${r.converted}</td><td>${r.feedback.substring(0, 30)}...</td><td><button class="btn btn-primary btn-small" onclick="editItem('ceReport', '${r.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('ceReport', '${r.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No reports</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'webinars') {
+    document.getElementById('webinarsBody').innerHTML = DATA.webinars.length > 0
+      ? DATA.webinars.map(w => `<tr><td>${w.title}</td><td>${w.speaker}</td><td>${w.date}</td><td>${w.time}</td><td><button class="btn btn-primary btn-small" onclick="editItem('webinar', '${w.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('webinar', '${w.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No webinars</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'services') {
+    document.getElementById('servicesBody').innerHTML = DATA.services.length > 0
+      ? DATA.services.map(s => `<tr><td>${s.name}</td><td>${s.description}</td><td>₦${(s.price || 0).toLocaleString()}</td><td><button class="btn btn-primary btn-small" onclick="editItem('service', '${s.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('service', '${s.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No services</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'scholarships') {
+    document.getElementById('scholarshipsBody').innerHTML = DATA.scholarships.length > 0
+      ? DATA.scholarships.map(s => `<tr><td>${s.country}</td><td>${s.destination}</td><td>${s.deadline}</td><td><span class="badge badge-warn">${s.status}</span></td><td><button class="btn btn-primary btn-small" onclick="editItem('scholarship', '${s.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('scholarship', '${s.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No scholarships</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'finances') {
+    const rev = DATA.revenue.reduce((s, r) => s + (r.amount || 0), 0);
+    const exp = DATA.expenses.reduce((s, e) => s + (e.amount || 0), 0);
+    document.getElementById('finRevenue').textContent = '₦' + rev.toLocaleString();
+    document.getElementById('finExpenses').textContent = '₦' + exp.toLocaleString();
+    document.getElementById('revenueBody').innerHTML = DATA.revenue.length > 0
+      ? DATA.revenue.map(r => `<tr><td>${r.date}</td><td>${r.client}</td><td>${r.service}</td><td>₦${(r.amount || 0).toLocaleString()}</td><td><button class="btn btn-primary btn-small" onclick="editItem('revenue', '${r.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('revenue', '${r.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No revenue</td></tr>';
+    document.getElementById('expenseBody').innerHTML = DATA.expenses.length > 0
+      ? DATA.expenses.map(e => `<tr><td>${e.date}</td><td>${e.category}</td><td>${e.description}</td><td>₦${(e.amount || 0).toLocaleString()}</td><td><button class="btn btn-primary btn-small" onclick="editItem('expense', '${e.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('expense', '${e.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">No expenses</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'personal') {
+    document.getElementById('personalEduvoyageBody').innerHTML = DATA.personalEduvoyage.length > 0
+      ? DATA.personalEduvoyage.map(n => `<tr><td>${n.note}</td><td>${n.date}</td><td><button class="btn btn-primary btn-small" onclick="editItem('personalEduvoyage', '${n.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('personalEduvoyage', '${n.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">No notes</td></tr>';
+    document.getElementById('personalWakaBody').innerHTML = DATA.personalWaka.length > 0
+      ? DATA.personalWaka.map(w => `<tr><td>${w.content}</td><td>${w.type}</td><td>${w.date}</td><td><button class="btn btn-primary btn-small" onclick="editItem('personalWaka', '${w.id}')"> Edit</button> <button class="btn btn-danger btn-small" onclick="deleteItem('personalWaka', '${w.id}')">Del</button></td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No content</td></tr>';
+  }
+  else if (CURRENT_PAGE === 'settings') {
+    document.getElementById('settingsUser').textContent = SESSION.name;
+    document.getElementById('settingsRole').textContent = SESSION.role;
+    const rev = DATA.revenue.reduce((s, r) => s + (r.amount || 0), 0);
+    document.getElementById('infoClients').textContent = DATA.clients.length;
+    document.getElementById('infoRevenue').textContent = 'N' + rev.toLocaleString();
+    document.getElementById('infoAttendance').textContent = DATA.attendance.length;
+    document.getElementById('infoActivity').textContent = DATA.activity.length;
+  }
+  else if (CURRENT_PAGE === 'activity') {
+    document.getElementById('fullActivityBody').innerHTML = DATA.activity.length > 0
+      ? DATA.activity.map(a => `<tr><td>${a.time}</td><td>${a.user}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">No activity</td></tr>';
+  }
+}
+
+// MODAL FUNCTIONS
+function openModal(type, id = null) {
+  MODAL_TYPE = type;
+  EDIT_ID = id;
+  const body = document.getElementById('modalBody');
+  let html = '';
+  let title = '';
+  let item = null;
+
+  if (id) {
+    const map = {
+      client: DATA.clients, social: DATA.social, ceTask: DATA.ceTasks,
+      todo: DATA.todos, ceReport: DATA.ceReports, webinar: DATA.webinars,
+      service: DATA.services, scholarship: DATA.scholarships,
+      revenue: DATA.revenue, expense: DATA.expenses,
+      personalEduvoyage: DATA.personalEduvoyage, personalWaka: DATA.personalWaka
+    };
+    item = map[type]?.find(x => x.id === id);
+  }
+
+  if (type === 'client') {
+    title = id ? ' Edit Client' : ' Add Client';
+    html = `
+      <div class="form-group"><label>Client Name</label><input type="text" id="f-name" value="${item?.name || ''}" /></div>
+      <div class="form-group"><label>Service</label><input type="text" id="f-service" value="${item?.service || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Country</label><input type="text" id="f-country" value="${item?.country || ''}" /></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option ${item?.status === 'Active' ? 'selected' : ''}>Active</option><option ${item?.status === 'On Hold' ? 'selected' : ''}>On Hold</option><option ${item?.status === 'Completed' ? 'selected' : ''}>Completed</option></select></div>
+      </div>
+      <div class="form-group"><label>Assigned CE</label><input type="text" id="f-assignedCE" value="${item?.assignedCE || ''}" /></div>
+      <div class="form-group"><label>Balance (₦)</label><input type="number" id="f-balance" value="${item?.balance || 0}" /></div>
+    `;
+  }
+  else if (type === 'attendance') {
+    title = ' Sign In';
+    html = `
+      <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${today()}" /></div>
+      <div class="form-group"><label>Name</label><input type="text" id="f-name" value="${SESSION.name}" /></div>
+      <div class="form-group"><label>Time In</label><input type="time" id="f-timeIn" /></div>
+    `;
+  }
+  else if (type === 'social') {
+    title = id ? ' Edit Post' : ' Add Post';
+    html = `
+      <div class="form-group"><label>Platform</label><select id="f-platform"><option ${item?.platform === 'Instagram' ? 'selected' : ''}>Instagram</option><option ${item?.platform === 'TikTok' ? 'selected' : ''}>TikTok</option><option ${item?.platform === 'Facebook' ? 'selected' : ''}>Facebook</option></select></div>
+      <div class="form-group"><label>Topic</label><input type="text" id="f-topic" value="${item?.topic || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option ${item?.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option><option ${item?.status === 'Published' ? 'selected' : ''}>Published</option><option ${item?.status === 'Draft' ? 'selected' : ''}>Draft</option></select></div>
+      </div>
+    `;
+  }
+  else if (type === 'ceTask') {
+    title = id ? ' Edit Task' : ' Add Task';
+    html = `
+      <div class="form-group"><label>Task</label><input type="text" id="f-task" value="${item?.task || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+        <div class="form-group"><label>Status</label><select id="f-completed"><option value="false" ${!item?.completed ? 'selected' : ''}>Pending</option><option value="true" ${item?.completed ? 'selected' : ''}>Done</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="f-notes" value="${item?.notes || ''}" /></div>
+    `;
+  }
+  else if (type === 'todo') {
+    title = id ? ' Edit To-Do' : ' Add To-Do';
+    html = `
+      <div class="form-group"><label>Task</label><input type="text" id="f-task" value="${item?.task || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Priority</label><select id="f-priority"><option ${item?.priority === 'High' ? 'selected' : ''}>High</option><option ${item?.priority === 'Medium' ? 'selected' : ''}>Medium</option><option ${item?.priority === 'Low' ? 'selected' : ''}>Low</option></select></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option ${item?.status === 'Not Started' ? 'selected' : ''}>Not Started</option><option ${item?.status === 'In Progress' ? 'selected' : ''}>In Progress</option><option ${item?.status === 'Completed' ? 'selected' : ''}>Completed</option></select></div>
+      </div>
+      <div class="form-group"><label>Due Date</label><input type="date" id="f-due" value="${item?.due || ''}" /></div>
+    `;
+  }
+  else if (type === 'ceReport') {
+    title = id ? ' Edit Report' : ' Create Report';
+    html = `
+      <div class="form-group"><label>Week (e.g., Week 1 - June 2026)</label><input type="text" id="f-week" value="${item?.week || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Total Leads</label><input type="number" id="f-leads" value="${item?.leads || 0}" /></div>
+        <div class="form-group"><label>Converted Leads</label><input type="number" id="f-converted" value="${item?.converted || 0}" /></div>
+      </div>
+      <div class="form-group"><label>Feedback/Opinions/Responses</label><textarea id="f-feedback" style="height: 120px;">${item?.feedback || ''}</textarea></div>
+    `;
+  }
+  else if (type === 'webinar') {
+    title = id ? ' Edit Webinar' : ' Add Webinar';
+    html = `
+      <div class="form-group"><label>Title</label><input type="text" id="f-title" value="${item?.title || ''}" /></div>
+      <div class="form-group"><label>Speaker</label><input type="text" id="f-speaker" value="${item?.speaker || ''}" /></div>
+      <div class="two-col">
+        <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+        <div class="form-group"><label>Time</label><input type="time" id="f-time" value="${item?.time || ''}" /></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="f-description">${item?.description || ''}</textarea></div>
+    `;
+  }
+  else if (type === 'service') {
+    title = id ? ' Edit Service' : ' Add Service';
+    html = `
+      <div class="form-group"><label>Service Name</label><input type="text" id="f-name" value="${item?.name || ''}" /></div>
+      <div class="form-group"><label>Description</label><textarea id="f-description">${item?.description || ''}</textarea></div>
+      <div class="form-group"><label>Price (₦)</label><input type="number" id="f-price" value="${item?.price || 0}" /></div>
+    `;
+  }
+  else if (type === 'scholarship') {
+    title = id ? ' Edit Scholarship' : ' Add Scholarship';
+    html = `
+      <div class="two-col">
+        <div class="form-group"><label>Country</label><input type="text" id="f-country" value="${item?.country || ''}" /></div>
+        <div class="form-group"><label>Destination</label><input type="text" id="f-destination" value="${item?.destination || ''}" /></div>
+      </div>
+      <div class="two-col">
+        <div class="form-group"><label>Deadline</label><input type="date" id="f-deadline" value="${item?.deadline || ''}" /></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option ${item?.status === 'Open' ? 'selected' : ''}>Open</option><option ${item?.status === 'Closed' ? 'selected' : ''}>Closed</option><option ${item?.status === 'Applied' ? 'selected' : ''}>Applied</option></select></div>
+      </div>
+    `;
+  }
+  else if (type === 'revenue') {
+    title = id ? ' Edit Revenue' : ' Add Revenue';
+    html = `
+      <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+      <div class="form-group"><label>Client Name</label><input type="text" id="f-client" value="${item?.client || ''}" /></div>
+      <div class="form-group"><label>Service</label><input type="text" id="f-service" value="${item?.service || ''}" /></div>
+      <div class="form-group"><label>Amount (₦)</label><input type="number" id="f-amount" value="${item?.amount || 0}" /></div>
+    `;
+  }
+  else if (type === 'expense') {
+    title = id ? ' Edit Expense' : ' Add Expense';
+    html = `
+      <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+      <div class="form-group"><label>Category</label><input type="text" id="f-category" value="${item?.category || ''}" /></div>
+      <div class="form-group"><label>Description</label><input type="text" id="f-description" value="${item?.description || ''}" /></div>
+      <div class="form-group"><label>Amount (₦)</label><input type="number" id="f-amount" value="${item?.amount || 0}" /></div>
+    `;
+  }
+  else if (type === 'personalEduvoyage') {
+    title = id ? ' Edit Note' : ' Add Note';
+    html = `
+      <div class="form-group"><label>Note</label><textarea id="f-note" style="height: 120px;">${item?.note || ''}</textarea></div>
+      <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+    `;
+  }
+  else if (type === 'personalWaka') {
+    title = id ? ' Edit Content' : ' Add Content';
+    html = `
+      <div class="form-group"><label>Content</label><textarea id="f-content" style="height: 100px;">${item?.content || ''}</textarea></div>
+      <div class="two-col">
+        <div class="form-group"><label>Type</label><select id="f-type"><option ${item?.type === 'Script' ? 'selected' : ''}>Script</option><option ${item?.type === 'Idea' ? 'selected' : ''}>Idea</option><option ${item?.type === 'Draft' ? 'selected' : ''}>Draft</option></select></div>
+        <div class="form-group"><label>Date</label><input type="date" id="f-date" value="${item?.date || today()}" /></div>
+      </div>
+    `;
+  }
+
+  document.getElementById('modalTitle').textContent = title;
+  body.innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  MODAL_TYPE = null;
+  EDIT_ID = null;
+}
+
+// SAVE ITEM
+function saveItem() {
+  if (MODAL_TYPE === 'client') {
+    const data = {
+      id: EDIT_ID || uid(),
+      name: document.getElementById('f-name').value,
+      service: document.getElementById('f-service').value,
+      country: document.getElementById('f-country').value,
+      status: document.getElementById('f-status').value,
+      assignedCE: document.getElementById('f-assignedCE').value,
+      balance: parseFloat(document.getElementById('f-balance').value)
+    };
+    if (EDIT_ID) {
+      const idx = DATA.clients.findIndex(c => c.id === EDIT_ID);
+      DATA.clients[idx] = data;
+      logActivity('EDIT', `Edited client: ${data.name}`);
+    } else {
+      DATA.clients.push(data);
+      logActivity('ADD', `Added client: ${data.name}`);
+    }
+  }
+  else if (MODAL_TYPE === 'attendance') {
+    DATA.attendance.push({
+      id: uid(),
+      date: document.getElementById('f-date').value,
+      name: document.getElementById('f-name').value,
+      timeIn: document.getElementById('f-timeIn').value
+    });
+    logActivity('SIGN IN', `${SESSION.name} signed in`);
+  }
+  else if (MODAL_TYPE === 'social') {
+    const data = {
+      id: EDIT_ID || uid(),
+      platform: document.getElementById('f-platform').value,
+      topic: document.getElementById('f-topic').value,
+      date: document.getElementById('f-date').value,
+      status: document.getElementById('f-status').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.social.findIndex(s => s.id === EDIT_ID);
+      DATA.social[idx] = data;
+      logActivity('EDIT', `Edited social post: ${data.topic}`);
+    } else {
+      DATA.social.push(data);
+      logActivity('ADD', `Added social post: ${data.topic}`);
+    }
+  }
+  else if (MODAL_TYPE === 'ceTask') {
+    const data = {
+      id: EDIT_ID || uid(),
+      task: document.getElementById('f-task').value,
+      date: document.getElementById('f-date').value,
+      completed: document.getElementById('f-completed').value === 'true',
+      notes: document.getElementById('f-notes').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.ceTasks.findIndex(t => t.id === EDIT_ID);
+      DATA.ceTasks[idx] = data;
+      logActivity('EDIT', `Edited CE task: ${data.task}`);
+    } else {
+      DATA.ceTasks.push(data);
+      logActivity('ADD', `Added CE task: ${data.task}`);
+    }
+  }
+  else if (MODAL_TYPE === 'todo') {
+    const data = {
+      id: EDIT_ID || uid(),
+      task: document.getElementById('f-task').value,
+      priority: document.getElementById('f-priority').value,
+      status: document.getElementById('f-status').value,
+      due: document.getElementById('f-due').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.todos.findIndex(t => t.id === EDIT_ID);
+      DATA.todos[idx] = data;
+      logActivity('EDIT', `Edited to-do: ${data.task}`);
+    } else {
+      DATA.todos.push(data);
+      logActivity('ADD', `Added to-do: ${data.task}`);
+    }
+  }
+  else if (MODAL_TYPE === 'ceReport') {
+    const data = {
+      id: EDIT_ID || uid(),
+      week: document.getElementById('f-week').value,
+      leads: parseInt(document.getElementById('f-leads').value),
+      converted: parseInt(document.getElementById('f-converted').value),
+      feedback: document.getElementById('f-feedback').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.ceReports.findIndex(r => r.id === EDIT_ID);
+      DATA.ceReports[idx] = data;
+      logActivity('EDIT', `Edited CE report: ${data.week}`);
+    } else {
+      DATA.ceReports.push(data);
+      logActivity('ADD', `Added CE report: ${data.week}`);
+    }
+  }
+  else if (MODAL_TYPE === 'webinar') {
+    const data = {
+      id: EDIT_ID || uid(),
+      title: document.getElementById('f-title').value,
+      speaker: document.getElementById('f-speaker').value,
+      date: document.getElementById('f-date').value,
+      time: document.getElementById('f-time').value,
+      description: document.getElementById('f-description').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.webinars.findIndex(w => w.id === EDIT_ID);
+      DATA.webinars[idx] = data;
+      logActivity('EDIT', `Edited webinar: ${data.title}`);
+    } else {
+      DATA.webinars.push(data);
+      logActivity('ADD', `Added webinar: ${data.title}`);
+    }
+  }
+  else if (MODAL_TYPE === 'service') {
+    const data = {
+      id: EDIT_ID || uid(),
+      name: document.getElementById('f-name').value,
+      description: document.getElementById('f-description').value,
+      price: parseFloat(document.getElementById('f-price').value)
+    };
+    if (EDIT_ID) {
+      const idx = DATA.services.findIndex(s => s.id === EDIT_ID);
+      DATA.services[idx] = data;
+      logActivity('EDIT', `Edited service: ${data.name}`);
+    } else {
+      DATA.services.push(data);
+      logActivity('ADD', `Added service: ${data.name}`);
+    }
+  }
+  else if (MODAL_TYPE === 'scholarship') {
+    const data = {
+      id: EDIT_ID || uid(),
+      country: document.getElementById('f-country').value,
+      destination: document.getElementById('f-destination').value,
+      deadline: document.getElementById('f-deadline').value,
+      status: document.getElementById('f-status').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.scholarships.findIndex(s => s.id === EDIT_ID);
+      DATA.scholarships[idx] = data;
+      logActivity('EDIT', `Edited scholarship: ${data.country}`);
+    } else {
+      DATA.scholarships.push(data);
+      logActivity('ADD', `Added scholarship: ${data.country}`);
+    }
+  }
+  else if (MODAL_TYPE === 'revenue') {
+    const data = {
+      id: EDIT_ID || uid(),
+      date: document.getElementById('f-date').value,
+      client: document.getElementById('f-client').value,
+      service: document.getElementById('f-service').value,
+      amount: parseFloat(document.getElementById('f-amount').value)
+    };
+    if (EDIT_ID) {
+      const idx = DATA.revenue.findIndex(r => r.id === EDIT_ID);
+      DATA.revenue[idx] = data;
+      logActivity('EDIT', `Edited revenue: ${data.client}`);
+    } else {
+      DATA.revenue.push(data);
+      logActivity('ADD', `Added revenue: ${data.client}`);
+    }
+  }
+  else if (MODAL_TYPE === 'expense') {
+    const data = {
+      id: EDIT_ID || uid(),
+      date: document.getElementById('f-date').value,
+      category: document.getElementById('f-category').value,
+      description: document.getElementById('f-description').value,
+      amount: parseFloat(document.getElementById('f-amount').value)
+    };
+    if (EDIT_ID) {
+      const idx = DATA.expenses.findIndex(e => e.id === EDIT_ID);
+      DATA.expenses[idx] = data;
+      logActivity('EDIT', `Edited expense: ${data.category}`);
+    } else {
+      DATA.expenses.push(data);
+      logActivity('ADD', `Added expense: ${data.category}`);
+    }
+  }
+  else if (MODAL_TYPE === 'personalEduvoyage') {
+    const data = {
+      id: EDIT_ID || uid(),
+      note: document.getElementById('f-note').value,
+      date: document.getElementById('f-date').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.personalEduvoyage.findIndex(n => n.id === EDIT_ID);
+      DATA.personalEduvoyage[idx] = data;
+      logActivity('EDIT', `Edited Eduvoyage note`);
+    } else {
+      DATA.personalEduvoyage.push(data);
+      logActivity('ADD', `Added Eduvoyage note`);
+    }
+  }
+  else if (MODAL_TYPE === 'personalWaka') {
+    const data = {
+      id: EDIT_ID || uid(),
+      content: document.getElementById('f-content').value,
+      type: document.getElementById('f-type').value,
+      date: document.getElementById('f-date').value
+    };
+    if (EDIT_ID) {
+      const idx = DATA.personalWaka.findIndex(w => w.id === EDIT_ID);
+      DATA.personalWaka[idx] = data;
+      logActivity('EDIT', `Edited WakaWithAmi content`);
+    } else {
+      DATA.personalWaka.push(data);
+      logActivity('ADD', `Added WakaWithAmi content`);
+    }
+  }
+
+  saveData();
+  closeModal();
+  refreshPage();
+}
+
+// EDIT ITEM
+function editItem(type, id) {
+  openModal(type, id);
+}
+
+// DELETE ITEM
+function deleteItem(type, id) {
+  if (confirm('Delete this item?')) {
+    const maps = {
+      client: 'clients', social: 'social', ceTask: 'ceTasks',
+      todo: 'todos', ceReport: 'ceReports', webinar: 'webinars',
+      service: 'services', scholarship: 'scholarships',
+      revenue: 'revenue', expense: 'expenses',
+      personalEduvoyage: 'personalEduvoyage', personalWaka: 'personalWaka'
+    };
+    const key = maps[type];
+    DATA[key] = DATA[key].filter(item => item.id !== id);
+    logActivity('DELETE', `Deleted ${type}`);
+    saveData();
+    refreshPage();
+  }
+}
+
+// LOG ACTIVITY
+function logActivity(action, details) {
+  const time = new Date().toLocaleTimeString();
+  DATA.activity.push({ time, user: SESSION.name, action, details });
+  if (DATA.activity.length > 100) DATA.activity.shift();
+}
+
+function exportAllData() {
+  const csv = [
+    ['CLIENTS'],
+    ['Name', 'Service', 'Country', 'Status', 'Balance'],
+    ...DATA.clients.map(c => [c.name, c.service, c.country, c.status, c.balance]),
+    [],
+    ['REVENUE'],
+    ['Date', 'Client', 'Service', 'Amount'],
+    ...DATA.revenue.map(r => [r.date, r.client, r.service, r.amount]),
+    [],
+    ['ATTENDANCE'],
+    ['Date', 'Name', 'Time In'],
+    ...DATA.attendance.map(a => [a.date, a.name, a.timeIn])
+  ].map(row => row.join(',')).join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'eduvoyage_export.csv';
+  a.click();
+  alert('Data exported successfully!');
+}
+
+function downloadBackup() {
+  const backup = JSON.stringify(DATA, null, 2);
+  const blob = new Blob([backup], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'eduvoyage_backup.json';
+  a.click();
+  alert('Backup downloaded successfully!');
+}
+
+function restoreBackup() {
+  const fileInput = document.getElementById('backupFile');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('Please select a backup file');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      const restored = JSON.parse(e.target.result);
+      
+      // Validate that it's a valid backup
+      if (!restored.clients || !restored.attendance || !restored.revenue) {
+        alert('Invalid backup file format');
+        return;
+      }
+
+      // Restore data
+      DATA = restored;
+      saveData();
+      
+      alert('Backup restored successfully! Page will reload.');
+      logActivity('RESTORE', 'Restored from backup file');
+      saveData();
+      
+      setTimeout(() => location.reload(), 1000);
+    } catch(err) {
+      alert('Error reading backup file: ' + err.message);
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (confirm('This will delete ALL workspace data. Are you sure?')) {
+    if (confirm('FINAL WARNING: This cannot be undone! Continue?')) {
+      DATA = {
+        clients: [], attendance: [], social: [], ceTasks: [], todos: [],
+        ceReports: [], webinars: [], services: [], scholarships: [],
+        revenue: [], expenses: [], personalEduvoyage: [], personalWaka: [],
+        activity: []
+      };
+      saveData();
+      alert('All data cleared!');
+      location.reload();
+    }
+  }
+}
+
+// EXPORT CE REPORT
+function exportCEReport() {
+  if (DATA.ceReports.length === 0) {
+    alert('No reports to export');
+    return;
+  }
+  const latest = DATA.ceReports[DATA.ceReports.length - 1];
+  const text = ` CE WEEKLY REPORT\n\nWeek: ${latest.week}\nTotal Leads: ${latest.leads}\nConverted Leads: ${latest.converted}\nConversion Rate: ${((latest.converted/latest.leads)*100).toFixed(1)}%\n\nFeedback/Opinions:\n${latest.feedback}`;
+  navigator.clipboard.writeText(text);
+  alert(' Report copied to clipboard!');
+}
+
+// INIT
+window.addEventListener('load', () => {
+  loadData();
+  const saved = localStorage.getItem('eduvoyage_session');
+  if (saved) {
+    SESSION = JSON.parse(saved);
+    showWorkspace();
+  }
+});
+</script>
+
+</body>
+</html>
