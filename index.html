@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduVoyage Operations Workspace</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0A1F44;--navy-dark:#08152E;--navy-card:#0D274F;--navy-line:#1B345E;
+    --gold:#C8A24B;--gold-soft:#d8b76a;--white:#FFFFFF;--text:#E8EDF6;--muted:#9AAAC4;
+    --danger:#C0556B;--ok:#4F9A7A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--navy-dark);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-weight:600;color:var(--white)}
+  a{color:var(--gold-soft);text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none}
+  input,select,textarea{font-family:inherit}
+
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--navy-dark)}
+  .login-card{width:100%;max-width:420px;background:var(--navy);border:1px solid var(--navy-line);border-radius:14px;padding:38px 32px}
+  .brand{display:flex;flex-direction:column;align-items:center;margin-bottom:26px}
+  .brand .mark{width:54px;height:54px;border-radius:12px;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;margin-bottom:14px;letter-spacing:.5px}
+  .brand h1{font-size:19px;letter-spacing:.3px}
+  .brand .tag{color:var(--muted);font-size:12px;margin-top:5px;text-align:center}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:var(--navy-dark);border:1px solid var(--navy-line);color:var(--text);padding:11px 12px;border-radius:8px;font-size:14px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+  .btn{background:var(--gold);color:var(--navy-dark);font-weight:600;padding:11px 16px;border-radius:8px;font-size:14px;transition:background .15s}
+  .btn:hover{background:var(--gold-soft)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-block{width:100%;margin-top:6px}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--navy-line)}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-danger:hover{filter:brightness(1.1)}
+  .btn-sm{padding:6px 11px;font-size:12px;border-radius:6px}
+  .login-err{color:var(--danger);font-size:12.5px;margin-top:10px;min-height:16px;text-align:center}
+  .hint{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.7}
+  .setup-box{font-size:12.5px;color:var(--text);line-height:1.7;background:var(--navy-dark);border:1px solid var(--navy-line);border-radius:8px;padding:16px;margin-top:6px}
+  .setup-box code{background:#06101f;color:var(--gold-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+  #app{display:none;min-height:100vh}
+  .shell{display:flex;min-height:100vh}
+  .sidebar{width:248px;flex-shrink:0;background:var(--navy-dark);border-right:1px solid var(--navy-line);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:40}
+  .sidebar-head{padding:20px 20px 16px;border-bottom:1px solid var(--navy-line);display:flex;align-items:center;gap:11px}
+  .sidebar-head .mark{width:38px;height:38px;border-radius:9px;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+  .sidebar-head .name{font-size:14px;font-weight:600;color:var(--white);line-height:1.2}
+  .sidebar-head .sub{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .nav{flex:1;overflow-y:auto;padding:12px 10px}
+  .nav-item{display:block;width:100%;text-align:left;background:transparent;color:var(--muted);padding:10px 13px;border-radius:8px;font-size:13.5px;margin-bottom:2px;transition:all .12s}
+  .nav-item:hover{background:var(--navy-card);color:var(--text)}
+  .nav-item.active{background:var(--gold);color:var(--navy-dark);font-weight:600}
+  .nav-sep{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#5d6f8f;padding:14px 13px 6px}
+  .sidebar-foot{padding:14px 16px;border-top:1px solid var(--navy-line)}
+  .sidebar-foot .u-name{font-size:13px;color:var(--white);font-weight:600}
+  .sidebar-foot .u-role{font-size:11px;color:var(--gold-soft);text-transform:capitalize;margin-bottom:10px}
+
+  .main{flex:1;margin-left:248px;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:62px;border-bottom:1px solid var(--navy-line);background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:30}
+  .topbar h2{font-size:17px}
+  .topbar .right{display:flex;align-items:center;gap:12px}
+  .sync{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.off{background:var(--danger)}
+  .hamburger{display:none;background:transparent;color:var(--text);font-size:20px;padding:6px 10px;border-radius:6px}
+  .content{padding:26px;flex:1}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat{background:var(--navy);border:1px solid var(--navy-line);border-radius:12px;padding:18px}
+  .stat .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .stat .value{font-size:25px;font-weight:700;color:var(--white);margin-top:8px}
+  .stat .value.gold{color:var(--gold)}
+
+  .panel{background:var(--navy);border:1px solid var(--navy-line);border-radius:12px;padding:20px;margin-bottom:20px}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .panel-head h3{font-size:15px}
+  .panel-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:1px solid var(--navy-line);white-space:nowrap}
+  td{padding:11px 12px;border-bottom:1px solid var(--navy-line);color:var(--text);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--navy-card)}
+  .empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:13px}
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:var(--navy-line);color:var(--text)}
+  .pill.ok{background:rgba(79,154,122,.18);color:#7fd1ab}
+  .pill.warn{background:rgba(200,162,75,.18);color:var(--gold-soft)}
+  .pill.muted{background:var(--navy-line);color:var(--muted)}
+  .row-actions{display:flex;gap:7px;white-space:nowrap;justify-content:flex-end}
+  .icon-btn{background:var(--navy-card);color:var(--text);border:1px solid var(--navy-line);padding:5px 10px;border-radius:6px;font-size:12px}
+  .icon-btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .icon-btn.del:hover{border-color:var(--danger);color:var(--danger)}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(4,10,22,.72);z-index:100;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .overlay.show{display:flex}
+  .modal{width:100%;max-width:480px;background:var(--navy);border:1px solid var(--navy-line);border-radius:14px;padding:24px}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .modal-head h3{font-size:16px}
+  .modal-close{background:transparent;color:var(--muted);font-size:20px;line-height:1;padding:2px 8px}
+  .modal-close:hover{color:var(--white)}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .note{font-size:12px;color:var(--muted);background:var(--navy-dark);border:1px solid var(--navy-line);border-radius:8px;padding:12px 14px;margin-bottom:14px;line-height:1.6}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--navy-line);font-size:13px}
+  .kv:last-child{border:none}
+  .kv .k{color:var(--muted)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy-dark);padding:11px 20px;border-radius:8px;font-weight:600;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  @media(max-width:860px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .grid2{grid-template-columns:1fr}
+    .sidebar{transform:translateX(-100%);transition:transform .22s}
+    .sidebar.open{transform:translateX(0)}
+    .main{margin-left:0}
+    .hamburger{display:block}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35}
+    .scrim.show{display:block}
+  }
+  @media(max-width:520px){
+    .stats{grid-template-columns:1fr}
+    .content{padding:16px}
+    .topbar{padding:0 14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login">
+  <div class="login-card" id="loginCard">
+    <div class="brand">
+      <div class="mark">EV</div>
+      <h1>EduVoyage Operations</h1>
+      <div class="tag">Expert Guidance, Exceptional Journeys</div>
+    </div>
+    <div id="loginForm">
+      <div class="field"><label>Username</label><input id="loginUser" type="text" autocomplete="username" placeholder="admin or ce"></div>
+      <div class="field"><label>Password</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password"></div>
+      <button class="btn btn-block" id="loginBtn" onclick="login()">Sign In</button>
+      <div class="login-err" id="loginErr"></div>
+      <div class="hint">Cloud-synced workspace &bull; admin and ce log in with their own accounts</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <div class="mark">EV</div>
+        <div><div class="name">EduVoyage</div><div class="sub">Operations Workspace</div></div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="sidebar-foot">
+        <div class="u-name" id="uName">&mdash;</div>
+        <div class="u-role" id="uRole">&mdash;</div>
+        <button class="btn btn-ghost btn-block btn-sm" onclick="logout()">Log Out</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" onclick="toggleSidebar(false)"></div>
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="hamburger" onclick="toggleSidebar(true)">&#9776;</button>
+          <h2 id="pageTitle">Dashboard</h2>
+        </div>
+        <div class="right">
+          <span class="sync"><span class="dot" id="syncDot"></span><span id="syncText">Live</span></span>
+          <span style="font-size:12px;color:var(--muted)" id="topUser"></span>
+        </div>
+      </div>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Add</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div id="modalBody"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn" id="modalSave">Save</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   EDUVOYAGE OPERATIONS WORKSPACE v3 — Supabase real-time backend
+   ====================================================================== */
+
+/* ---- 1. PASTE YOUR SUPABASE CREDENTIALS HERE ---- */
+const SUPABASE_URL      = "https://qoluzahfjvgxsqpssatz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable__KpMdG9k3Z2aXbS39JaoGg_WB-okR89";
+
+/* Username -> email mapping (must match the two users you create in Supabase) */
+const ADMIN_EMAIL = "admin@eduvoyage.app";
+const CE_EMAIL    = "ce@eduvoyage.app";
+
+/* ---- internals ---- */
+let sb = null;
+let session = null;          // {name, role, email}
+let current = "dashboard";
+let rtChannel = null;
+let rtTimer = null;
+
+const ALL_TABLES = ["clients","attendance","social_media","ce_tasks","todos","ce_reports",
+  "webinars","services","scholarships","revenue","expenses","personal_eduvoyage","personal_waka","activity_log"];
+const HAS_CREATED_BY = new Set(["clients","social_media","todos","ce_reports"]);
+const HAS_UPDATED_AT = new Set(["clients","social_media","ce_tasks","todos","ce_reports","webinars","services","scholarships","revenue","expenses","personal_eduvoyage","personal_waka"]);
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function naira(n){ const v=Number(n)||0; return "\u20A6"+v.toLocaleString("en-NG",{maximumFractionDigits:2}); }
+function nowStamp(ts){ const d=ts?new Date(ts):new Date(); return d.toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),2200); }
+function configured(){ return SUPABASE_URL.indexOf("PASTE_")<0 && SUPABASE_ANON_KEY.indexOf("PASTE_")<0; }
+
+/* ---------- data access ---------- */
+async function fetchTable(table, orderCol){
+  const col = orderCol || (table==="activity_log" ? "timestamp" : "created_at");
+  const { data, error } = await sb.from(table).select("*").order(col,{ascending:false});
+  if(error){ throw error; }
+  return data||[];
+}
+async function logActivity(action, module, details, recordId){
+  try{
+    await sb.from("activity_log").insert({
+      user_name: session?session.name:"-", action, module,
+      details: details||"", record_id: recordId||null
+    });
+  }catch(e){ /* CE may lack read but can insert; never block main op */ }
+}
+
+/* ---------- auth ---------- */
+function roleFromEmail(email){
+  if(!email) return null;
+  email = email.toLowerCase();
+  if(email===ADMIN_EMAIL.toLowerCase()) return {role:"admin", name:"Aminat", email};
+  if(email===CE_EMAIL.toLowerCase())    return {role:"ce", name:"Client Executive", email};
+  return {role:"ce", name:email, email}; // unknown account treated as limited
+}
+async function login(){
+  const u = document.getElementById("loginUser").value.trim().toLowerCase();
+  const p = document.getElementById("loginPass").value;
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("loginBtn");
+  let email = u;
+  if(u==="admin") email = ADMIN_EMAIL;
+  else if(u==="ce") email = CE_EMAIL;
+  if(!email || !p){ err.textContent="Enter username and password."; return; }
+  err.textContent="Signing in\u2026"; btn.disabled=true;
+  try{
+    const { data, error } = await sb.auth.signInWithPassword({ email, password:p });
+    if(error){ err.textContent = friendlyAuthError(error.message); btn.disabled=false; return; }
+    session = roleFromEmail(data.user.email);
+    err.textContent="";
+    await logActivity("sign in","auth", session.name+" logged in");
+    subscribeRealtime();
+    startApp();
+  }catch(e){ err.textContent="Connection error: "+e.message; }
+  btn.disabled=false;
+}
+function friendlyAuthError(m){
+  if(/invalid login/i.test(m)) return "Invalid username or password.";
+  if(/confirm/i.test(m)) return "This account is not confirmed yet. Enable Auto-Confirm in Supabase.";
+  return m;
+}
+async function logout(){
+  await logActivity("sign out","auth",(session?session.name:"")+" logged out");
+  if(rtChannel){ try{ await sb.removeChannel(rtChannel); }catch(e){} rtChannel=null; }
+  try{ await sb.auth.signOut(); }catch(e){}
+  session=null;
+  document.getElementById("app").style.display="none";
+  document.getElementById("login").style.display="flex";
+  document.getElementById("loginUser").value="";
+  document.getElementById("loginPass").value="";
+}
+
+/* ---------- realtime ---------- */
+function subscribeRealtime(){
+  if(rtChannel) return;
+  rtChannel = sb.channel("eduvoyage-rt");
+  ALL_TABLES.forEach(t=>{
+    rtChannel.on("postgres_changes",{event:"*",schema:"public",table:t}, ()=>onRealtime(t));
+  });
+  rtChannel.subscribe(status=>{
+    const dot=document.getElementById("syncDot"), txt=document.getElementById("syncText");
+    if(!dot) return;
+    if(status==="SUBSCRIBED"){ dot.classList.remove("off"); txt.textContent="Live"; }
+    else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){ dot.classList.add("off"); txt.textContent="Offline"; }
+  });
+}
+function viewTables(key){
+  if(key==="dashboard") return ["clients","revenue","todos","ce_tasks","activity_log"];
+  if(key==="finances")  return ["revenue","expenses","clients"];
+  if(key==="personal")  return ["personal_eduvoyage","personal_waka"];
+  if(key==="activity")  return ["activity_log"];
+  if(key==="attendance")return ["attendance"];
+  if(CRUD[key])         return [CRUD[key].table];
+  return [];
+}
+function onRealtime(table){
+  if(viewTables(current).includes(table)){
+    clearTimeout(rtTimer);
+    rtTimer=setTimeout(()=>show(current),250);
+  }
+}
+
+/* ---------- module registry ---------- */
+const NAV = [
+  { key:"dashboard",    label:"Dashboard",            access:"admin", group:"Overview" },
+  { key:"attendance",   label:"Attendance",           access:"all",   group:"Overview" },
+  { key:"clients",      label:"Client Work",          access:"all",   group:"Operations" },
+  { key:"social",       label:"Social Media",         access:"all",   group:"Operations" },
+  { key:"ceTasks",      label:"CE Management",         access:"admin", group:"Operations" },
+  { key:"todos",        label:"My To-Dos",            access:"all",   group:"Operations" },
+  { key:"ceReports",    label:"CE Reports",           access:"all",   group:"Operations" },
+  { key:"webinars",     label:"Webinars",             access:"all",   group:"Operations" },
+  { key:"services",     label:"Services & Pricing",   access:"all",   group:"Operations" },
+  { key:"scholarships", label:"Scholarship Advisory", access:"all",   group:"Operations" },
+  { key:"finances",     label:"Finances",             access:"admin", group:"Private" },
+  { key:"personal",     label:"Personal Workspace",   access:"admin", group:"Private" },
+  { key:"activity",     label:"Activity Log",         access:"admin", group:"Private" },
+  { key:"settings",     label:"Settings",             access:"all",   group:"System" }
+];
+
+const ST = {
+  client:["Lead","In Progress","Submitted","Approved","Completed","On Hold"],
+  social:["Draft","Scheduled","Published"],
+  ceTask:["Pending","Done"],
+  todo:["Pending","In Progress","Done"],
+  scholarship:["Open","Applied","Closed"],
+  webinar:["Upcoming","Done","Cancelled"]
+};
+const CE_OPTS = [{value:"ce",label:"Client Executive"},{value:"admin",label:"Admin (Aminat)"}];
+const CE_MAP  = {ce:"Client Executive", admin:"Admin"};
+
+const CRUD = {
+  clients:{ table:"clients", title:"Client Work", addLabel:"Add Client",
+    fields:[
+      {k:"client_name",label:"Client Name",type:"text",req:true},
+      {k:"service",label:"Service",type:"text"},
+      {k:"country",label:"Country",type:"text"},
+      {k:"status",label:"Status",type:"select",opts:ST.client},
+      {k:"assigned_ce",label:"Assigned To",type:"select",opts:CE_OPTS},
+      {k:"google_drive_link",label:"Google Drive Link",type:"text"},
+      {k:"balance",label:"Balance (\u20A6)",type:"number"}
+    ],
+    cols:[
+      {k:"client_name",label:"Client"},{k:"service",label:"Service"},{k:"country",label:"Country"},
+      {k:"status",label:"Status",pill:true},{k:"assigned_ce",label:"Assigned",map:CE_MAP},
+      {k:"google_drive_link",label:"Drive",link:true},{k:"balance",label:"Balance",money:true}
+    ]},
+  social:{ table:"social_media", title:"Social Media", addLabel:"Add Post",
+    fields:[
+      {k:"platform",label:"Platform",type:"select",opts:["Instagram","TikTok","Facebook"]},
+      {k:"topic",label:"Topic",type:"text",req:true},
+      {k:"post_date",label:"Date",type:"date"},
+      {k:"status",label:"Status",type:"select",opts:ST.social}
+    ],
+    cols:[{k:"platform",label:"Platform"},{k:"topic",label:"Topic"},{k:"post_date",label:"Date"},{k:"status",label:"Status",pill:true}]},
+  ceTasks:{ table:"ce_tasks", title:"CE Management", addLabel:"Add Task",
+    fields:[
+      {k:"task",label:"Task",type:"text",req:true},
+      {k:"task_date",label:"Date",type:"date"},
+      {k:"status",label:"Status",type:"select",opts:ST.ceTask},
+      {k:"notes",label:"Notes",type:"textarea"}
+    ],
+    cols:[{k:"task",label:"Task"},{k:"task_date",label:"Date"},{k:"status",label:"Status",pill:true},{k:"notes",label:"Notes"}]},
+  todos:{ table:"todos", title:"My To-Dos", addLabel:"Add To-Do",
+    fields:[
+      {k:"task",label:"Task",type:"text",req:true},
+      {k:"priority",label:"Priority",type:"select",opts:["High","Medium","Low"]},
+      {k:"status",label:"Status",type:"select",opts:ST.todo},
+      {k:"due_date",label:"Due Date",type:"date"}
+    ],
+    cols:[{k:"task",label:"Task"},{k:"priority",label:"Priority",prio:true},{k:"status",label:"Status",pill:true},{k:"due_date",label:"Due"}]},
+  ceReports:{ table:"ce_reports", title:"CE Reports", addLabel:"Add Report", export:true,
+    fields:[
+      {k:"week",label:"Week",type:"text",req:true},
+      {k:"total_leads",label:"Total Leads",type:"number"},
+      {k:"leads_followed_up",label:"Leads Followed Up",type:"number"},
+      {k:"converted_leads",label:"Converted Leads",type:"number"},
+      {k:"pending_leads",label:"Pending / In Conversation",type:"number"},
+      {k:"lost_leads",label:"Lost / No Response",type:"number"},
+      {k:"client_responses",label:"Client Responses / Objections",type:"textarea"},
+      {k:"feedback",label:"Feedback / Notes",type:"textarea"}
+    ],
+    cols:[{k:"week",label:"Week"},{k:"total_leads",label:"Total Leads"},{k:"converted_leads",label:"Converted"},{k:"feedback",label:"Feedback"}]},
+  webinars:{ table:"webinars", title:"Webinars", addLabel:"Add Webinar",
+    fields:[
+      {k:"title",label:"Title",type:"text",req:true},
+      {k:"speaker",label:"Speaker",type:"text"},
+      {k:"event_date",label:"Date",type:"date"},
+      {k:"event_time",label:"Time",type:"time"},
+      {k:"status",label:"Status",type:"select",opts:ST.webinar},
+      {k:"description",label:"Description",type:"textarea"}
+    ],
+    cols:[{k:"title",label:"Title"},{k:"speaker",label:"Speaker"},{k:"event_date",label:"Date"},{k:"event_time",label:"Time"},{k:"status",label:"Status",pill:true},{k:"description",label:"Description"}]},
+  services:{ table:"services", title:"Services & Pricing", addLabel:"Add Service",
+    fields:[
+      {k:"service_name",label:"Service Name",type:"text",req:true},
+      {k:"description",label:"Description",type:"textarea"},
+      {k:"price",label:"Price (\u20A6)",type:"number"}
+    ],
+    cols:[{k:"service_name",label:"Service"},{k:"description",label:"Description"},{k:"price",label:"Price",money:true}]},
+  scholarships:{ table:"scholarships", title:"Scholarship Advisory", addLabel:"Add Scholarship",
+    fields:[
+      {k:"country",label:"Country",type:"text",req:true},
+      {k:"destination",label:"Destination / School",type:"text"},
+      {k:"deadline",label:"Deadline",type:"date"},
+      {k:"status",label:"Status",type:"select",opts:ST.scholarship}
+    ],
+    cols:[{k:"country",label:"Country"},{k:"destination",label:"Destination"},{k:"deadline",label:"Deadline"},{k:"status",label:"Status",pill:true}]}
+};
+
+/* ---------- boot ---------- */
+function startApp(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("uName").textContent=session.name;
+  document.getElementById("uRole").textContent=session.role==="admin"?"Administrator":"Client Executive";
+  document.getElementById("topUser").textContent=session.name+" \u00B7 "+(session.role==="admin"?"Admin":"CE");
+  buildNav();
+  current = session.role==="admin" ? "dashboard" : "attendance";
+  show(current);
+}
+function canAccess(item){ return item.access==="all" || session.role==="admin"; }
+function buildNav(){
+  let html="", last="";
+  NAV.filter(canAccess).forEach(it=>{
+    if(it.group!==last){ html+='<div class="nav-sep">'+esc(it.group)+'</div>'; last=it.group; }
+    html+='<button class="nav-item" data-key="'+it.key+'" onclick="show(\''+it.key+'\')">'+esc(it.label)+'</button>';
+  });
+  document.getElementById("nav").innerHTML=html;
+}
+function setActive(key){ document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.key===key)); }
+function toggleSidebar(open){
+  const sb2=document.getElementById("sidebar"), sc=document.getElementById("scrim");
+  if(open===undefined) open=!sb2.classList.contains("open");
+  sb2.classList.toggle("open",open); sc.classList.toggle("show",open);
+}
+
+async function show(key){
+  const item=NAV.find(n=>n.key===key);
+  if(item && !canAccess(item)) key="attendance";
+  current=key; setActive(key); toggleSidebar(false);
+  document.getElementById("pageTitle").textContent=(NAV.find(n=>n.key===key)||{}).label||"Workspace";
+  const c=document.getElementById("content");
+  c.innerHTML="<div class='panel'><div class='empty'>Loading\u2026</div></div>";
+  try{
+    let html;
+    if(key==="dashboard")        html=await viewDashboard();
+    else if(key==="attendance")  html=await viewAttendance();
+    else if(key==="finances")    html=await viewFinances();
+    else if(key==="personal")    html=await viewPersonal();
+    else if(key==="activity")    html=await viewActivity();
+    else if(key==="settings")    html=await viewSettings();
+    else if(key==="ceReports")   html=await viewCEReports();
+    else if(CRUD[key])           html=await viewCRUD(key);
+    else html="<div class='panel'><div class='empty'>Module not found.</div></div>";
+    if(current===key){ c.innerHTML=html; window.scrollTo(0,0); }
+  }catch(e){
+    c.innerHTML="<div class='panel'><div class='empty'>Could not load data.<br><span style='color:var(--danger)'>"+esc(e.message||e)+"</span></div></div>";
+  }
+}
+
+/* ---------- pills ---------- */
+function pill(val){
+  if(val==null||val==="") return "<span class='pill muted'>&mdash;</span>";
+  const v=String(val).toLowerCase(); let cls="";
+  if(["completed","approved","published","done","applied"].includes(v)) cls="ok";
+  else if(["pending","scheduled","in progress","submitted","lead","open","draft","on hold","upcoming"].includes(v)) cls="warn";
+  return "<span class='pill "+cls+"'>"+esc(val)+"</span>";
+}
+function prioPill(val){ const v=String(val||"").toLowerCase(); let cls="muted"; if(v==="high")cls="warn"; if(v==="low")cls="ok"; return "<span class='pill "+cls+"'>"+esc(val||"\u2014")+"</span>"; }
+
+/* ---------- Dashboard ---------- */
+async function viewDashboard(){
+  const [clients,revenue,todos,ceTasks,activity]=await Promise.all([
+    fetchTable("clients"),fetchTable("revenue"),fetchTable("todos"),fetchTable("ce_tasks"),fetchTable("activity_log")
+  ]);
+  const activeClients=clients.filter(c=>String(c.status).toLowerCase()!=="completed").length;
+  const totalRevenue=revenue.reduce((s,r)=>s+(Number(r.amount)||0),0);
+  const outstanding=clients.reduce((s,c)=>s+(Number(c.balance)||0),0);
+  const activeTasks=todos.filter(t=>String(t.status).toLowerCase()!=="done").length+ceTasks.filter(t=>String(t.status).toLowerCase()!=="done").length;
+  const recent=activity.slice(0,12);
+  const rows=recent.length?recent.map(a=>"<tr><td style='white-space:nowrap;color:var(--muted)'>"+esc(nowStamp(a.timestamp))+"</td><td>"+esc(a.user_name)+"</td><td>"+esc(a.action)+"</td><td style='color:var(--muted)'>"+esc(a.module)+(a.details?" \u2014 "+esc(a.details):"")+"</td></tr>").join(""):"<tr><td colspan='4' class='empty'>No activity yet.</td></tr>";
+  return `
+    <div class="stats">
+      <div class="stat"><div class="label">Active Clients</div><div class="value">${activeClients}</div></div>
+      <div class="stat"><div class="label">Total Revenue</div><div class="value gold">${naira(totalRevenue)}</div></div>
+      <div class="stat"><div class="label">Outstanding Balance</div><div class="value">${naira(outstanding)}</div></div>
+      <div class="stat"><div class="label">Active Tasks</div><div class="value">${activeTasks}</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Recent Activity</h3><div class="panel-sub">Live across all devices</div></div></div>
+      <div class="table-wrap"><table><thead><tr><th>When</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+}
+
+/* ---------- Attendance (immutable) ---------- */
+async function viewAttendance(){
+  const list=await fetchTable("attendance");
+  const rows=list.length?list.map(a=>"<tr><td>"+esc(a.name)+"</td><td>"+esc(a.date)+"</td><td>"+esc(a.time_in)+"</td></tr>").join(""):"<tr><td colspan='3' class='empty'>No sign-ins recorded yet.</td></tr>";
+  return `
+    <div class="panel">
+      <div class="panel-head"><div><h3>Daily Sign-In</h3><div class="panel-sub">Permanent records &mdash; cannot be edited or deleted.</div></div>
+      <button class="btn" onclick="signIn()">Sign In Now</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Name</th><th>Date</th><th>Time In</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+}
+async function signIn(){
+  const t=new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const {error}=await sb.from("attendance").insert({name:session.name,date:todayISO(),time_in:t});
+  if(error){ toast("Error: "+error.message); return; }
+  await logActivity("add","attendance",session.name+" signed in");
+  toast("Signed in"); show("attendance");
+}
+
+/* ---------- generic CRUD ---------- */
+async function viewCRUD(key){
+  const cfg=CRUD[key];
+  const data=await fetchTable(cfg.table);
+  const head=cfg.cols.map(c=>"<th>"+esc(c.label)+"</th>").join("")+"<th style='text-align:right'>Actions</th>";
+  let body;
+  if(!data.length){
+    body="<tr><td colspan='"+(cfg.cols.length+1)+"' class='empty'>Nothing here yet. Use \u201C"+esc(cfg.addLabel)+"\u201D to begin.</td></tr>";
+  }else{
+    body=data.map(it=>{
+      const tds=cfg.cols.map(c=>{
+        let v=it[c.k];
+        if(c.money) return "<td>"+naira(v)+"</td>";
+        if(c.pill) return "<td>"+pill(v)+"</td>";
+        if(c.prio) return "<td>"+prioPill(v)+"</td>";
+        if(c.map)  return "<td>"+esc(c.map[v]||v||"\u2014")+"</td>";
+        if(c.link) return "<td>"+(v?"<a href='"+esc(v)+"' target='_blank' rel='noopener'>Open</a>":"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
+        return "<td>"+(v?esc(v):"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
+      }).join("");
+      return "<tr>"+tds+"<td><div class='row-actions'>"+
+        "<button class='icon-btn' onclick=\"openForm('"+key+"','"+it.id+"')\">Edit</button>"+
+        "<button class='icon-btn del' onclick=\"removeItem('"+cfg.table+"','"+it.id+"','"+key+"')\">Delete</button>"+
+        "</div></td></tr>";
+    }).join("");
+  }
+  const sub = key==="clients"&&session.role==="ce" ? '<div class="panel-sub">Showing clients assigned to you.</div>' : '';
+  return `<div class="panel"><div class="panel-head"><div><h3>${esc(cfg.title)}</h3>${sub}</div>
+    <button class="btn" onclick="openForm('${key}',null)">${esc(cfg.addLabel)}</button></div>
+    <div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></div>`;
+}
+
+/* ---------- CE Reports (with export) ---------- */
+async function viewCEReports(){
+  const data=await fetchTable("ce_reports");
+  const dash="<span style='color:var(--muted)'>&mdash;</span>";
+  const body=data.length?data.map(it=>(
+    "<tr><td>"+esc(it.week)+"</td>"+
+    "<td>"+esc(it.total_leads||0)+"</td>"+
+    "<td>"+esc(it.leads_followed_up||0)+"</td>"+
+    "<td>"+esc(it.converted_leads||0)+"</td>"+
+    "<td>"+esc(it.pending_leads||0)+"</td>"+
+    "<td>"+esc(it.lost_leads||0)+"</td>"+
+    "<td>"+(it.client_responses?esc(it.client_responses):dash)+"</td>"+
+    "<td>"+(it.feedback?esc(it.feedback):dash)+"</td>"+
+    "<td><div class='row-actions'>"+
+    "<button class='icon-btn' onclick=\"exportReport('"+it.id+"')\">Export</button>"+
+    "<button class='icon-btn' onclick=\"openForm('ceReports','"+it.id+"')\">Edit</button>"+
+    "<button class='icon-btn del' onclick=\"removeItem('ce_reports','"+it.id+"','ceReports')\">Delete</button>"+
+    "</div></td></tr>"
+  )).join(""):"<tr><td colspan='9' class='empty'>No reports yet. Use \u201CAdd Report\u201D to begin.</td></tr>";
+  return `<div class="panel"><div class="panel-head"><div><h3>CE Reports</h3><div class="panel-sub">Track follow-ups, what clients are saying, and why leads convert or not. Export copies a summary to your clipboard.</div></div>
+    <button class="btn" onclick="openForm('ceReports',null)">Add Report</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Week</th><th>Total Leads</th><th>Followed Up</th><th>Converted</th><th>Pending</th><th>Lost</th><th>Client Responses</th><th>Feedback</th><th style="text-align:right">Actions</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+}
+async function exportReport(id){
+  const {data:r}=await sb.from("ce_reports").select("*").eq("id",id).single();
+  if(!r) return;
+  const leads=Number(r.total_leads)||0, conv=Number(r.converted_leads)||0, rate=leads?Math.round(conv/leads*100):0;
+  const text="EDUVOYAGE \u2014 CE WEEKLY REPORT\nWeek: "+(r.week||"-")+
+    "\nTotal Leads: "+leads+
+    "\nLeads Followed Up: "+(Number(r.leads_followed_up)||0)+
+    "\nConverted Leads: "+conv+
+    "\nPending / In Conversation: "+(Number(r.pending_leads)||0)+
+    "\nLost / No Response: "+(Number(r.lost_leads)||0)+
+    "\nConversion Rate: "+rate+"%"+
+    "\n\nClient Responses / Objections:\n"+(r.client_responses||"-")+
+    "\n\nFeedback / Notes:\n"+(r.feedback||"-")+
+    "\n\nPrepared by: "+session.name+"\nGenerated: "+nowStamp();
+  copyText(text);
+}
+function copyText(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>toast("Copied to clipboard")).catch(()=>fallbackCopy(text)); }
+  else fallbackCopy(text);
+}
+function fallbackCopy(text){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");toast("Copied to clipboard");}catch(e){alert(text);} document.body.removeChild(ta); }
+
+/* ---------- Finances (admin) ---------- */
+async function viewFinances(){
+  const [revenue,expenses,clients]=await Promise.all([fetchTable("revenue"),fetchTable("expenses"),fetchTable("clients")]);
+  const totalRev=revenue.reduce((s,r)=>s+(Number(r.amount)||0),0);
+  const totalExp=expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const net=totalRev-totalExp;
+  const outstanding=clients.reduce((s,c)=>s+(Number(c.balance)||0),0);
+  const revRows=revenue.length?revenue.map(r=>("<tr><td>"+esc(r.date)+"</td><td>"+esc(r.client)+"</td><td>"+esc(r.service)+"</td><td>"+naira(r.amount)+"</td><td><div class='row-actions'><button class='icon-btn' onclick=\"openForm('revenue','"+r.id+"')\">Edit</button><button class='icon-btn del' onclick=\"removeItem('revenue','"+r.id+"','finances')\">Delete</button></div></td></tr>")).join(""):"<tr><td colspan='5' class='empty'>No revenue recorded.</td></tr>";
+  const expRows=expenses.length?expenses.map(e=>("<tr><td>"+esc(e.date)+"</td><td>"+esc(e.category)+"</td><td>"+esc(e.description)+"</td><td>"+naira(e.amount)+"</td><td><div class='row-actions'><button class='icon-btn' onclick=\"openForm('expenses','"+e.id+"')\">Edit</button><button class='icon-btn del' onclick=\"removeItem('expenses','"+e.id+"','finances')\">Delete</button></div></td></tr>")).join(""):"<tr><td colspan='5' class='empty'>No expenses recorded.</td></tr>";
+  return `
+    <div class="stats">
+      <div class="stat"><div class="label">Total Revenue</div><div class="value gold">${naira(totalRev)}</div></div>
+      <div class="stat"><div class="label">Total Expenses</div><div class="value">${naira(totalExp)}</div></div>
+      <div class="stat"><div class="label">Net</div><div class="value ${net>=0?'gold':''}">${naira(net)}</div></div>
+      <div class="stat"><div class="label">Outstanding (Clients)</div><div class="value">${naira(outstanding)}</div></div>
+    </div>
+    <div class="panel"><div class="panel-head"><div><h3>Revenue</h3></div><button class="btn" onclick="openForm('revenue',null)">Add Revenue</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Client</th><th>Service</th><th>Amount</th><th style="text-align:right">Actions</th></tr></thead><tbody>${revRows}</tbody></table></div></div>
+    <div class="panel"><div class="panel-head"><div><h3>Expenses</h3></div><button class="btn" onclick="openForm('expenses',null)">Add Expense</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th style="text-align:right">Actions</th></tr></thead><tbody>${expRows}</tbody></table></div></div>`;
+}
+
+/* ---------- Personal Workspace (admin) ---------- */
+async function viewPersonal(){
+  const [edu,waka]=await Promise.all([fetchTable("personal_eduvoyage"),fetchTable("personal_waka")]);
+  const eduRows=edu.length?edu.map(n=>("<tr><td style='white-space:nowrap;color:var(--muted)'>"+esc(n.note_date)+"</td><td>"+esc(n.note)+"</td><td><div class='row-actions'><button class='icon-btn' onclick=\"openForm('personal_eduvoyage','"+n.id+"')\">Edit</button><button class='icon-btn del' onclick=\"removeItem('personal_eduvoyage','"+n.id+"','personal')\">Delete</button></div></td></tr>")).join(""):"<tr><td colspan='3' class='empty'>No notes yet.</td></tr>";
+  const wakaRows=waka.length?waka.map(w=>("<tr><td style='white-space:nowrap;color:var(--muted)'>"+esc(w.content_date)+"</td><td>"+pill(w.content_type)+"</td><td>"+esc(w.content)+"</td><td><div class='row-actions'><button class='icon-btn' onclick=\"openForm('personal_waka','"+w.id+"')\">Edit</button><button class='icon-btn del' onclick=\"removeItem('personal_waka','"+w.id+"','personal')\">Delete</button></div></td></tr>")).join(""):"<tr><td colspan='4' class='empty'>No content yet.</td></tr>";
+  return `
+    <div class="panel"><div class="panel-head"><div><h3>Eduvoyage Business</h3><div class="panel-sub">Private notes &mdash; admin only.</div></div><button class="btn" onclick="openForm('personal_eduvoyage',null)">Add Note</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Note</th><th style="text-align:right">Actions</th></tr></thead><tbody>${eduRows}</tbody></table></div></div>
+    <div class="panel"><div class="panel-head"><div><h3>WakaWithAmi</h3><div class="panel-sub">Personal travel brand &mdash; scripts, ideas, drafts.</div></div><button class="btn" onclick="openForm('personal_waka',null)">Add Content</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Content</th><th style="text-align:right">Actions</th></tr></thead><tbody>${wakaRows}</tbody></table></div></div>`;
+}
+
+/* ---------- Activity Log (admin) ---------- */
+async function viewActivity(){
+  const list=await fetchTable("activity_log");
+  const rows=list.length?list.map(a=>("<tr><td style='white-space:nowrap;color:var(--muted)'>"+esc(nowStamp(a.timestamp))+"</td><td>"+esc(a.user_name)+"</td><td>"+esc(a.action)+"</td><td style='color:var(--muted)'>"+esc(a.module)+(a.details?" \u2014 "+esc(a.details):"")+"</td></tr>")).join(""):"<tr><td colspan='4' class='empty'>No activity recorded.</td></tr>";
+  return `<div class="panel"><div class="panel-head"><div><h3>Activity Log</h3><div class="panel-sub">Immutable record (${list.length} entries).</div></div></div>
+    <div class="table-wrap"><table><thead><tr><th>When</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+/* ---------- Settings ---------- */
+async function viewSettings(){
+  const admin=session.role==="admin";
+  return `
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h3>Workspace Info</h3></div>
+        <div class="kv"><span class="k">Current User</span><span>${esc(session.name)}</span></div>
+        <div class="kv"><span class="k">Role</span><span>${admin?"Administrator":"Client Executive"}</span></div>
+        <div class="kv"><span class="k">Account</span><span>${esc(session.email)}</span></div>
+        <div class="kv"><span class="k">Storage</span><span>Supabase Cloud (live sync)</span></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Data Management</h3></div>
+        <div class="note">Your data lives in the Supabase cloud and syncs automatically across all devices. No manual restore is needed.</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-ghost" onclick="downloadBackup()">Download Backup (JSON)</button>
+          ${admin?'<button class="btn btn-ghost" onclick="exportCSV()">Export All Data (CSV)</button>':''}
+          <button class="btn btn-ghost" disabled title="Not needed with cloud sync">Upload &amp; Restore (disabled)</button>
+          ${admin?'<button class="btn btn-danger" onclick="clearAll()">Clear All Data (cloud)</button>':''}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- modal / form ---------- */
+let modalCtx=null;
+function fieldDefs(key){
+  if(CRUD[key]) return CRUD[key].fields;
+  if(key==="revenue") return [{k:"date",label:"Date",type:"date"},{k:"client",label:"Client",type:"text",req:true},{k:"service",label:"Service",type:"text"},{k:"amount",label:"Amount (\u20A6)",type:"number"}];
+  if(key==="expenses") return [{k:"date",label:"Date",type:"date"},{k:"category",label:"Category",type:"text",req:true},{k:"description",label:"Description",type:"text"},{k:"amount",label:"Amount (\u20A6)",type:"number"}];
+  if(key==="personal_eduvoyage") return [{k:"note_date",label:"Date",type:"date"},{k:"note",label:"Note",type:"textarea",req:true}];
+  if(key==="personal_waka") return [{k:"content_date",label:"Date",type:"date"},{k:"content_type",label:"Type",type:"select",opts:["Script","Idea","Draft"]},{k:"content",label:"Content",type:"textarea",req:true}];
+  return [];
+}
+function tableFor(key){ return CRUD[key]?CRUD[key].table:key; }
+function parentViewFor(key){
+  if(key==="revenue"||key==="expenses") return "finances";
+  if(key==="personal_eduvoyage"||key==="personal_waka") return "personal";
+  return key;
+}
+function moduleLabel(key){ return CRUD[key]?CRUD[key].title:({revenue:"Revenue",expenses:"Expense",personal_eduvoyage:"Note",personal_waka:"WakaWithAmi"}[key]||key); }
+function labelOf(obj){ return obj.client_name||obj.title||obj.task||obj.client||obj.week||obj.country||obj.note||obj.content||obj.topic||obj.service_name||"record"; }
+
+async function openForm(key,id){
+  const fields=fieldDefs(key), table=tableFor(key);
+  let existing=null;
+  if(id){ const {data}=await sb.from(table).select("*").eq("id",id).single(); existing=data; }
+  modalCtx={key,table,id:id||null,parentView:parentViewFor(key)};
+  document.getElementById("modalTitle").textContent=(id?"Edit ":"Add ")+(CRUD[key]?CRUD[key].title.replace(/s$/,""):moduleLabel(key));
+  let html="";
+  fields.forEach(f=>{
+    let val = existing ? (existing[f.k]==null?"":existing[f.k]) : (f.type==="date"?todayISO():"");
+    html+="<div class='field'><label>"+esc(f.label)+(f.req?" *":"")+"</label>";
+    if(f.type==="select"){
+      html+="<select id='f_"+f.k+"'>";
+      f.opts.forEach(o=>{ const ov=typeof o==="object"?o.value:o, ol=typeof o==="object"?o.label:o; html+="<option value='"+esc(ov)+"'"+(String(val)===String(ov)?" selected":"")+">"+esc(ol)+"</option>"; });
+      html+="</select>";
+    } else if(f.type==="textarea"){ html+="<textarea id='f_"+f.k+"' rows='3'>"+esc(val)+"</textarea>"; }
+    else { html+="<input id='f_"+f.k+"' type='"+f.type+"' value='"+esc(val)+"'>"; }
+    html+="</div>";
+  });
+  document.getElementById("modalBody").innerHTML=html;
+  document.getElementById("modalSave").onclick=saveForm;
+  document.getElementById("overlay").classList.add("show");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("show"); modalCtx=null; }
+
+async function saveForm(){
+  const {key,table,id,parentView}=modalCtx;
+  const fields=fieldDefs(key), obj={};
+  for(const f of fields){
+    const el=document.getElementById("f_"+f.k); let v=el.value.trim();
+    if(f.req&&!v){ el.focus(); el.style.borderColor="var(--danger)"; return; }
+    if(f.type==="number") v = v===""?null:Number(v);
+    if((f.type==="date"||f.type==="time")&&v==="") v=null;
+    obj[f.k]=v;
+  }
+  if(!id && HAS_CREATED_BY.has(table)) obj.created_by=session.role;
+  if(id && HAS_UPDATED_AT.has(table)) obj.updated_at=new Date().toISOString();
+  const saveBtn=document.getElementById("modalSave"); saveBtn.disabled=true;
+  let res, recId=id;
+  if(id) res=await sb.from(table).update(obj).eq("id",id);
+  else { res=await sb.from(table).insert(obj).select(); if(res.data&&res.data[0]) recId=res.data[0].id; }
+  saveBtn.disabled=false;
+  if(res.error){ toast("Error: "+res.error.message); return; }
+  await logActivity(id?"edit":"add", moduleLabel(key), labelOf(obj), recId);
+  toast(id?"Updated":"Added"); closeModal(); show(parentView);
+}
+
+async function removeItem(table,id,parentView){
+  if(!confirm("Delete this record? This cannot be undone.")) return;
+  const {error}=await sb.from(table).delete().eq("id",id);
+  if(error){ toast("Error: "+error.message); return; }
+  await logActivity("delete", table, "", id);
+  toast("Deleted"); show(parentView);
+}
+
+/* ---------- data management ---------- */
+async function downloadBackup(){
+  toast("Preparing backup\u2026");
+  const out={};
+  for(const t of ALL_TABLES){ try{ out[t]=await fetchTable(t); }catch(e){ out[t]=[]; } }
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download="eduvoyage-backup-"+todayISO()+".json"; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast("Backup downloaded");
+}
+function csvCell(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; }
+async function exportCSV(){
+  toast("Preparing CSV\u2026");
+  const blocks={
+    CLIENTS:["client_name","service","country","status","assigned_ce","balance","google_drive_link"],
+    ATTENDANCE:["name","date","time_in"],
+    "SOCIAL MEDIA":["platform","topic","post_date","status"],
+    "CE MANAGEMENT":["task","task_date","status","notes"],
+    "MY TO-DOS":["task","priority","status","due_date"],
+    "CE REPORTS":["week","total_leads","leads_followed_up","converted_leads","pending_leads","lost_leads","client_responses","feedback"],
+    WEBINARS:["title","speaker","event_date","event_time","status","description"],
+    SERVICES:["service_name","description","price"],
+    SCHOLARSHIPS:["country","destination","deadline","status"],
+    REVENUE:["date","client","service","amount"],
+    EXPENSES:["date","category","description","amount"]
+  };
+  const map={CLIENTS:"clients",ATTENDANCE:"attendance","SOCIAL MEDIA":"social_media","CE MANAGEMENT":"ce_tasks","MY TO-DOS":"todos","CE REPORTS":"ce_reports",WEBINARS:"webinars",SERVICES:"services",SCHOLARSHIPS:"scholarships",REVENUE:"revenue",EXPENSES:"expenses"};
+  let outStr="";
+  for(const title in blocks){
+    let data=[]; try{ data=await fetchTable(map[title]); }catch(e){}
+    outStr+=title+"\n"+blocks[title].map(csvCell).join(",")+"\n";
+    data.forEach(r=>{ outStr+=blocks[title].map(k=>csvCell(r[k])).join(",")+"\n"; });
+    outStr+="\n";
+  }
+  const blob=new Blob([outStr],{type:"text/csv"}); const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download="eduvoyage-export-"+todayISO()+".csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  await logActivity("export","settings","Exported all data to CSV"); toast("CSV exported");
+}
+async function clearAll(){
+  if(!confirm("This permanently deletes ALL workspace data from the cloud (clients, finances, social, etc.). Attendance and the activity log are immutable and will remain. Continue?")) return;
+  if(!confirm("Are you absolutely sure? Download a backup first if unsure.")) return;
+  const clearable=ALL_TABLES.filter(t=>t!=="attendance"&&t!=="activity_log");
+  for(const t of clearable){ try{ await sb.from(t).delete().not("id","is",null); }catch(e){} }
+  await logActivity("clear","settings","All data cleared"); toast("All data cleared"); show("settings");
+}
+
+/* ---------- listeners ---------- */
+document.getElementById("overlay").addEventListener("click",e=>{ if(e.target.id==="overlay") closeModal(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+document.getElementById("loginPass").addEventListener("keydown",e=>{ if(e.key==="Enter") login(); });
+document.getElementById("loginUser").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("loginPass").focus(); });
+
+/* ---------- init ---------- */
+function showSetup(){
+  document.getElementById("loginForm").innerHTML=
+    '<div class="setup-box"><strong>Setup needed.</strong><br>Open this file and paste your Supabase credentials near the top of the script:<br><br>'+
+    '&bull; <code>SUPABASE_URL</code><br>&bull; <code>SUPABASE_ANON_KEY</code><br><br>'+
+    'Then create two users in Supabase Authentication:<br>&bull; <code>'+esc(ADMIN_EMAIL)+'</code> (admin)<br>&bull; <code>'+esc(CE_EMAIL)+'</code> (ce)<br><br>Reload the page after saving.</div>';
+}
+async function init(){
+  if(!configured()){ showSetup(); return; }
+  if(typeof supabase==="undefined"){ document.getElementById("loginErr").textContent="Could not load Supabase library (check your internet connection)."; return; }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  try{
+    const { data:{ session:s } } = await sb.auth.getSession();
+    if(s && s.user){ session=roleFromEmail(s.user.email); subscribeRealtime(); startApp(); }
+  }catch(e){ /* fall through to login */ }
+}
+init();
+</script>
+</body>
+</html>
