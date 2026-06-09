@@ -7,9 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --navy:#0A1F44;--navy-dark:#08152E;--navy-card:#0D274F;--navy-line:#1B345E;
-    --gold:#C8A24B;--gold-soft:#d8b76a;--white:#FFFFFF;--text:#E8EDF6;--muted:#9AAAC4;
-    --danger:#C0556B;--ok:#4F9A7A;
+    --navy:#16365F;--navy-dark:#102A4C;--navy-card:#1E4474;--navy-line:#305487;
+    --gold:#C8A24B;--gold-soft:#dcbd72;--white:#FFFFFF;--text:#EDF2FB;--muted:#AEBDD8;
+    --danger:#C0556B;--ok:#5BA888;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -342,7 +342,9 @@ const ST = {
   ceTask:["Pending","Done"],
   todo:["Pending","In Progress","Done"],
   scholarship:["Open","Applied","Closed"],
-  webinar:["Upcoming","Done","Cancelled"]
+  webinar:["Upcoming","Done","Cancelled"],
+  contentType:["Carousel","Flyer","Reel","Video","Talking-head Video","Meme"],
+  brand:["Study Abroad","Travel & Tourism"]
 };
 const CE_OPTS = [{value:"ce",label:"Client Executive"},{value:"admin",label:"Admin (Aminat)"}];
 const CE_MAP  = {ce:"Client Executive", admin:"Admin"};
@@ -365,12 +367,14 @@ const CRUD = {
     ]},
   social:{ table:"social_media", title:"Social Media", addLabel:"Add Post",
     fields:[
+      {k:"brand",label:"Brand",type:"select",opts:ST.brand},
       {k:"platform",label:"Platform",type:"select",opts:["Instagram","TikTok","Facebook"]},
+      {k:"content_type",label:"Content Type",type:"select",opts:ST.contentType},
       {k:"topic",label:"Topic",type:"text",req:true},
       {k:"post_date",label:"Date",type:"date"},
       {k:"status",label:"Status",type:"select",opts:ST.social}
     ],
-    cols:[{k:"platform",label:"Platform"},{k:"topic",label:"Topic"},{k:"post_date",label:"Date"},{k:"status",label:"Status",pill:true}]},
+    cols:[{k:"brand",label:"Brand"},{k:"platform",label:"Platform"},{k:"content_type",label:"Type"},{k:"topic",label:"Topic"},{k:"post_date",label:"Date"},{k:"status",label:"Status",pill:true}]},
   ceTasks:{ table:"ce_tasks", title:"CE Management", addLabel:"Add Task",
     fields:[
       {k:"task",label:"Task",type:"text",req:true},
@@ -396,6 +400,7 @@ const CRUD = {
       {k:"pending_leads",label:"Pending / In Conversation",type:"number"},
       {k:"lost_leads",label:"Lost / No Response",type:"number"},
       {k:"client_responses",label:"Client Responses / Objections",type:"textarea"},
+      {k:"ce_opinion",label:"CE's Opinion / Thoughts on Leads",type:"textarea"},
       {k:"feedback",label:"Feedback / Notes",type:"textarea"}
     ],
     cols:[{k:"week",label:"Week"},{k:"total_leads",label:"Total Leads"},{k:"converted_leads",label:"Converted"},{k:"feedback",label:"Feedback"}]},
@@ -573,16 +578,17 @@ async function viewCEReports(){
     "<td>"+esc(it.pending_leads||0)+"</td>"+
     "<td>"+esc(it.lost_leads||0)+"</td>"+
     "<td>"+(it.client_responses?esc(it.client_responses):dash)+"</td>"+
+    "<td>"+(it.ce_opinion?esc(it.ce_opinion):dash)+"</td>"+
     "<td>"+(it.feedback?esc(it.feedback):dash)+"</td>"+
     "<td><div class='row-actions'>"+
     "<button class='icon-btn' onclick=\"exportReport('"+it.id+"')\">Export</button>"+
     "<button class='icon-btn' onclick=\"openForm('ceReports','"+it.id+"')\">Edit</button>"+
     "<button class='icon-btn del' onclick=\"removeItem('ce_reports','"+it.id+"','ceReports')\">Delete</button>"+
     "</div></td></tr>"
-  )).join(""):"<tr><td colspan='9' class='empty'>No reports yet. Use \u201CAdd Report\u201D to begin.</td></tr>";
+  )).join(""):"<tr><td colspan='10' class='empty'>No reports yet. Use \u201CAdd Report\u201D to begin.</td></tr>";
   return `<div class="panel"><div class="panel-head"><div><h3>CE Reports</h3><div class="panel-sub">Track follow-ups, what clients are saying, and why leads convert or not. Export copies a summary to your clipboard.</div></div>
     <button class="btn" onclick="openForm('ceReports',null)">Add Report</button></div>
-    <div class="table-wrap"><table><thead><tr><th>Week</th><th>Total Leads</th><th>Followed Up</th><th>Converted</th><th>Pending</th><th>Lost</th><th>Client Responses</th><th>Feedback</th><th style="text-align:right">Actions</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+    <div class="table-wrap"><table><thead><tr><th>Week</th><th>Total Leads</th><th>Followed Up</th><th>Converted</th><th>Pending</th><th>Lost</th><th>Client Responses</th><th>CE Opinion</th><th>Feedback</th><th style="text-align:right">Actions</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 }
 async function exportReport(id){
   const {data:r}=await sb.from("ce_reports").select("*").eq("id",id).single();
@@ -596,6 +602,7 @@ async function exportReport(id){
     "\nLost / No Response: "+(Number(r.lost_leads)||0)+
     "\nConversion Rate: "+rate+"%"+
     "\n\nClient Responses / Objections:\n"+(r.client_responses||"-")+
+    "\n\nCE's Opinion / Thoughts on Leads:\n"+(r.ce_opinion||"-")+
     "\n\nFeedback / Notes:\n"+(r.feedback||"-")+
     "\n\nPrepared by: "+session.name+"\nGenerated: "+nowStamp();
   copyText(text);
@@ -760,10 +767,10 @@ async function exportCSV(){
   const blocks={
     CLIENTS:["client_name","service","country","status","assigned_ce","balance","google_drive_link"],
     ATTENDANCE:["name","date","time_in"],
-    "SOCIAL MEDIA":["platform","topic","post_date","status"],
+    "SOCIAL MEDIA":["brand","platform","content_type","topic","post_date","status"],
     "CE MANAGEMENT":["task","task_date","status","notes"],
     "MY TO-DOS":["task","priority","status","due_date"],
-    "CE REPORTS":["week","total_leads","leads_followed_up","converted_leads","pending_leads","lost_leads","client_responses","feedback"],
+    "CE REPORTS":["week","total_leads","leads_followed_up","converted_leads","pending_leads","lost_leads","client_responses","ce_opinion","feedback"],
     WEBINARS:["title","speaker","event_date","event_time","status","description"],
     SERVICES:["service_name","description","price"],
     SCHOLARSHIPS:["country","destination","deadline","status"],
