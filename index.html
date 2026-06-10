@@ -92,6 +92,7 @@
   .pill.ok{background:rgba(79,154,122,.18);color:#7fd1ab}
   .pill.warn{background:rgba(200,162,75,.18);color:var(--gold-soft)}
   .pill.muted{background:var(--navy-line);color:var(--muted)}
+  .pill.danger{background:rgba(192,85,107,.20);color:#e79aa8}
   .row-actions{display:flex;gap:7px;white-space:nowrap;justify-content:flex-end}
   .icon-btn{background:var(--navy-card);color:var(--text);border:1px solid var(--navy-line);padding:5px 10px;border-radius:6px;font-size:12px}
   .icon-btn:hover{border-color:var(--gold);color:var(--gold-soft)}
@@ -337,7 +338,7 @@ const NAV = [
 ];
 
 const ST = {
-  client:["Lead","In Progress","Submitted","Approved","Completed","On Hold"],
+  client:["Lead","In Progress","Submitted","Approved","Rejected","Reapplied","Reapplied - Approved","Completed","On Hold"],
   social:["Draft","Scheduled","Published"],
   ceTask:["Pending","Done"],
   todo:["Pending","In Progress","Done"],
@@ -486,8 +487,9 @@ async function show(key){
 function pill(val){
   if(val==null||val==="") return "<span class='pill muted'>&mdash;</span>";
   const v=String(val).toLowerCase(); let cls="";
-  if(["completed","approved","published","done","applied"].includes(v)) cls="ok";
-  else if(["pending","scheduled","in progress","submitted","lead","open","draft","on hold","upcoming"].includes(v)) cls="warn";
+  if(["completed","approved","published","done","applied","reapplied - approved"].includes(v)) cls="ok";
+  else if(["rejected"].includes(v)) cls="danger";
+  else if(["pending","scheduled","in progress","submitted","lead","open","draft","on hold","upcoming","reapplied"].includes(v)) cls="warn";
   return "<span class='pill "+cls+"'>"+esc(val)+"</span>";
 }
 function prioPill(val){ const v=String(val||"").toLowerCase(); let cls="muted"; if(v==="high")cls="warn"; if(v==="low")cls="ok"; return "<span class='pill "+cls+"'>"+esc(val||"\u2014")+"</span>"; }
