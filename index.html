@@ -93,6 +93,7 @@
   .pill.warn{background:rgba(200,162,75,.18);color:var(--gold-soft)}
   .pill.muted{background:var(--navy-line);color:var(--muted)}
   .pill.danger{background:rgba(192,85,107,.20);color:#e79aa8}
+  .section-label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-soft);margin:4px 0 10px}
   .row-actions{display:flex;gap:7px;white-space:nowrap;justify-content:flex-end}
   .icon-btn{background:var(--navy-card);color:var(--text);border:1px solid var(--navy-line);padding:5px 10px;border-radius:6px;font-size:12px}
   .icon-btn:hover{border-color:var(--gold);color:var(--gold-soft)}
@@ -338,7 +339,7 @@ const NAV = [
 ];
 
 const ST = {
-  client:["Lead","In Progress","Submitted","Approved","Rejected","Reapplied","Reapplied - Approved","Completed","On Hold"],
+  client:["In Progress","Submitted","Visa Approved","Visa Rejected","Visa Reapplied","On Hold","Completed"],
   social:["Draft","Scheduled","Published"],
   ceTask:["Pending","Done"],
   todo:["Pending","In Progress","Done"],
@@ -354,6 +355,7 @@ const CRUD = {
   clients:{ table:"clients", title:"Client Work", addLabel:"Add Client",
     fields:[
       {k:"client_name",label:"Client Name",type:"text",req:true},
+      {k:"invoice_no",label:"Invoice No",type:"text"},
       {k:"service",label:"Service",type:"text"},
       {k:"country",label:"Country",type:"text"},
       {k:"status",label:"Status",type:"select",opts:ST.client},
@@ -362,7 +364,7 @@ const CRUD = {
       {k:"balance",label:"Balance (\u20A6)",type:"number"}
     ],
     cols:[
-      {k:"client_name",label:"Client"},{k:"service",label:"Service"},{k:"country",label:"Country"},
+      {k:"invoice_no",label:"Invoice No"},{k:"client_name",label:"Client"},{k:"service",label:"Service"},{k:"country",label:"Country"},
       {k:"status",label:"Status",pill:true},{k:"assigned_ce",label:"Assigned",map:CE_MAP},
       {k:"google_drive_link",label:"Drive",link:true},{k:"balance",label:"Balance",money:true}
     ]},
@@ -487,9 +489,9 @@ async function show(key){
 function pill(val){
   if(val==null||val==="") return "<span class='pill muted'>&mdash;</span>";
   const v=String(val).toLowerCase(); let cls="";
-  if(["completed","approved","published","done","applied","reapplied - approved"].includes(v)) cls="ok";
-  else if(["rejected"].includes(v)) cls="danger";
-  else if(["pending","scheduled","in progress","submitted","lead","open","draft","on hold","upcoming","reapplied"].includes(v)) cls="warn";
+  if(["completed","approved","published","done","applied","visa approved"].includes(v)) cls="ok";
+  else if(["rejected","visa rejected"].includes(v)) cls="danger";
+  else if(["pending","scheduled","in progress","submitted","lead","open","draft","on hold","upcoming","visa reapplied"].includes(v)) cls="warn";
   return "<span class='pill "+cls+"'>"+esc(val)+"</span>";
 }
 function prioPill(val){ const v=String(val||"").toLowerCase(); let cls="muted"; if(v==="high")cls="warn"; if(v==="low")cls="ok"; return "<span class='pill "+cls+"'>"+esc(val||"\u2014")+"</span>"; }
@@ -542,30 +544,41 @@ async function viewCRUD(key){
   const cfg=CRUD[key];
   const data=await fetchTable(cfg.table);
   const head=cfg.cols.map(c=>"<th>"+esc(c.label)+"</th>").join("")+"<th style='text-align:right'>Actions</th>";
-  let body;
-  if(!data.length){
-    body="<tr><td colspan='"+(cfg.cols.length+1)+"' class='empty'>Nothing here yet. Use \u201C"+esc(cfg.addLabel)+"\u201D to begin.</td></tr>";
-  }else{
-    body=data.map(it=>{
-      const tds=cfg.cols.map(c=>{
-        let v=it[c.k];
-        if(c.money) return "<td>"+naira(v)+"</td>";
-        if(c.pill) return "<td>"+pill(v)+"</td>";
-        if(c.prio) return "<td>"+prioPill(v)+"</td>";
-        if(c.map)  return "<td>"+esc(c.map[v]||v||"\u2014")+"</td>";
-        if(c.link) return "<td>"+(v?"<a href='"+esc(v)+"' target='_blank' rel='noopener'>Open</a>":"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
-        return "<td>"+(v?esc(v):"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
-      }).join("");
-      return "<tr>"+tds+"<td><div class='row-actions'>"+
-        "<button class='icon-btn' onclick=\"openForm('"+key+"','"+it.id+"')\">Edit</button>"+
-        "<button class='icon-btn del' onclick=\"removeItem('"+cfg.table+"','"+it.id+"','"+key+"')\">Delete</button>"+
-        "</div></td></tr>";
+  const rowHtml=(it)=>{
+    const tds=cfg.cols.map(c=>{
+      let v=it[c.k];
+      if(c.money) return "<td>"+naira(v)+"</td>";
+      if(c.pill) return "<td>"+pill(v)+"</td>";
+      if(c.prio) return "<td>"+prioPill(v)+"</td>";
+      if(c.map)  return "<td>"+esc(c.map[v]||v||"\u2014")+"</td>";
+      if(c.link) return "<td>"+(v?"<a href='"+esc(v)+"' target='_blank' rel='noopener'>Open</a>":"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
+      return "<td>"+(v?esc(v):"<span style='color:var(--muted)'>&mdash;</span>")+"</td>";
     }).join("");
+    return "<tr>"+tds+"<td><div class='row-actions'>"+
+      "<button class='icon-btn' onclick=\"openForm('"+key+"','"+it.id+"')\">Edit</button>"+
+      "<button class='icon-btn del' onclick=\"removeItem('"+cfg.table+"','"+it.id+"','"+key+"')\">Delete</button>"+
+      "</div></td></tr>";
+  };
+  const emptyRow=(msg)=>"<tr><td colspan='"+(cfg.cols.length+1)+"' class='empty'>"+esc(msg)+"</td></tr>";
+  const tableBlock=(rows)=>"<div class='table-wrap'><table><thead><tr>"+head+"</tr></thead><tbody>"+rows+"</tbody></table></div>";
+  const headHtml=`<div class="panel-head"><div><h3>${esc(cfg.title)}</h3></div>
+    <button class="btn" onclick="openForm('${key}',null)">${esc(cfg.addLabel)}</button></div>`;
+
+  if(key==="clients"){
+    const isDone=(c)=>String(c.status||"").toLowerCase()==="completed";
+    const active=data.filter(c=>!isDone(c));
+    const done=data.filter(isDone);
+    const activeRows = active.length?active.map(rowHtml).join(""):emptyRow("No active clients. Use \u201C"+cfg.addLabel+"\u201D to begin.");
+    const doneRows = done.length?done.map(rowHtml).join(""):emptyRow("No completed clients yet.");
+    return `<div class="panel">${headHtml}
+      <div class="section-label">Active Clients (${active.length})</div>
+      ${tableBlock(activeRows)}
+      <div class="section-label" style="margin-top:24px">Completed (${done.length})</div>
+      ${tableBlock(doneRows)}</div>`;
   }
-  const sub = key==="clients"&&session.role==="ce" ? '<div class="panel-sub">Showing clients assigned to you.</div>' : '';
-  return `<div class="panel"><div class="panel-head"><div><h3>${esc(cfg.title)}</h3>${sub}</div>
-    <button class="btn" onclick="openForm('${key}',null)">${esc(cfg.addLabel)}</button></div>
-    <div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></div>`;
+
+  const body = data.length?data.map(rowHtml).join(""):emptyRow("Nothing here yet. Use \u201C"+cfg.addLabel+"\u201D to begin.");
+  return `<div class="panel">${headHtml}${tableBlock(body)}</div>`;
 }
 
 /* ---------- CE Reports (with export) ---------- */
@@ -706,8 +719,16 @@ async function openForm(key,id){
   modalCtx={key,table,id:id||null,parentView:parentViewFor(key)};
   document.getElementById("modalTitle").textContent=(id?"Edit ":"Add ")+(CRUD[key]?CRUD[key].title.replace(/s$/,""):moduleLabel(key));
   let html="";
+  let autoInvoice="";
+  if(key==="clients" && !id){
+    try{
+      const ex=await fetchTable("clients"); let max=0;
+      ex.forEach(c=>{ const n=parseInt(String(c.invoice_no||"").replace(/[^0-9]/g,""),10); if(!isNaN(n)&&n>max) max=n; });
+      autoInvoice="#"+String(max+1).padStart(3,"0");
+    }catch(e){ autoInvoice=""; }
+  }
   fields.forEach(f=>{
-    let val = existing ? (existing[f.k]==null?"":existing[f.k]) : (f.type==="date"?todayISO():"");
+    let val = existing ? (existing[f.k]==null?"":existing[f.k]) : (f.k==="invoice_no"?autoInvoice : (f.type==="date"?todayISO():""));
     html+="<div class='field'><label>"+esc(f.label)+(f.req?" *":"")+"</label>";
     if(f.type==="select"){
       html+="<select id='f_"+f.k+"'>";
@@ -767,7 +788,7 @@ function csvCell(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; }
 async function exportCSV(){
   toast("Preparing CSV\u2026");
   const blocks={
-    CLIENTS:["client_name","service","country","status","assigned_ce","balance","google_drive_link"],
+    CLIENTS:["invoice_no","client_name","service","country","status","assigned_ce","balance","google_drive_link"],
     ATTENDANCE:["name","date","time_in"],
     "SOCIAL MEDIA":["brand","platform","content_type","topic","post_date","status"],
     "CE MANAGEMENT":["task","task_date","status","notes"],
